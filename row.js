@@ -18,7 +18,7 @@ class Row {
         .join(" ");
   }
 
-  createDiv(index, showDetails) {
+  createDiv(index, showDetails, pattern) {
     const stitchDelta = this.countOutputStitches() - this.countInputStitches();
 
     const rowDiv = document.createElement('div');
@@ -42,14 +42,27 @@ class Row {
     if (showDetails) {
       const detailsP = document.createElement('p');
       detailsP.classList.add('details');
-      const previousStitches = pattern.slice(0, index).reduce(
+      const previousStitches = pattern.rows.slice(0, index).reduce(
           (total, r) => total + r.countOutputStitches(), 0);
       detailsP.textContent =
-          Math.floor(100 * previousStitches / countTotalStitches()) + '%'
+          Math.floor(100 * previousStitches / pattern.countTotalStitches()) + '%'
       rowDiv.appendChild(detailsP);
     }
 
     rowDiv.classList.add('row');
     return rowDiv;
   }
+
+  borderWrap() {
+    return new Row([new StitchSequence([Knit], 3), ...this.stitchSequences,
+                    new StitchSequence([SlipStitchPurlwise], 3)]);
+  }
+}
+
+function borderWrapAdjust(rowWithoutBorder, growType) {
+  return new Row(
+        [new StitchSequence([Knit], 2),
+         new StitchSequence([growType], 1),
+         ...rowWithoutBorder.stitchSequences,
+         new StitchSequence([SlipStitchPurlwise], 3)]);
 }

@@ -1,85 +1,8 @@
-// Your pattern array
-var pattern = [];
 
-function countStitches() {
-  if (pattern.length == 0) return 0;
-  return pattern[pattern.length - 1].countOutputStitches() - 6;
-}
-
-function countTotalStitches() {
-  return pattern.reduce(
-      (total, row) => total + row.countOutputStitches(), 0);
-}
-
-function borderWrap(row) {
-  return new Row([new StitchSequence([Knit], 3), ...row.stitchSequences,
-                  new StitchSequence([SlipStitchPurlwise], 3)]);
-}
-
-function borderWrapAdjust(rowGenerator, growType) {
-  let stitches = countStitches() + (growType.inputs == 2 ? -1 : 0);
-  return new Row(
-      [new StitchSequence([Knit], 2),
-       new StitchSequence([growType], 1),
-       ...rowGenerator(stitches).stitchSequences,
-       new StitchSequence([SlipStitchPurlwise], 3)]);
-}
-
-function Row1x1(stitches, startKnit) {
-  const finalStitch = new StitchSequence([startKnit ? Knit : Purl], 1);
-  let output = [new StitchSequence(startKnit
-                                       ? [Knit, Purl] : [Purl, Knit],
-                                   Math.floor(stitches / 2))];
-  if (stitches % 2 == 1) output.push(finalStitch);
-  return new Row(output);
-}
-
-function rightSide() { return pattern.length % 2 == 0; }
-
-function Row2x2(stitches) {
-  const rowBottomKnit = (pattern.length + 1) % 4 < 2;
-  const startKnit = rightSide() ? rowBottomKnit : !rowBottomKnit;
-  let head = [new StitchSequence(
-      rightSide() == rowBottomKnit
-          ? [Purl, Purl, Knit, Knit] : [Knit, Knit, Purl, Purl],
-      Math.floor(stitches / 4))];
-  let tail = [];
-  if (stitches % 4 >= 1)
-    tail.push(new StitchSequence([rowBottomKnit ? Knit : Purl], 1));
-  if (stitches % 4 >= 2)
-    tail.push(new StitchSequence([rowBottomKnit ? Knit : Purl], 1));
-  if (stitches % 4 == 3)
-    tail.push(new StitchSequence([rowBottomKnit ? Purl : Knit], 1));
-  return new Row(!rightSide()
-                     ? [...head, ...tail] : [...tail.reverse(), ...head]);
-}
-
-function mossStitchRow(stitches) {
-  return Row2x2(stitches);
-}
-
-function adjustAndGenerate(rows, adjust, adjustAtStart, rowGenerator) {
-  const patternEmpty = pattern.length == 0;
-  if (adjustAtStart && !patternEmpty)
-    pattern.push(borderWrapAdjust(rowGenerator, adjust));
-  const stitches = countStitches()
-  for (let row = pattern.length == 0 || stitches == 0 ? 0 : 1;
-       row < rows; ++row)
-    pattern.push(borderWrap(rowGenerator(stitches)));
-  if (!adjustAtStart && !patternEmpty && stitches > 0)
-    pattern.push(borderWrapAdjust(rowGenerator, adjust));
-}
-
-// (45 / 183) * 412
-// (50 / 200) * 412
-
-var sizes = [16, 14, 14, 14, 14, 12, 12, 12, 12, 12, 10, 10, 8, 8, 10, 12, 16];
-sizes.forEach((value, index) =>
-              adjustAndGenerate(value, KnitFrontBack, true, mossStitchRow));
-pattern.push(borderWrap(mossStitchRow(countStitches())));
-sizes.reverse().forEach(
-    (value, index) =>
-    adjustAndGenerate(value, KnitTwoTogether, false, mossStitchRow));
+let pattern = new ScarfPatternFactory(
+    3,
+    mossStitchRow,
+    [16, 14, 14, 14, 14, 12, 12, 12, 12, 12, 10, 10, 8, 8, 10, 12, 16]).build();
 
 // pattern.push('Bind off');
 
@@ -88,7 +11,7 @@ var currentRow = 0;
 function selectRow(row) {
   currentRow = row;
   renderPattern();
-  drawKnitPattern(pattern);
+  pattern.drawToCanvas(document.getElementById('knitCanvas'));
 }
 
 function renderPattern() {
@@ -100,15 +23,15 @@ function renderPattern() {
 
   let selectedRow = null;
 
-  pattern.forEach((rowData, index) => {
-    const divNormal = rowData.createDiv(index, false);
+  pattern.forEachRow((rowData, index) => {
+    const divNormal = rowData.createDiv(index, false, pattern);
     container.appendChild(divNormal);
     divNormal.addEventListener('click', () => {
       selectRow(index);
     });
     if (index === currentRow) {
       divNormal.classList.add('highlight');
-      currentDivContainer.appendChild(rowData.createDiv(index, true));
+      currentDivContainer.appendChild(rowData.createDiv(index, true, pattern));
       selectedRow = divNormal;
     }
   });
@@ -130,7 +53,7 @@ function renderPattern() {
 }
 
 function addRow(delta) {
-  if (delta > 0 && currentRow < pattern.length - 1) {
+  if (delta > 0 && currentRow < pattern.rows.length - 1) {
     selectRow(currentRow + 1);
   }
   if (delta < 0 && currentRow > 0) {
@@ -142,45 +65,6 @@ function invertColor(color) {
   if (color === 'black') return 'white';
   if (color === 'white') return 'black';
   return color;
-}
-
-function drawKnitPattern(rows) {
-  const canvas = document.getElementById('knitCanvas');
-  const ctx = canvas.getContext('2d');
-
-  canvas.width = window.innerWidth;
-  canvas.height = 150;
-
-  const maxStitches = Math.max(...rows.map(row => row.countOutputStitches()));
-  const numRows = rows.length;
-
-  const stitchSizeWidth = canvas.width / numRows;
-  const stitchSizeHeight = canvas.height / maxStitches;
-  const stitchSize = Math.min(stitchSizeWidth, stitchSizeHeight);
-
-  rows.forEach((row, rowIndex) => {
-    let stitchIndex = 0;
-    let rowOutputStitches = row.countOutputStitches();
-    row.stitchSequences.forEach(stitchSequence => {
-      for (let i = 0; i < stitchSequence.repetitions; i++) {
-        stitchSequence.sequence.forEach(stitch => {
-          if (rowIndex == currentRow)
-            ctx.fillStyle = 'cyan'
-          else
-            ctx.fillStyle =
-                rowIndex % 2 == 0 ? stitch.color : invertColor(stitch.color);
-          for (let s = 0; s < stitch.outputs; s++) {
-            const x = rowIndex * stitchSize;
-            const y = stitchSize * (maxStitches -
-                ((rowIndex % 2 == 0)
-                    ? rowOutputStitches - stitchIndex : stitchIndex + 1));
-            ctx.fillRect(x, y, stitchSize, stitchSize);
-            stitchIndex++;
-          }
-        });
-      }
-    });
-  });
 }
 
 document.addEventListener('DOMContentLoaded', (event) => {
