@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Knitting Pattern Viewer</title>
+<style>
+body {
+    font-family: courier;
+    background-color: #3f3f3f;
+    color: #dcdccc;
+}
+.highlight {
+    background-color: #2f2f2f;
+    color: #ffffff;
+    xpadding: 5px;
+}
+body, html {
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+  overflow-y: hidden;
+  height: 100%;
+}
+#knitCanvas {
+    width: 100%; /* Adjust based on your requirement */
+    height: 200px; /* Adjust based on your requirement */
+    position: fixed;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: #3f3f3f; /* Prevents transparency issues */
+    z-index: 2; /* Ensures it stays above other content */
+}
+#currentRow {
+  width: 100%;
+  height: 100px;
+  position: fixed;
+  top: 200px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 2;
+  text-align: center;
+  background-color: #3f3f3f;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 200%;
+}
+#patternContainer {
+  margin-top: 300px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  position: relative;
+  z-index: 1;
+
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(15em, 1fr));
+  gap: 10px; /* Adjust the space between rows */
+
+  height: calc(100vh - 300px);
+  padding: 0px;
+}
+.row {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  height: 100%;
+  width: 100%;
+  margin: 4px;
+  padding: 0px;
+  border: 1px solid #5f5f5f;
+}
+.row .details {
+  font-size: 50%;
+}
+div.highlight {
+  border: 1px solid #93e0e3;
+}
+.rowIndex {
+  color: #93e0e3;
+}
+.row p {
+  margin: 0px;
+  padding: 0px;
+}
+</style>
+</head>
+<body>
+
+<canvas id="knitCanvas"></canvas>
+<div id=currentRow>...loading...</div>
+<div id="patternContainer" class="pattern-container"></div>
+
+<script src="knit.js"></script>
+</body>
+</html>
