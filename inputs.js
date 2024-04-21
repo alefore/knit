@@ -11,7 +11,9 @@ class PatternFactoryInput {
     return $('<li>')
         .append($('<span>').text(this.name + ': '))
         .append($('<span>')
-            .append($('<input>').attr('value', this.defaultValue)));
+            .append($('<input>')
+                        .attr('title', this.tooltip)
+                        .attr('value', this.defaultValue)));
   }
 
   setFormInput(formInput) {
