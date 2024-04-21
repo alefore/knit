@@ -1,8 +1,9 @@
-
-let pattern = new ScarfPatternFactory(
+let patternFactory = new ScarfPatternFactory(
     3,
     mossStitchRow,
-    [16, 14, 14, 14, 14, 12, 12, 12, 12, 12, 10, 10, 8, 8, 10, 12, 16]).build();
+    [16, 14, 14, 14, 14, 12, 12, 12, 12, 12, 10, 10, 8, 8, 10, 12, 16]);
+
+let pattern = patternFactory.build();
 
 // pattern.push('Bind off');
 
@@ -67,7 +68,16 @@ function invertColor(color) {
   return color;
 }
 
+function applyInputs() {
+  // hideInputHtml();
+  // $('#knitCanvas').css('display', 'inline');
+  // $('#currentRow').css('display', 'inline');
+  // $('#patternContainer').css('display', 'inline');
+  return false;
+}
+
 document.addEventListener('DOMContentLoaded', (event) => {
+  drawInputs(patternFactory.getInputs());
   selectRow(0);
 });
 

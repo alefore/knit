@@ -3,6 +3,25 @@ class ScarfPatternFactory {
     this.borderStitches = borderStitches;
     this.rowGenerator = rowGenerator;
     this.sizes = sizes;
+
+    this.rowsInput =
+        new PatternFactoryInput(
+            'Rows',
+            'How long should the scarf measure from tip to top along its '
+            + 'longest dimension?',
+            412,
+            'rows')
+    this.centerRowsInput =
+        new PatternFactoryInput(
+            'Center Rows',
+            'How many rows should the scarf measure in the center part, '
+            + 'between the increases and decreases?',
+            16,
+            'rows');
+  }
+
+  getInputs() {
+    return [this.rowsInput, this.centerRowsInput];
   }
 
   build() {
