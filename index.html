@@ -5,8 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Knitting Pattern Viewer</title>
 <style>
-body {
-    font-family: courier;
+body, input[type="text"], textarea {
+    font-family: courier, monospace;
     background-color: #3f3f3f;
     color: #dcdccc;
 }
@@ -39,9 +39,17 @@ body, html {
 #inputsDiv ul li {
   display: inline;
   padding: 0.2em;
+  margin-left: 2em;
+}
+#inputsDiv ul li .name {
+  font-weight: bold;
+}
+#inputsDiv ul li .units {
+  font-size: 80%;
 }
 #inputsDiv input {
   width: 5em;
+  margin: 4px;
 }
 #knitCanvas {
   width: 100%;

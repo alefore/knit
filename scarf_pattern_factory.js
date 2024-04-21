@@ -3,63 +3,76 @@ class ScarfPatternFactory {
     this.borderStitches = borderStitches;
     this.rowGenerator = rowGenerator;
     this.sizes = sizes;
-
     this.rowsInput =
         new PatternFactoryInput(
-            'Rows',
+            'Total Length',
             'How long should the scarf measure from tip to top along its '
             + 'longest dimension?',
             412,
             'rows')
-    this.centerRowsInput =
+    this.centerLengthInput =
         new PatternFactoryInput(
-            'Center Rows',
-            'How many rows should the scarf measure in the center part, '
-            + 'between the increases and decreases?',
-            16,
+            'Center Length',
+            'How many rows should the scarf have in the center part '
+            + '(between increases and decreases) along the long dimension?',
+            50,
             'rows');
+    this.centerWidthInput =
+        new PatternFactoryInput(
+            'Center Stitches',
+            'How many stitches should the scarf have in the center part, '
+            + 'between the increases and decreases?'
+            + ' Does not include the 6 stitches for the i-cord border.',
+            25,
+            'stitches');
   }
 
   getInputs() {
-    return [this.rowsInput, this.centerRowsInput];
+    return [this.rowsInput, this.centerLengthInput, this.centerWidthInput];
+  }
+
+  stitchesForRow(row) {
+    const normalizedRow = row / this.rowsPerSide();
+    return this.centerWidthInput.value()
+          * (1 - Math.cos((0.2 + normalizedRow * 0.8) * Math.PI)) ** 2 / 4;
+  }
+
+  rowsPerSide() {
+    return (this.rowsInput.value() - this.centerLengthInput.value()) / 2;
   }
 
   build() {
-    let output = new Pattern();
-    this.sizes.forEach((value, index) =>
-              this.adjustAndGenerate(output, value, KnitFrontBack, true));
-    this.addRowWithBorder(output, null);
-    this.sizes.reverse().forEach(
-        (value, index) =>
-        this.adjustAndGenerate(output, value, KnitTwoTogether, false));
+    const output = new Pattern();
+    const stitches = [];
+    for (let row = 0; row < this.rowsPerSide(); row++)
+      stitches.push(Math.floor(this.stitchesForRow(row)));
+    stitches.forEach((value, index) => this.addRow(output, value));
+    for (let row = 0; row < this.centerLengthInput.value(); row++)
+      this.addRow(output, this.centerWidthInput.value());
+    stitches.reverse().forEach((value, index) => this.addRow(output, value));
     return output;
   }
 
-  addRowWithBorder(pattern, adjust) {
+  addRow(pattern, desiredStitches) {
     const totalBorderStitches = this.borderStitches * 2;
-    const stitches =
+    const previousStitches =
         pattern.isEmpty()
             ? 0
-            : pattern.lastRow().countOutputStitches() - totalBorderStitches
-              + (adjust != null && adjust.inputs == 2 ? -1 : 0);
-    const rowWithoutBorder = this.rowGenerator(pattern.rows.length, stitches);
-    pattern.addRow(
-        adjust == null
-            ? rowWithoutBorder.borderWrap()
-            : borderWrapAdjust(rowWithoutBorder, adjust));
-  }
-
-  adjustAndGenerate(pattern, rowsCount, adjust, adjustAtStart) {
-    if (adjustAtStart)
-      this.addRowWithBorder(pattern, pattern.isEmpty() ? null : adjust);
-    const totalBorderStitches = this.borderStitches * 2;
-    const stitches = pattern.isEmpty()
-        ? 0
-        : pattern.lastRow().countOutputStitches() - totalBorderStitches;
-    for (let row = 0; row < rowsCount - 1; ++row)
-      this.addRowWithBorder(pattern, null);
-    if (!adjustAtStart)
-      this.addRowWithBorder(pattern, adjust);
+            : pattern.lastRow().countOutputStitches() - totalBorderStitches;
+    if (previousStitches < desiredStitches)
+      pattern.addRow(
+          borderWrapAdjust(
+              this.rowGenerator(pattern.rows.length, previousStitches),
+              KnitFrontBack));
+    else if (previousStitches > desiredStitches)
+      pattern.addRow(
+          borderWrapAdjust(
+              this.rowGenerator(pattern.rows.length, previousStitches - 1),
+              KnitTwoTogether));
+    else
+      pattern.addRow(
+          this.rowGenerator(pattern.rows.length, previousStitches)
+              .borderWrap());
   }
 }
 

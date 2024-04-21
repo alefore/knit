@@ -3,7 +3,7 @@ let patternFactory = new ScarfPatternFactory(
     mossStitchRow,
     [16, 14, 14, 14, 14, 12, 12, 12, 12, 12, 10, 10, 8, 8, 10, 12, 16]);
 
-let pattern = patternFactory.build();
+let pattern = null;
 
 // pattern.push('Bind off');
 
@@ -11,8 +11,10 @@ var currentRow = 0;
 
 function selectRow(row) {
   currentRow = row;
-  renderPattern();
-  pattern.drawToCanvas(document.getElementById('knitCanvas'));
+  if (pattern != null) {
+    renderPattern();
+    pattern.drawToCanvas(document.getElementById('knitCanvas'));
+  }
 }
 
 function renderPattern() {
@@ -69,19 +71,18 @@ function invertColor(color) {
 }
 
 function applyInputs() {
-  // hideInputHtml();
-  // $('#knitCanvas').css('display', 'inline');
-  // $('#currentRow').css('display', 'inline');
-  // $('#patternContainer').css('display', 'inline');
+  pattern = patternFactory.build();
+  selectRow(0);
   return false;
 }
 
 document.addEventListener('DOMContentLoaded', (event) => {
   drawInputs(patternFactory.getInputs());
-  selectRow(0);
+  applyInputs();
 });
 
 document.body.addEventListener('keydown', function(e) {
+  if (pattern == null) return;
   if (e.code === 'Space' || e.code === 'ArrowRight') {
     addRow(1);
     e.preventDefault();

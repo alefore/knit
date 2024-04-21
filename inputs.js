@@ -9,15 +9,25 @@ class PatternFactoryInput {
 
   renderTableRow() {
     return $('<li>')
-        .append($('<span>').text(this.name + ': '))
+        .append($('<span>').text(this.name + ': ').attr('class', 'name'))
         .append($('<span>')
             .append($('<input>')
+                        .attr('id', this.id())
                         .attr('title', this.tooltip)
-                        .attr('value', this.defaultValue)));
+                        .attr('value', this.defaultValue)))
+        .append($('<span>').text(' ' + this.units).attr('class', 'units'));
   }
 
   setFormInput(formInput) {
     this.formInput = formInput;
+  }
+
+  value() {
+    return Number($('#' + this.id()).val());
+  }
+
+  id() {
+    return 'patternFactoryInput' + this.name.replace(/\s+/g, '');
   }
 }
 
