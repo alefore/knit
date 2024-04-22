@@ -1,7 +1,6 @@
 class ScarfPatternFactory {
-  constructor(borderStitches, rowGenerator, sizes) {
+  constructor(borderStitches, sizes) {
     this.borderStitches = borderStitches;
-    this.rowGenerator = rowGenerator;
     this.sizes = sizes;
     this.rowsInput = new PatternFactoryInput(
         'Total Length',
@@ -19,23 +18,31 @@ class ScarfPatternFactory {
             'between the increases and decreases?' +
             ' Does not include the 6 stitches for the i-cord border.',
         25, 'stitches');
+    this.textureInput = new PatternFactoryInput(
+        'Texture', 'What type of texture do you want?', 'Garter', null,
+        ['Double moss', 'Garter']);
   }
 
   getInputs() {
-    return [this.rowsInput, this.centerLengthInput, this.centerWidthInput];
+    return [
+      this.rowsInput, this.centerLengthInput, this.centerWidthInput,
+      this.textureInput
+    ];
   }
 
   stitchesForRow(row) {
     const normalizedRow = row / this.rowsPerSide();
     const skipStart = 0.2;  // Otherwise the very start is waaay too long.
-    return this.centerWidthInput.value() *
+    return this.centerWidthInput.numberValue() *
         (1 -
          Math.cos((skipStart + normalizedRow * (1 - skipStart)) * Math.PI)) **
         2 / 4;
   }
 
   rowsPerSide() {
-    return (this.rowsInput.value() - this.centerLengthInput.value()) / 2;
+    return (this.rowsInput.numberValue() -
+            this.centerLengthInput.numberValue()) /
+        2;
   }
 
   build() {
@@ -44,8 +51,8 @@ class ScarfPatternFactory {
     for (let row = 0; row < this.rowsPerSide(); row++)
       stitches.push(Math.floor(this.stitchesForRow(row)));
     stitches.forEach((value, index) => this.addRow(output, value));
-    for (let row = 0; row < this.centerLengthInput.value(); row++)
-      this.addRow(output, this.centerWidthInput.value());
+    for (let row = 0; row < this.centerLengthInput.numberValue(); row++)
+      this.addRow(output, this.centerWidthInput.numberValue());
     stitches.reverse().forEach((value, index) => this.addRow(output, value));
     return output;
   }
@@ -56,17 +63,19 @@ class ScarfPatternFactory {
         0 :
         pattern.lastRow().countOutputStitches() - totalBorderStitches;
     const atEvenRow = pattern.rowsCount() % 2 == 0;
+    console.log(this.textureInput.value());
+    const rowGenerator =
+        this.textureInput.value() == 'Garter' ? garterRow : doubleMossStitchRow;
     if (atEvenRow && previousStitches < desiredStitches)
       pattern.addRow(borderWrapAdjust(
-          this.rowGenerator(pattern.rows.length, previousStitches),
-          KnitFrontBack));
+          rowGenerator(pattern.rows.length, previousStitches), KnitFrontBack));
     else if (atEvenRow && previousStitches > desiredStitches)
       pattern.addRow(borderWrapAdjust(
-          this.rowGenerator(pattern.rows.length, previousStitches - 1),
+          rowGenerator(pattern.rows.length, previousStitches - 1),
           KnitTwoTogether));
     else
-      pattern.addRow(this.rowGenerator(pattern.rows.length, previousStitches)
-                         .borderWrap());
+      pattern.addRow(
+          rowGenerator(pattern.rows.length, previousStitches).borderWrap());
   }
 }
 
@@ -102,6 +111,10 @@ function Row2x2(rowId, stitches) {
       !rightSide(rowId) ? [...head, ...tail] : [...tail.reverse(), ...head]);
 }
 
-function mossStitchRow(rowId, stitches) {
+function doubleMossStitchRow(rowId, stitches) {
   return Row2x2(rowId, stitches);
+}
+
+function garterRow(rowId, stitches) {
+  return new Row([new StitchSequence([Knit], stitches)]);
 }

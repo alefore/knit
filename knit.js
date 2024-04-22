@@ -1,6 +1,5 @@
 let patternFactory = new ScarfPatternFactory(
-    3, mossStitchRow,
-    [16, 14, 14, 14, 14, 12, 12, 12, 12, 12, 10, 10, 8, 8, 10, 12, 16]);
+    3, [16, 14, 14, 14, 14, 12, 12, 12, 12, 12, 10, 10, 8, 8, 10, 12, 16]);
 
 let pattern = null;
 
