@@ -3,28 +3,22 @@ class ScarfPatternFactory {
     this.borderStitches = borderStitches;
     this.rowGenerator = rowGenerator;
     this.sizes = sizes;
-    this.rowsInput =
-        new PatternFactoryInput(
-            'Total Length',
-            'How long should the scarf measure from tip to top along its '
-            + 'longest dimension?',
-            412,
-            'rows')
-    this.centerLengthInput =
-        new PatternFactoryInput(
-            'Center Length',
-            'How many rows should the scarf have in the center part '
-            + '(between increases and decreases) along the long dimension?',
-            50,
-            'rows');
-    this.centerWidthInput =
-        new PatternFactoryInput(
-            'Center Stitches',
-            'How many stitches should the scarf have in the center part, '
-            + 'between the increases and decreases?'
-            + ' Does not include the 6 stitches for the i-cord border.',
-            25,
-            'stitches');
+    this.rowsInput = new PatternFactoryInput(
+        'Total Length',
+        'How long should the scarf measure from tip to top along its ' +
+            'longest dimension?',
+        412, 'rows');
+    this.centerLengthInput = new PatternFactoryInput(
+        'Center Length',
+        'How many rows should the scarf have in the center part ' +
+            '(between increases and decreases) along the long dimension?',
+        50, 'rows');
+    this.centerWidthInput = new PatternFactoryInput(
+        'Center Stitches',
+        'How many stitches should the scarf have in the center part, ' +
+            'between the increases and decreases?' +
+            ' Does not include the 6 stitches for the i-cord border.',
+        25, 'stitches');
   }
 
   getInputs() {
@@ -34,8 +28,10 @@ class ScarfPatternFactory {
   stitchesForRow(row) {
     const normalizedRow = row / this.rowsPerSide();
     const skipStart = 0.2;  // Otherwise the very start is waaay too long.
-    return this.centerWidthInput.value()
-          * (1 - Math.cos((skipStart + normalizedRow * (1 - skipStart)) * Math.PI)) ** 2 / 4;
+    return this.centerWidthInput.value() *
+        (1 -
+         Math.cos((skipStart + normalizedRow * (1 - skipStart)) * Math.PI)) **
+        2 / 4;
   }
 
   rowsPerSide() {
@@ -56,24 +52,20 @@ class ScarfPatternFactory {
 
   addRow(pattern, desiredStitches) {
     const totalBorderStitches = this.borderStitches * 2;
-    const previousStitches =
-        pattern.isEmpty()
-            ? 0
-            : pattern.lastRow().countOutputStitches() - totalBorderStitches;
+    const previousStitches = pattern.isEmpty() ?
+        0 :
+        pattern.lastRow().countOutputStitches() - totalBorderStitches;
     if (previousStitches < desiredStitches)
-      pattern.addRow(
-          borderWrapAdjust(
-              this.rowGenerator(pattern.rows.length, previousStitches),
-              KnitFrontBack));
+      pattern.addRow(borderWrapAdjust(
+          this.rowGenerator(pattern.rows.length, previousStitches),
+          KnitFrontBack));
     else if (previousStitches > desiredStitches)
-      pattern.addRow(
-          borderWrapAdjust(
-              this.rowGenerator(pattern.rows.length, previousStitches - 1),
-              KnitTwoTogether));
+      pattern.addRow(borderWrapAdjust(
+          this.rowGenerator(pattern.rows.length, previousStitches - 1),
+          KnitTwoTogether));
     else
-      pattern.addRow(
-          this.rowGenerator(pattern.rows.length, previousStitches)
-              .borderWrap());
+      pattern.addRow(this.rowGenerator(pattern.rows.length, previousStitches)
+                         .borderWrap());
   }
 }
 
@@ -88,14 +80,15 @@ function Row1x1(pattern, stitches, startKnit) {
 }
 */
 
-function rightSide(rowId) { return rowId % 2 == 0; }
+function rightSide(rowId) {
+  return rowId % 2 == 0;
+}
 
 function Row2x2(rowId, stitches) {
   const rowBottomKnit = (rowId + 1) % 4 < 2;
   let head = [new StitchSequence(
-      rightSide(rowId) != rowBottomKnit
-          ? [Knit, Knit, Purl, Purl]
-          : [Purl, Purl, Knit, Knit],
+      rightSide(rowId) != rowBottomKnit ? [Knit, Knit, Purl, Purl] :
+                                          [Purl, Purl, Knit, Knit],
       Math.floor(stitches / 4))];
   let tail = [];
   if (stitches % 4 >= 1)
@@ -104,11 +97,10 @@ function Row2x2(rowId, stitches) {
     tail.push(new StitchSequence([rowBottomKnit ? Knit : Purl], 1));
   if (stitches % 4 == 3)
     tail.push(new StitchSequence([rowBottomKnit ? Purl : Knit], 1));
-  return new Row(!rightSide(rowId)
-                     ? [...head, ...tail] : [...tail.reverse(), ...head]);
+  return new Row(
+      !rightSide(rowId) ? [...head, ...tail] : [...tail.reverse(), ...head]);
 }
 
 function mossStitchRow(rowId, stitches) {
   return Row2x2(rowId, stitches);
 }
-

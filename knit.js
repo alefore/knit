@@ -1,6 +1,5 @@
 let patternFactory = new ScarfPatternFactory(
-    3,
-    mossStitchRow,
+    3, mossStitchRow,
     [16, 14, 14, 14, 14, 12, 12, 12, 12, 12, 10, 10, 8, 8, 10, 12, 16]);
 
 let pattern = null;
@@ -40,9 +39,9 @@ function renderPattern() {
   });
 
 
-      //const style = window.getComputedStyle(selectedRow);
-      //const marginTop = parseInt(style.marginTop, 10);
-  const rowTop = selectedRow.offsetTop; // - marginTop;
+  // const style = window.getComputedStyle(selectedRow);
+  // const marginTop = parseInt(style.marginTop, 10);
+  const rowTop = selectedRow.offsetTop;  // - marginTop;
   const rowHeight = selectedRow.offsetHeight;
 
   const containerHeight = container.offsetHeight;
