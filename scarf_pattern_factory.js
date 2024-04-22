@@ -63,7 +63,6 @@ class ScarfPatternFactory {
         0 :
         pattern.lastRow().countOutputStitches() - totalBorderStitches;
     const atEvenRow = pattern.rowsCount() % 2 == 0;
-    console.log(this.textureInput.value());
     const rowGenerator =
         this.textureInput.value() == 'Garter' ? garterRow : doubleMossStitchRow;
     if (atEvenRow && previousStitches < desiredStitches)
