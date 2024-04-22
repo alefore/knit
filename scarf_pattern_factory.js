@@ -55,11 +55,12 @@ class ScarfPatternFactory {
     const previousStitches = pattern.isEmpty() ?
         0 :
         pattern.lastRow().countOutputStitches() - totalBorderStitches;
-    if (previousStitches < desiredStitches)
+    const atEvenRow = pattern.rowsCount() % 2 == 0;
+    if (atEvenRow && previousStitches < desiredStitches)
       pattern.addRow(borderWrapAdjust(
           this.rowGenerator(pattern.rows.length, previousStitches),
           KnitFrontBack));
-    else if (previousStitches > desiredStitches)
+    else if (atEvenRow && previousStitches > desiredStitches)
       pattern.addRow(borderWrapAdjust(
           this.rowGenerator(pattern.rows.length, previousStitches - 1),
           KnitTwoTogether));
