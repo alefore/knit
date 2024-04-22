@@ -8,13 +8,16 @@ class PatternFactoryInput {
   }
 
   renderTableRow() {
-    return $('<li>')
-        .append($('<span>').text(this.name + ': ').attr('class', 'name'))
-        .append($('<span>').append($('<input>')
-                                       .attr('id', this.id())
-                                       .attr('title', this.tooltip)
-                                       .attr('value', this.defaultValue)))
-        .append($('<span>').text(' ' + this.units).attr('class', 'units'));
+    const li =
+        $('<li>')
+            .append($('<span>').text(this.name + ': ').attr('class', 'name'))
+            .append($('<span>').append($('<input>')
+                                           .attr('id', this.id())
+                                           .attr('title', this.tooltip)
+                                           .attr('value', this.defaultValue)));
+    if (this.units != null)
+      li.append($('<span>').text(' ' + this.units).attr('class', 'units'));
+    return li;
   }
 
   setFormInput(formInput) {
