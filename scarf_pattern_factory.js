@@ -33,8 +33,9 @@ class ScarfPatternFactory {
 
   stitchesForRow(row) {
     const normalizedRow = row / this.rowsPerSide();
+    const skipStart = 0.2;  // Otherwise the very start is waaay too long.
     return this.centerWidthInput.value()
-          * (1 - Math.cos((0.2 + normalizedRow * 0.8) * Math.PI)) ** 2 / 4;
+          * (1 - Math.cos((skipStart + normalizedRow * (1 - skipStart)) * Math.PI)) ** 2 / 4;
   }
 
   rowsPerSide() {
