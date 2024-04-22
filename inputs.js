@@ -1,20 +1,28 @@
 class PatternFactoryInput {
-  constructor(name, tooltip, defaultValue, units) {
+  constructor(name, tooltip, defaultValue, units, selectValues) {
     this.name = name;
     this.tooltip = tooltip;
     this.defaultValue = defaultValue;
     this.units = units;
     this.formInput = null;
+    this.selectValues = selectValues;
   }
 
   renderTableRow() {
-    const li =
-        $('<li>')
-            .append($('<span>').text(this.name + ': ').attr('class', 'name'))
-            .append($('<span>').append($('<input>')
-                                           .attr('id', this.id())
-                                           .attr('title', this.tooltip)
-                                           .attr('value', this.defaultValue)));
+    const li = $('<li>').append(
+        $('<span>').text(this.name + ': ').attr('class', 'name'));
+    if (this.selectValues == null)
+      li.append($('<span>').append($('<input>')
+                                       .attr('id', this.id())
+                                       .attr('title', this.tooltip)
+                                       .attr('value', this.defaultValue)))
+      else {
+        const select = $('<select>').attr('id', this.id());
+        this.selectValues.forEach(function(id) {
+          select.append($('<option>').text(id).attr('value', id))
+        });
+        li.append(select.val(this.defaultValue));
+      }
     if (this.units != null)
       li.append($('<span>').text(' ' + this.units).attr('class', 'units'));
     return li;
@@ -25,7 +33,11 @@ class PatternFactoryInput {
   }
 
   value() {
-    return Number($('#' + this.id()).val());
+    return $('#' + this.id()).val();
+  }
+
+  numberValue() {
+    return Number(this.value());
   }
 
   id() {
