@@ -9,9 +9,9 @@ class ScarfPatternFactory {
         412, 'rows');
     this.centerLengthInput = new PatternFactoryInput(
         'Center Length',
-        'How many rows should the scarf have in the center part ' +
+        'How many additional rows should the scarf have in the center part ' +
             '(between increases and decreases) along the long dimension?',
-        50, 'rows');
+        0, 'rows');
     this.centerWidthInput = new PatternFactoryInput(
         'Center Stitches',
         'How many stitches should the scarf have in the center part, ' +
@@ -21,22 +21,52 @@ class ScarfPatternFactory {
     this.textureInput = new PatternFactoryInput(
         'Texture', 'What type of texture do you want?', 'Garter', null,
         ['Double moss', 'Garter']);
+
+    this.bezierFocalPointFunctions = {
+      Thin: [{x: 0.75, y: 0.3}, {x: 0.5, y: 0.7}],
+      Balanced: [{x: 0.6, y: 0.3}, {x: 0.4, y: 0.7}],
+      Thick: [{x: 0.5, y: 0.3}, {x: 0.25, y: 0.7}],
+      Straight: [{x: 0.5, y: 0.5}, {x: 0.5, y: 0.5}],
+    };
+
+    this.shapeInput = new PatternFactoryInput(
+        'Shape', 'What general shape would you like?', 'Balanced', null,
+        Object.keys(this.bezierFocalPointFunctions));
   }
 
   getInputs() {
     return [
       this.rowsInput, this.centerLengthInput, this.centerWidthInput,
-      this.textureInput
+      this.textureInput, this.shapeInput
     ];
   }
 
-  stitchesForRow(row) {
-    const normalizedRow = row / this.rowsPerSide();
-    const skipStart = 0.2;  // Otherwise the very start is waaay too long.
-    return this.centerWidthInput.numberValue() *
-        (1 -
-         Math.cos((skipStart + normalizedRow * (1 - skipStart)) * Math.PI)) **
-        2 / 4;
+  bezier(t, p0, p1, p2, p3) {
+    const cx = 3 * (p1.x - p0.x);
+    const bx = 3 * (p2.x - p1.x) - cx;
+    const ax = p3.x - p0.x - cx - bx;
+
+    const cy = 3 * (p1.y - p0.y);
+    const by = 3 * (p2.y - p1.y) - cy;
+    const ay = p3.y - p0.y - cy - by;
+
+    const x = ax * t * t * t + bx * t * t + cx * t + p0.x;
+    const y = ay * t * t * t + by * t * t + cy * t + p0.y;
+
+    return {x: x, y: y};
+  }
+
+  // Fills all indices of array in range [i, n). At index x, stores a valid
+  // value for y at a value in [x, x+1).
+  fillBezierArray(array, i, n, ti, tn, p0, p1, p2, p3) {
+    const middle = (ti + tn) / 2;
+    const newPoint = this.bezier(middle, p0, p1, p2, p3);
+    const newIndex = Math.round(newPoint.x);
+    array[Math.round(newPoint.x)] = Math.floor(newPoint.y);
+    if (i < newIndex && newIndex < n) {
+      this.fillBezierArray(array, i, newIndex, ti, middle, p0, p1, p2, p3);
+      this.fillBezierArray(array, newIndex, n, middle, tn, p0, p1, p2, p3);
+    }
   }
 
   rowsPerSide() {
@@ -47,9 +77,20 @@ class ScarfPatternFactory {
 
   build() {
     const output = new Pattern();
-    const stitches = [];
-    for (let row = 0; row < this.rowsPerSide(); row++)
-      stitches.push(Math.floor(this.stitchesForRow(row)));
+    const stitches = Array(this.rowsPerSide()).fill(null);
+    const coordinates = this.bezierFocalPointFunctions[this.shapeInput.value()];
+    const p0 = {x: 0, y: 0};
+    const p1 = {
+      x: coordinates[0].x * this.rowsPerSide(),
+      y: coordinates[0].y * this.centerWidthInput.numberValue()
+    };
+    const p2 = {
+      x: coordinates[1].x * this.rowsPerSide(),
+      y: coordinates[1].y * this.centerWidthInput.numberValue()
+    };
+    const p3 = {x: this.rowsPerSide(), y: this.centerWidthInput.numberValue()};
+    this.fillBezierArray(
+        stitches, 0, this.rowsPerSide() + 1, 0, 1, p0, p1, p2, p3);
     stitches.forEach((value, index) => this.addRow(output, value));
     for (let row = 0; row < this.centerLengthInput.numberValue(); row++)
       this.addRow(output, this.centerWidthInput.numberValue());
