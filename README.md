@@ -60,9 +60,9 @@ In this case:
   You can also think of down as "right side"
   and up as "wrong side".
 
-* (13 Δ1) tells you that this row ends with 13 stitches.
-  The delta tells you that this row grows the number of stitches
-  by the amount given
+* (13 Δ1) tells you that you should have 13 stitches at the end of this row.
+  The delta, if present, tells you that this row increases
+  the number of stitches by the amount given
   (or shrinks, if negative).
 
 * The rest are the steps for this row.
