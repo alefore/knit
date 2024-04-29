@@ -75,6 +75,13 @@ function applyInputs() {
 }
 
 document.addEventListener('DOMContentLoaded', (event) => {
+  new SwipeHandler(
+      function() {
+        addRow(1);
+      },
+      function() {
+        addRow(-1);
+      });
   drawInputs(patternFactory.getInputs());
   applyInputs();
 });
