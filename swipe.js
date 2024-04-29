@@ -4,21 +4,25 @@ function positionFromTouch(touch) {
 
 class SwipeHandler {
   constructor(onLeft, onRight) {
-    console.log('start');
     this.onLeft = onLeft;
     this.onRight = onRight;
     this.start = null;
-    document.addEventListener('touchstart', this.touchStart, false);
-    document.addEventListener('touchmove', this.touchMove, false);
+    const handler = this;
+    document.addEventListener('touchstart', function() {
+      handler.touchStart(event);
+    }, false);
+    document.addEventListener('touchmove', function() {
+      handler.touchMove(event);
+    }, false);
   }
 
   touchStart(event) {
-    console.log(event);
     this.start =
         positionFromTouch((event.touches || event.originalEvent.touches)[0]);
   }
 
   touchMove(event) {
+    console.log(this.onLeft);
     if (this.start == null) return;
     const release = positionFromTouch(event.touches[0]);
 
@@ -27,8 +31,8 @@ class SwipeHandler {
         ratio * Math.abs(this.start.y - release.y))
       return;
     if (release.x > this.start.x)
-      this.onLeft();
-    else
       this.onRight();
+    else
+      this.onLeft();
   }
 }
