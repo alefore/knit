@@ -59,6 +59,7 @@ class Row {
   borderWrap() {
     return new Row([
       new StitchSequence([Knit], 3), ...this.stitchSequences,
+      new StitchSequence([WithYarnInFront], 1),
       new StitchSequence([SlipStitchPurlwise], 3)
     ]);
   }
@@ -68,6 +69,7 @@ function borderWrapAdjust(rowWithoutBorder, growType) {
   return new Row([
     new StitchSequence([Knit], 2), new StitchSequence([growType], 1),
     ...rowWithoutBorder.stitchSequences,
+    new StitchSequence([WithYarnInFront], 1),
     new StitchSequence([SlipStitchPurlwise], 3)
   ]);
 }
