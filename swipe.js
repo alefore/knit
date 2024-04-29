@@ -30,9 +30,15 @@ class SwipeHandler {
     if (Math.abs(this.start.x - release.x) <
         ratio * Math.abs(this.start.y - release.y))
       return;
-    if (release.x > this.start.x)
+
+    // We reset `start` to avoid multiple calls for the same swipe; whichever
+    // direction triggers first, that's where we stay.
+    if (release.x > this.start.x) {
       this.onRight();
-    else
+      this.start = null;
+    } else {
       this.onLeft();
+      this.start = null;
+    }
   }
 }
