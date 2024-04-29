@@ -71,6 +71,14 @@ function invertColor(color) {
 function applyInputs() {
   pattern = patternFactory.build();
   selectRow(0);
+
+  window.location.hash =
+      patternFactory.getInputs()
+          .map(
+              i => i.hasDefaultValue() ? '' :
+                                         `${i.nameCamelCase()}=${i.value()}`)
+          .filter(str => str !== '')
+          .join('&');
   return false;
 }
 
@@ -82,7 +90,7 @@ document.addEventListener('DOMContentLoaded', (event) => {
       function() {
         addRow(-1);
       });
-  drawInputs(patternFactory.getInputs());
+  drawInputs(patternFactory.getInputs(), parseHash());
   applyInputs();
 });
 
