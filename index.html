@@ -75,27 +75,17 @@ div#currentRow, div#controls {
   align-items: center;
   justify-content: center;
 }
-#currentRow {
-  top: 335px;
-  font-size: 200%;
-  height: 100px;
-}
 #controls {
   top: 300px;
   height: 35px;
 }
 #patternContainer {
-  margin-top: 435px;
+  margin-top: 335px;
   overflow-y: auto;
   overflow-x: hidden;
   position: relative;
   z-index: 1;
-
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(15em, 1fr));
-  gap: 10px; /* Adjust the space between rows */
-
-  height: calc(100vh - 435px);
+  height: calc(100vh - 335px);
   padding: 0px;
 }
 .row {
@@ -104,7 +94,6 @@ div#currentRow, div#controls {
   justify-content: center;
   align-items: center;
   text-align: center;
-  height: 100%;
   width: 100%;
   margin: 4px;
   padding: 0px;
@@ -115,6 +104,9 @@ div#currentRow, div#controls {
 }
 div.highlight {
   border: 1px solid #93e0e3;
+  font-size: 300%;
+  padding-top: 0.5em;
+  padding-bottom: 0.5em;
 }
 .rowIndex {
   color: #93e0e3;
@@ -134,7 +126,6 @@ div.highlight {
   </form>
 </div>
 <canvas id="knitCanvas"></canvas>
-<div id=currentRow>...loading...</div>
 <div id=controls>
 <form onsubmit="return false;">
   <input type=submit value=Prev onclick="addRow(-1);">

@@ -27,27 +27,20 @@ function renderPattern() {
   const container = document.getElementById('patternContainer');
   container.innerHTML = '';
 
-  const currentDivContainer = document.getElementById('currentRow');
-  currentDivContainer.innerHTML = '';
-
   let selectedRow = null;
 
   pattern.forEachRow((rowData, index) => {
-    const divNormal = rowData.createDiv(index, false, pattern);
+    const divNormal = rowData.createDiv(index, index === currentRow, pattern);
+    if (index === currentRow) {
+      divNormal.classList.add('highlight');
+      selectedRow = divNormal;
+    }
     container.appendChild(divNormal);
     divNormal.addEventListener('click', () => {
       selectRow(index);
     });
-    if (index === currentRow) {
-      divNormal.classList.add('highlight');
-      currentDivContainer.appendChild(rowData.createDiv(index, true, pattern));
-      selectedRow = divNormal;
-    }
   });
 
-
-  // const style = window.getComputedStyle(selectedRow);
-  // const marginTop = parseInt(style.marginTop, 10);
   const rowTop = selectedRow.offsetTop;  // - marginTop;
   const rowHeight = selectedRow.offsetHeight;
 
