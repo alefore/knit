@@ -10,9 +10,17 @@ var currentRow = 0;
 function selectRow(row) {
   currentRow = row;
   if (pattern != null) {
+    updateLocationHash();
     renderPattern();
     pattern.drawToCanvas(document.getElementById('knitCanvas'));
   }
+}
+
+function updateLocationHash() {
+  let fragments = patternFactory.getInputs().map(
+      i => i.hasDefaultValue() ? '' : `${i.nameCamelCase()}=${i.value()}`);
+  if (currentRow != 0) fragments.push(`row=${currentRow}`);
+  window.location.hash = fragments.filter(str => str !== '').join('&');
 }
 
 function renderPattern() {
@@ -70,15 +78,7 @@ function invertColor(color) {
 
 function applyInputs() {
   pattern = patternFactory.build();
-  selectRow(0);
-
-  window.location.hash =
-      patternFactory.getInputs()
-          .map(
-              i => i.hasDefaultValue() ? '' :
-                                         `${i.nameCamelCase()}=${i.value()}`)
-          .filter(str => str !== '')
-          .join('&');
+  selectRow(currentRow);
   return false;
 }
 
@@ -90,7 +90,9 @@ document.addEventListener('DOMContentLoaded', (event) => {
       function() {
         addRow(-1);
       });
-  drawInputs(patternFactory.getInputs(), parseHash());
+  const inputs = parseHash();
+  if ('row' in inputs) currentRow = Number(inputs['row']);
+  drawInputs(patternFactory.getInputs(), inputs);
   applyInputs();
 });
 
