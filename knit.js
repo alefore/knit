@@ -83,7 +83,7 @@ document.addEventListener('DOMContentLoaded', (event) => {
       .append($('<canvas />', {id: 'knitCanvas'}))
       .append($('<div />', {
                 id: 'inputs',
-                style: currentRow === 0 ? '' : '' /*'display:none'*/,
+                style: currentRow === 0 ? '' : 'display:none',
               }).append($('<form/>').submit((e) => {
         applyInputs();
         $('#inputs').css('display', 'none');
@@ -99,6 +99,22 @@ document.addEventListener('DOMContentLoaded', (event) => {
                           .submit(function(e) {
                             return false;
                           })
+                          .append($('<input/>', {
+                                    type: 'submit',
+                                    value: 'About'
+                                  }).click(function() {
+                            window.open(
+                                'http://github.com/alefore/knit', '_blank');
+                          }))
+                          .append($('<input/>', {
+                                    type: 'submit',
+                                    value: 'Configure',
+                                    id: 'configureButton'
+                                  }).click(function(e) {
+                            $('#inputs').css('display', 'inline');
+                            $('#controls').css('display', 'none');
+                            $('#patternContainer').css('display', 'none');
+                          }))
                           .append($('<input/>', {type: 'submit', value: 'Prev'})
                                       .click(function(e) {
                                         addRow(-1);
