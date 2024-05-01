@@ -13,7 +13,7 @@ class ScarfPatternFactory {
             '(between increases and decreases) along the long dimension?',
         0, 'rows');
     this.centerWidthInput = new PatternFactoryInput(
-        'Center Stitches',
+        'Center Width',
         'How many stitches should the scarf have in the center part, ' +
             'between the increases and decreases?' +
             ' Does not include the 6 stitches for the i-cord border.',
