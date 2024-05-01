@@ -22,45 +22,55 @@ body, html {
   overflow-y: hidden;
   height: 100%;
 }
-#inputsDiv {
-  width: 100%;
-  height: 100px;
-  position: fixed;
-  top: 0px;
-  left: 50%;
-  text-align: center;
-  transform: translateX(-50%);
-}
-#inputsDiv ul {
-  list-type-type: none;
-  padding: 0;
-  margin: 0;
-}
-#inputsDiv ul li {
-  display: inline;
-  padding: 0.2em;
-  margin-left: 2em;
-}
-#inputsDiv ul li .name {
-  font-weight: bold;
-}
-#inputsDiv ul li .units {
-  font-size: 80%;
-}
-#inputsDiv input {
-  width: 5em;
-  margin: 4px;
-}
 #knitCanvas {
   width: 100%;
   height: 200px;
   position: fixed;
-  top: 100px;
+  top: 0px;
   left: 50%;
   transform: translateX(-50%);
   background-color: #3f3f3f; /* Prevents transparency issues */
   z-index: 2; /* Ensures it stays above other content */
 }
+
+#inputs {
+  margin-top: 200px;
+  width: 100%;
+
+  overflow-y: auto;
+  overflow-x: hidden;
+  position: fixed;
+
+  left: 50%;
+  text-align: center;
+  transform: translateX(-50%);
+
+  z-index: 1;
+  height: calc(100vh - 200px);
+  padding: 0px;
+}
+
+#inputs ul {
+  list-type-type: none;
+  padding: 0;
+  margin: 0;
+}
+#inputs ul li {
+  display: inline;
+  padding: 0.2em;
+  margin-left: 2em;
+}
+#inputs ul li .name {
+  font-weight: bold;
+}
+#inputs ul li .units {
+  font-size: 80%;
+}
+#inputs input {
+  width: 5em;
+  margin: 4px;
+}
+
 div#currentRow, div#controls {
   width: 100%;
   padding: 0;
@@ -76,7 +86,7 @@ div#currentRow, div#controls {
   justify-content: center;
 }
 #controls {
-  top: 300px;
+  top: 200px;
   height: 35px;
 }
 #controls input {
@@ -84,12 +94,13 @@ div#currentRow, div#controls {
   margin-right: 1ch;
 }
 #patternContainer {
-  margin-top: 335px;
+  top: 235px;
+  width: 100%;
   overflow-y: auto;
   overflow-x: hidden;
-  position: relative;
+  position: fixed;
   z-index: 1;
-  height: calc(100vh - 335px);
+  height: calc(100vh - 235px);
   padding: 0px;
 }
 span.stitchSequence {

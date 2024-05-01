@@ -80,15 +80,24 @@ document.addEventListener('DOMContentLoaded', (event) => {
   if ('row' in inputs) currentRow = Number(inputs['row']);
 
   $('body')
-      .append($('<div />', {id: 'inputsDiv'})
-                  .append($('<form/>')
-                              .submit(function(e) {
-                                return applyInputs();
-                              })
-                              .append($('<ul/>', {id: 'inputs'}))))
       .append($('<canvas />', {id: 'knitCanvas'}))
+      .append($('<div />', {
+                id: 'inputs',
+                style: currentRow === 0 ? '' : '' /*'display:none'*/,
+              })
+                  .append($('<form/>')
+                              .submit((e) => {
+                                applyInputs();
+                                $('#inputs').css('display', 'none');
+                                $('#controls').css('display', 'inline');
+                                $('#patternContainer').css('display', 'inline');
+                              })
+                              .append($('<ul/>'))))
       .append(
-          $('<div/>', {id: 'controls'})
+          $('<div/>', {
+            id: 'controls',
+            style: currentRow === 0 ? 'display:none' : 'display:inline'
+          })
               .append($('<form/>')
                           .submit(function(e) {
                             return false;
@@ -101,7 +110,10 @@ document.addEventListener('DOMContentLoaded', (event) => {
                                       .click(function(e) {
                                         addRow(+1);
                                       }))))
-      .append($('<div/>', {id: 'patternContainer'}));
+      .append($('<div/>', {
+        id: 'patternContainer',
+        style: currentRow === 0 ? 'display:none' : 'display:inline'
+      }));
 
   drawInputs(patternFactory.getInputs(), inputs);
   applyInputs();

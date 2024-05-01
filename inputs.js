@@ -61,14 +61,14 @@ class PatternFactoryInput {
 }
 
 function drawInputs(inputs, parsedHash) {
-  const list = $('#inputs');
+  const list = $('#inputs ul');
   inputs.forEach(function(input) {
     list.append(input.renderTableRow(parsedHash == null ? {} : parsedHash));
   });
 
   const inputElement = document.createElement('input');
   inputElement.setAttribute('type', 'submit');
-  inputElement.setAttribute('value', 'Update');
+  inputElement.setAttribute('value', 'Knit!');
 
   list.append($('<li>').append(inputElement));
 }
