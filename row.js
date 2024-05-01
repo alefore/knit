@@ -24,13 +24,12 @@ class Row {
   createDiv(index, showDetails, pattern) {
     const stitchDelta = this.countOutputStitches() - this.countInputStitches();
 
-    const rowDiv = document.createElement('div');
-    const rowP = document.createElement('p');
+    const rowDiv =
+        $('<div>').attr('class', showDetails ? 'highlight row' : 'row');
+
+    const rowP = $('<p>').get(0);
 
     const indexSpan = document.createElement('span');
-    if (showDetails) {
-      rowDiv.classList.add('highlight');
-    }
     indexSpan.classList.add('rowIndex');
     indexSpan.textContent = index + (index % 2 == 0 ? '↓' : '↑') + ' (' +
         this.countOutputStitches() +
@@ -42,7 +41,7 @@ class Row {
 
     rowP.appendChild(htmlContainer);
 
-    rowDiv.appendChild(rowP);
+    rowDiv.append(rowP);
 
     if (showDetails) {
       const detailsP = document.createElement('p');
@@ -52,10 +51,9 @@ class Row {
       detailsP.textContent =
           Math.floor(100 * previousStitches / pattern.countTotalStitches()) +
           '%'
-      rowDiv.appendChild(detailsP);
+      rowDiv.append(detailsP);
     }
 
-    rowDiv.classList.add('row');
     return rowDiv;
   }
 

@@ -35,22 +35,16 @@ function renderPattern() {
       selectedRow = divNormal;
     }
     container.append(divNormal);
-    divNormal.addEventListener('click', () => {
+    divNormal.click(() => {
       selectRow(index);
     });
   });
 
-  const rowTop = selectedRow.offsetTop;  // - marginTop;
-  const rowHeight = selectedRow.offsetHeight;
+  const rowTop = selectedRow.position().top + container.scrollTop();
+  const paddingTop =  // Leave 1/3 above current row, 2/3 below.
+      Math.max(0, container.innerHeight() - selectedRow.outerHeight()) / 3;
 
-  const containerHeight = container.outerHeight();
-  const rowCenter = rowTop + (rowHeight / 2);
-  scrollPosition = rowCenter - (containerHeight / 2);
-  scrollPosition = Math.max(scrollPosition, 0);
-
-  const maxScrollPosition = container.prop('scrollHeight') - containerHeight;
-  scrollPosition = Math.min(scrollPosition, maxScrollPosition);
-  container.scrollTop(scrollPosition);
+  container.scrollTop(Math.max(0, rowTop - paddingTop));
 }
 
 function addRow(delta) {
