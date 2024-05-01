@@ -67,8 +67,6 @@ function drawInputs(inputs, parsedHash, onChange) {
     table.append(
         input.renderTableRow(parsedHash == null ? {} : parsedHash, onChange));
   });
-
-  $('#inputs form').append($('<input/>', {type: 'submit', value: 'Knit!'}));
   onChange();
 }
 

@@ -1,3 +1,21 @@
+function createConstants(...keys) {
+  const constants = keys.reduce((obj, key) => {
+    obj[key] = key;
+    return obj;
+  }, {});
+  return new Proxy(constants, {
+    get: (target, name) => {
+      if (name in target)
+        return target[name];
+      else
+        throw new Error(`Constant "${String(name)}" is not defined.`);
+    }
+  });
+}
+
+const objectIds = createConstants(
+    'configureButton', 'knitButton', 'buttonNext', 'buttonPrev');
+
 let patternFactory = new ScarfPatternFactory(
     3, [16, 14, 14, 14, 14, 12, 12, 12, 12, 12, 10, 10, 8, 8, 10, 12, 16]);
 
@@ -50,9 +68,11 @@ function renderPattern() {
 function addRow(delta) {
   if (delta > 0 && currentRow < pattern.rows.length - 1) {
     selectRow(currentRow + 1);
+    $('#' + objectIds.knitButton).click();
   }
   if (delta < 0 && currentRow > 0) {
     selectRow(currentRow - 1);
+    $('#' + objectIds.knitButton).click();
   }
 }
 
@@ -68,6 +88,16 @@ function applyInputs() {
   return false;
 }
 
+function updateAllControls() {
+  $('#controls form input').prop('disabled', false);
+  $('#' + objectIds.buttonPrev)
+      .prop('disabled', pattern === null || currentRow === 0);
+  $('#' + objectIds.buttonNext)
+      .prop(
+          'disabled',
+          pattern === null || currentRow === pattern.rowsCount() - 1);
+}
+
 document.addEventListener('DOMContentLoaded', (event) => {
   new SwipeHandler(
       function() {
@@ -81,6 +111,55 @@ document.addEventListener('DOMContentLoaded', (event) => {
 
   $('body')
       .append($('<canvas />', {id: 'knitCanvas'}))
+      .append(
+          $('<div/>', {id: 'controls'})
+              .append(
+                  $('<form/>')
+                      .submit(function(e) {
+                        return false;
+                      })
+                      .append($('<input/>', {type: 'submit', value: 'About'})
+                                  .click(function() {
+                                    window.open(
+                                        'http://github.com/alefore/knit',
+                                        '_blank');
+                                  }))
+                      .append($('<input/>', {
+                                type: 'submit',
+                                value: 'Configure',
+                                id: objectIds.configureButton
+                              }).click(function(e) {
+                        $('#inputs').css('display', 'inline');
+                        $('#patternContainer').css('display', 'none');
+
+                        updateAllControls();
+                        $('#' + objectIds.configureButton)
+                            .prop('disabled', true);
+                      }))
+                      .append($('<input/>', {
+                                type: 'submit',
+                                value: 'Knit',
+                                id: objectIds.knitButton
+                              }).click(function(e) {
+                        $('#inputs').css('display', 'none');
+                        $('#patternContainer').css('display', 'inline');
+                        updateAllControls();
+                        $('#' + objectIds.knitButton).prop('disabled', true);
+                      }))
+                      .append($('<input/>', {
+                                type: 'submit',
+                                value: 'Prev',
+                                id: objectIds.buttonPrev
+                              }).click(function(e) {
+                        addRow(-1);
+                      }))
+                      .append($('<input/>', {
+                                type: 'submit',
+                                value: 'Next',
+                                id: objectIds.buttonNext
+                              }).click(function(e) {
+                        addRow(+1);
+                      }))))
       .append($('<div />', {
                 id: 'inputs',
                 style: currentRow === 0 ? '' : 'display:none',
@@ -90,55 +169,25 @@ document.addEventListener('DOMContentLoaded', (event) => {
         $('#controls').css('display', 'inline');
         $('#patternContainer').css('display', 'inline');
       })))
-      .append(
-          $('<div/>', {
-            id: 'controls',
-            style: currentRow === 0 ? 'display:none' : 'display:inline'
-          })
-              .append($('<form/>')
-                          .submit(function(e) {
-                            return false;
-                          })
-                          .append($('<input/>', {
-                                    type: 'submit',
-                                    value: 'About'
-                                  }).click(function() {
-                            window.open(
-                                'http://github.com/alefore/knit', '_blank');
-                          }))
-                          .append($('<input/>', {
-                                    type: 'submit',
-                                    value: 'Configure',
-                                    id: 'configureButton'
-                                  }).click(function(e) {
-                            $('#inputs').css('display', 'inline');
-                            $('#controls').css('display', 'none');
-                            $('#patternContainer').css('display', 'none');
-                          }))
-                          .append($('<input/>', {type: 'submit', value: 'Prev'})
-                                      .click(function(e) {
-                                        addRow(-1);
-                                      }))
-                          .append($('<input/>', {type: 'submit', value: 'Next'})
-                                      .click(function(e) {
-                                        addRow(+1);
-                                      }))))
       .append($('<div/>', {
         id: 'patternContainer',
         style: currentRow === 0 ? 'display:none' : 'display:inline'
       }));
 
+  updateAllControls();
+  $('#' + (currentRow === 0 ? objectIds.configureButton : objectIds.knitButton))
+      .prop('disabled', true);
   drawInputs(patternFactory.getInputs(), inputs, applyInputs);
 });
 
 document.body.addEventListener('keydown', function(e) {
   if (pattern == null) return;
-  if (e.code === 'Space' || e.code === 'ArrowRight') {
-    addRow(1);
+  if (e.code === 'Space' || e.code === 'ArrowDown') {
+    $('#' + objectIds.buttonNext).click();
     e.preventDefault();
   }
-  if (e.code === 'ArrowLeft') {
-    addRow(-1);
+  if (e.code === 'ArrowUp') {
+    $('#' + objectIds.buttonPrev).click();
     e.preventDefault();
   }
 });
