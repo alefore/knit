@@ -112,8 +112,7 @@ document.addEventListener('DOMContentLoaded', (event) => {
         style: currentRow === 0 ? 'display:none' : 'display:inline'
       }));
 
-  drawInputs(patternFactory.getInputs(), inputs);
-  applyInputs();
+  drawInputs(patternFactory.getInputs(), inputs, applyInputs);
 });
 
 document.body.addEventListener('keydown', function(e) {
