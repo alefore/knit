@@ -84,15 +84,12 @@ document.addEventListener('DOMContentLoaded', (event) => {
       .append($('<div />', {
                 id: 'inputs',
                 style: currentRow === 0 ? '' : '' /*'display:none'*/,
-              })
-                  .append($('<form/>')
-                              .submit((e) => {
-                                applyInputs();
-                                $('#inputs').css('display', 'none');
-                                $('#controls').css('display', 'inline');
-                                $('#patternContainer').css('display', 'inline');
-                              })
-                              .append($('<ul/>'))))
+              }).append($('<form/>').submit((e) => {
+        applyInputs();
+        $('#inputs').css('display', 'none');
+        $('#controls').css('display', 'inline');
+        $('#patternContainer').css('display', 'inline');
+      })))
       .append(
           $('<div/>', {
             id: 'controls',

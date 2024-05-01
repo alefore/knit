@@ -41,36 +41,26 @@ body, html {
   overflow-x: hidden;
   position: fixed;
 
-  left: 50%;
   text-align: center;
-  transform: translateX(-50%);
 
   z-index: 1;
-  height: calc(100vh - 200px);
   padding: 0px;
 }
 
-#inputs ul {
-  list-type-type: none;
-  padding: 0;
-  margin: 0;
+#inputs table {
+  margin-left: auto;
+  margin-right: auto;
 }
-#inputs ul li {
-  display: inline;
-  padding: 0.2em;
-  margin-left: 2em;
-}
-#inputs ul li .name {
+#inputs table tr td.name {
+  text-align: right;
   font-weight: bold;
 }
-#inputs ul li .units {
+#inputs table tr td.units {
   font-size: 80%;
 }
-#inputs input {
-  width: 5em;
-  margin: 4px;
+#inputs table tr td {
+  text-align: left;
 }
-
 div#currentRow, div#controls {
   width: 100%;
   padding: 0;

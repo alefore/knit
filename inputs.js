@@ -9,30 +9,27 @@ class PatternFactoryInput {
   }
 
   renderTableRow(parsedHash) {
-    const li = $('<li>').append(
-        $('<span>').text(this.name + ': ').attr('class', 'name'));
-    console.log('Searching: ' + this.nameCamelCase());
+    const tr = $('<tr>').append($('<td>', {class: 'name'}).text(this.name));
     let defaultValue = Object.keys(parsedHash).includes(this.nameCamelCase()) ?
         parsedHash[this.nameCamelCase()] :
         this.defaultValue;
     if (this.selectValues == null) {
       const input = this;
-      li.append($('<span>').append($('<input>')
-                                       .attr('id', this.id())
-                                       .attr('title', this.tooltip)
-                                       .attr('value', defaultValue)))
+      tr.append($('<td>').append($(
+          '<input/>',
+          {id: this.id(), title: this.tooltip, value: defaultValue, size: 4})));
     } else {
       const select = $('<select>').attr('id', this.id());
       this.selectValues.forEach(function(id) {
         select.append($('<option>').text(id).attr('value', id))
       });
-      li.append(select.val(
+      tr.append($('<td>').append(select.val(
           this.selectValues.includes(defaultValue) ? defaultValue :
-                                                     this.defaultValue));
+                                                     this.defaultValue)));
     }
     if (this.units != null)
-      li.append($('<span>').text(' ' + this.units).attr('class', 'units'));
-    return li;
+      tr.append($('<td>', {class: 'units'}).text(this.units));
+    return tr;
   }
 
   setFormInput(formInput) {
@@ -61,16 +58,12 @@ class PatternFactoryInput {
 }
 
 function drawInputs(inputs, parsedHash) {
-  const list = $('#inputs ul');
+  const table = $('<table>').appendTo('#inputs form');
   inputs.forEach(function(input) {
-    list.append(input.renderTableRow(parsedHash == null ? {} : parsedHash));
+    table.append(input.renderTableRow(parsedHash == null ? {} : parsedHash));
   });
 
-  const inputElement = document.createElement('input');
-  inputElement.setAttribute('type', 'submit');
-  inputElement.setAttribute('value', 'Knit!');
-
-  list.append($('<li>').append(inputElement));
+  $('#inputs form').append($('<input/>', {type: 'submit', value: 'Knit!'}));
 }
 
 function hideInputHtml() {
