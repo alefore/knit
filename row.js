@@ -28,6 +28,9 @@ class Row {
     const rowP = document.createElement('p');
 
     const indexSpan = document.createElement('span');
+    if (showDetails) {
+      rowDiv.classList.add('highlight');
+    }
     indexSpan.classList.add('rowIndex');
     indexSpan.textContent = index + (index % 2 == 0 ? '↓' : '↑') + ' (' +
         this.countOutputStitches() +

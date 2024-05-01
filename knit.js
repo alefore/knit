@@ -32,7 +32,6 @@ function renderPattern() {
   pattern.forEachRow((rowData, index) => {
     const divNormal = rowData.createDiv(index, index === currentRow, pattern);
     if (index === currentRow) {
-      divNormal.classList.add('highlight');
       selectedRow = divNormal;
     }
     container.append(divNormal);
