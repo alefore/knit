@@ -38,14 +38,15 @@ class Row {
                     .append(this.describeStitches()));
 
     if (showDetails) {
-      const detailsP = document.createElement('p');
-      detailsP.classList.add('details');
       const previousStitches = pattern.rows.slice(0, index).reduce(
           (total, r) => total + r.countOutputStitches(), 0);
-      detailsP.textContent =
-          Math.floor(100 * previousStitches / pattern.countTotalStitches()) +
-          '%'
-      rowDiv.append(detailsP);
+      rowDiv.append(
+          $('<p>')
+              .attr('class', 'details')
+              .text(
+                  Math.floor(
+                      100 * previousStitches / pattern.countTotalStitches()) +
+                  '%'));
     }
 
     return rowDiv;
