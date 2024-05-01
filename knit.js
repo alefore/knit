@@ -24,8 +24,8 @@ function updateLocationHash() {
 }
 
 function renderPattern() {
-  const container = document.getElementById('patternContainer');
-  container.innerHTML = '';
+  const container = $('#patternContainer');
+  container.empty();
 
   let selectedRow = null;
 
@@ -35,7 +35,7 @@ function renderPattern() {
       divNormal.classList.add('highlight');
       selectedRow = divNormal;
     }
-    container.appendChild(divNormal);
+    container.append(divNormal);
     divNormal.addEventListener('click', () => {
       selectRow(index);
     });
@@ -44,14 +44,14 @@ function renderPattern() {
   const rowTop = selectedRow.offsetTop;  // - marginTop;
   const rowHeight = selectedRow.offsetHeight;
 
-  const containerHeight = container.offsetHeight;
+  const containerHeight = container.outerHeight();
   const rowCenter = rowTop + (rowHeight / 2);
   scrollPosition = rowCenter - (containerHeight / 2);
   scrollPosition = Math.max(scrollPosition, 0);
 
-  const maxScrollPosition = container.scrollHeight - container.offsetHeight;
+  const maxScrollPosition = container.prop('scrollHeight') - containerHeight;
   scrollPosition = Math.min(scrollPosition, maxScrollPosition);
-  container.scrollTop = scrollPosition;
+  container.scrollTop(scrollPosition);
 }
 
 function addRow(delta) {
