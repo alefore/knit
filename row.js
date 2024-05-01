@@ -30,7 +30,7 @@ class Row {
                     .append(
                         $('<span>')
                             .attr('class', 'rowIndex')
-                            .text(
+                            .append(
                                 index + (index % 2 == 0 ? '↓' : '↑') + ' (' +
                                 this.countOutputStitches() +
                                 (stitchDelta == 0 ? '' : ' Δ' + stitchDelta) +
@@ -40,13 +40,13 @@ class Row {
     if (showDetails) {
       const previousStitches = pattern.rows.slice(0, index).reduce(
           (total, r) => total + r.countOutputStitches(), 0);
-      rowDiv.append(
-          $('<p>')
-              .attr('class', 'details')
-              .text(
-                  Math.floor(
-                      100 * previousStitches / pattern.countTotalStitches()) +
-                  '%'));
+      const totalStitches = pattern.countTotalStitches();
+      rowDiv.append($('<p>')
+                        .attr('class', 'details')
+                        .append(
+                            Math.floor(100 * previousStitches / totalStitches) +
+                            '% (' + previousStitches + ' of ' + totalStitches +
+                            ' st)'));
     }
 
     return rowDiv;
