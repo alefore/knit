@@ -6,13 +6,14 @@ class StitchSequence {
   }
 
   describe() {
-    let sequenceDescription =
-        this.sequence.map(stitch => stitch.html()).join(' ');
     if (this.repetitions == 0 || this.sequence === []) return '';
-    if (this.repetitions == 1) return sequenceDescription;
-    if (this.sequence.length > 1)
-      sequenceDescription = '(' + sequenceDescription + ')';
-    return this.repetitions + sequenceDescription;
+    const output = $('<span>').attr('class', 'stitchSequence');
+    const needParens = this.repetitions != 1 && this.sequence.length > 1;
+    if (this.repetitions != 1) output.text(this.repetitions);
+    if (needParens) output.text('(');
+    output.append(this.sequence.map(stitch => stitch.html()).join(' '));
+    if (needParens) output.text(')');
+    return output;
   }
 
   countInputStitches() {

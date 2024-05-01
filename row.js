@@ -14,34 +14,28 @@ class Row {
   }
 
   describeStitches() {
-    return this.stitchSequences
-        .map(sequence => {
-          return sequence.describe();
-        })
-        .join(' ');
+    return this.stitchSequences.map(sequence => {
+      return sequence.describe();
+    });
   }
 
   createDiv(index, showDetails, pattern) {
     const stitchDelta = this.countOutputStitches() - this.countInputStitches();
 
     const rowDiv =
-        $('<div>').attr('class', showDetails ? 'highlight row' : 'row');
-
-    const rowP = $('<p>').get(0);
-
-    const indexSpan = document.createElement('span');
-    indexSpan.classList.add('rowIndex');
-    indexSpan.textContent = index + (index % 2 == 0 ? '↓' : '↑') + ' (' +
-        this.countOutputStitches() +
-        (stitchDelta == 0 ? '' : ' Δ' + stitchDelta) + ') ';
-
-    rowP.appendChild(indexSpan);
-    const htmlContainer = document.createElement('span');
-    htmlContainer.innerHTML = this.describeStitches();
-
-    rowP.appendChild(htmlContainer);
-
-    rowDiv.append(rowP);
+        $('<div>')
+            .attr('class', showDetails ? 'highlight row' : 'row')
+            .append(
+                $('<p>')
+                    .append(
+                        $('<span>')
+                            .attr('class', 'rowIndex')
+                            .text(
+                                index + (index % 2 == 0 ? '↓' : '↑') + ' (' +
+                                this.countOutputStitches() +
+                                (stitchDelta == 0 ? '' : ' Δ' + stitchDelta) +
+                                ') '))
+                    .append(this.describeStitches()));
 
     if (showDetails) {
       const detailsP = document.createElement('p');
