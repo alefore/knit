@@ -78,6 +78,31 @@ document.addEventListener('DOMContentLoaded', (event) => {
       });
   const inputs = parseHash();
   if ('row' in inputs) currentRow = Number(inputs['row']);
+
+  $('body')
+      .append($('<div />', {id: 'inputsDiv'})
+                  .append($('<form/>')
+                              .submit(function(e) {
+                                return applyInputs();
+                              })
+                              .append($('<ul/>', {id: 'inputs'}))))
+      .append($('<canvas />', {id: 'knitCanvas'}))
+      .append(
+          $('<div/>', {id: 'controls'})
+              .append($('<form/>')
+                          .submit(function(e) {
+                            return false;
+                          })
+                          .append($('<input/>', {type: 'submit', value: 'Prev'})
+                                      .click(function(e) {
+                                        addRow(-1);
+                                      }))
+                          .append($('<input/>', {type: 'submit', value: 'Next'})
+                                      .click(function(e) {
+                                        addRow(+1);
+                                      }))))
+      .append($('<div/>', {id: 'patternContainer'}));
+
   drawInputs(patternFactory.getInputs(), inputs);
   applyInputs();
 });
