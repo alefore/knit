@@ -9,10 +9,10 @@ class StitchSequence {
     if (this.repetitions == 0 || this.sequence === []) return '';
     const output = $('<span>').attr('class', 'stitchSequence');
     const needParens = this.repetitions != 1 && this.sequence.length > 1;
-    if (this.repetitions != 1) output.text(this.repetitions);
-    if (needParens) output.text('(');
+    if (this.repetitions != 1) output.append(this.repetitions);
+    if (needParens) output.append('(');
     output.append(this.sequence.map(stitch => stitch.html()).join(' '));
-    if (needParens) output.text(')');
+    if (needParens) output.append(')');
     return output;
   }
 
