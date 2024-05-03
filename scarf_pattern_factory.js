@@ -70,12 +70,17 @@ class ScarfPatternFactory {
   }
 
   rowsPerSide() {
-    return (this.rowsInput.numberValue() -
-            this.centerLengthInput.numberValue()) /
-        2;
+    return Math.floor(
+        (this.rowsInput.numberValue() - this.centerLengthInput.numberValue()) /
+        2);
   }
 
   build() {
+    if (this.centerLengthInput.numberValue() > this.rowsInput.numberValue())
+      throw new Error(
+          this.centerLengthInput.name + ' must smaller than or equal to ' +
+          this.rowsInput.name);
+
     const output = new Pattern();
     const stitches = Array(this.rowsPerSide()).fill(null);
     const coordinates = this.bezierFocalPointFunctions[this.shapeInput.value()];
