@@ -14,7 +14,8 @@ function createConstants(...keys) {
 }
 
 const objectIds = createConstants(
-    'configureButton', 'knitButton', 'buttonNext', 'buttonPrev');
+    'configureButton', 'factoryWarnings', 'knitButton', 'buttonNext',
+    'buttonPrev');
 
 let patternFactory = new ScarfPatternFactory(
     3, [16, 14, 14, 14, 14, 12, 12, 12, 12, 12, 10, 10, 8, 8, 10, 12, 16]);
@@ -27,11 +28,15 @@ var currentRow = 0;
 
 function selectRow(row) {
   currentRow = row;
+  const canvas = $('#knitCanvas')[0];
+  canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
   if (pattern != null) {
     updateLocationHash();
-    renderPattern();
     pattern.drawToCanvas(document.getElementById('knitCanvas'));
+  } else {
+    $('#knitCanvas').empty();
   }
+  renderPattern();
 }
 
 function updateLocationHash() {
@@ -45,6 +50,7 @@ function renderPattern() {
   const container = $('#patternContainer');
   container.empty();
 
+  if (pattern === null) return;
   let selectedRow = null;
 
   pattern.forEachRow((rowData, index) => {
@@ -83,7 +89,14 @@ function invertColor(color) {
 }
 
 function applyInputs() {
-  pattern = patternFactory.build();
+  const warningsDiv = $('#' + objectIds.factoryWarnings).empty();
+  try {
+    pattern = patternFactory.build();
+  } catch (error) {
+    pattern = null;
+    warningsDiv.append($('<p>').text(error));
+  }
+  $('#' + objectIds.knitButton).prop('disabled', pattern === null);
   selectRow(currentRow);
   return false;
 }
@@ -163,20 +176,30 @@ document.addEventListener('DOMContentLoaded', (event) => {
       .append($('<div />', {
                 id: 'inputs',
                 style: currentRow === 0 ? '' : 'display:none',
-              }).append($('<form/>').submit((e) => {
-        applyInputs();
-        $('#inputs').css('display', 'none');
-        $('#controls').css('display', 'inline');
-        $('#patternContainer').css('display', 'inline');
-      })))
+              })
+                  .append($('<form/>').submit((e) => {
+                    applyInputs();
+                    if (pattern === null) {
+                      $('#controls').css('display', 'inline');
+                      $('#inputs').css('display', 'inline');
+                      $('#patternContainer').css('display', 'none');
+                    } else {
+                      $('#inputs').css('display', 'none');
+                      $('#controls').css('display', 'inline');
+                      $('#patternContainer').css('display', 'inline');
+                    }
+                  }))
+                  .append($('<div/>', {id: objectIds.factoryWarnings})))
       .append($('<div/>', {
         id: 'patternContainer',
         style: currentRow === 0 ? 'display:none' : 'display:inline'
       }));
 
   updateAllControls();
-  $('#' + (currentRow === 0 ? objectIds.configureButton : objectIds.knitButton))
-      .prop('disabled', true);
+  $('#' + objectIds.configureButton)
+      .prop('disabled', currentRow === 0 || pattern === null);
+  $('#' + objectIds.knitButton)
+      .prop('disabled', pattern != null && currentRow != 0);
   drawInputs(patternFactory.getInputs(), inputs, applyInputs);
 });
 
