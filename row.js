@@ -14,9 +14,12 @@ class Row {
   }
 
   describeStitches() {
-    return this.stitchSequences.map(sequence => {
-      return sequence.describe();
-    });
+    const zeroWidthSpace = '&#8203;';
+    return intersperse(
+        this.stitchSequences.map(sequence => {
+          return sequence.describe();
+        }),
+        zeroWidthSpace);
   }
 
   createDiv(index, showDetails, pattern) {
@@ -68,4 +71,15 @@ function borderWrapAdjust(rowWithoutBorder, growType) {
     new StitchSequence([WithYarnInFront], 1),
     new StitchSequence([SlipStitchPurlwise], 3)
   ]);
+}
+
+function intersperse(array, value) {
+  return array.reduce((acc, elem, index) => {
+    if (index !== array.length - 1) {
+      acc.push(elem, value);
+    } else {
+      acc.push(elem);
+    }
+    return acc;
+  }, []);
 }
