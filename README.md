@@ -4,21 +4,27 @@
 
 Knit is a web application to help you knit simple wavy scarfs.
 It allows you to specify a few input parameters
-about the length and shape of the scarf
+concerning the scarf's length and shape
 in order to generate the "pattern":
 the sequence of rows that you can knit.
 Knit displays a render of the scarf
 (given your input parameters)
 and helps you keep track of which row you're on.
 
+![Sample scarf](images/000.jpg)
+
 The scarf shapes (i.e., the position of increases and decreases)
 are generated using Bézier curves given the input parameters.
 
-## Caveats
+This application state is contained entirely in the browser.
+There is no server-side component or communication
+(beyond just loading the static files).
 
-I've mostly tested this on a laptop.
-I've tried to add some rudimentary support for mobile interfaces,
-but I don't know how well it works.
+## Example
+
+The following is a scarf I knit ([parameters](https://alefore.github.io/knit/#TotalLength=654&CenterWidth=26&Shape=Thin)):
+
+![Sample scarf](images/001.jpg)
 
 ## Using Knit
 
@@ -27,25 +33,34 @@ In order to knit a new scarf using this software:
 1. Load it from the Github page:
    https://alefore.github.io/knit/
 
-2. Save a local copy.
+2. Optionally, save a local copy.
    I recommend using a local copy
    as a way to freeze the version you're working on.
    I may change the implementation.
 
-3. Play with the parameters (at the top of the screen,
-   clock "Update")
-   until you're satisfied.
+3. Configure your scarf:
+   play with the parameters until you're satisfied.
    I recommend you knit a small swatch to get gauge;
-   that would let you know how many rows/stitches you want your scarf to have.
+   that would let you decide
+   the length and width of your scarf in rows and stitches.
 
-4. Cast-on 6 stitches.
+4. Unless you plan to knit your entire scarf
+   (which typically takes a few hours, depending on your parameters)
+   in a single sitting,
+   I'd recommend that you do a simple test:
+   advance a few rows (without knitting),
+   put your phone (or computer) away (e.g., lock it or such),
+   and come back to your browser
+   to confirm that it correctly remembers which row you were on.
+
+5. Cast-on 6 stitches.
    This is the left tip of your scarf.
 
-5. Work through the rows.
+6. Work through the rows.
    Start at row 0.
-   Whenever you finish a row, press space
-   (or, on mobile, swipe left or use the "Prev" and "Next" buttons)
-   to move to the next row.
+   Whenever you finish a row, clock "Next" to advance.
+   You can also press space, up or down;
+   on mobile devices, you can swipe left or right.
 
 ### Display
 
