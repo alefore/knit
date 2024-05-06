@@ -64,6 +64,8 @@ function renderPattern() {
     });
   });
 
+  if (selectedRow === null) selectedRow = container.children(0);
+
   const rowTop = selectedRow.position().top + container.scrollTop();
   const paddingTop =  // Leave 1/3 above current row, 2/3 below.
       Math.max(0, container.innerHeight() - selectedRow.outerHeight()) / 3;

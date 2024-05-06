@@ -62,7 +62,7 @@ class ScarfPatternFactory {
     const middle = (ti + tn) / 2;
     const newPoint = this.bezier(middle, p0, p1, p2, p3);
     const newIndex = Math.round(newPoint.x);
-    array[Math.round(newPoint.x)] = Math.round(newPoint.y);
+    array[Math.floor(newPoint.x)] = Math.round(newPoint.y);
     if (i < newIndex && newIndex < n) {
       this.fillBezierArray(array, i, newIndex, ti, middle, p0, p1, p2, p3);
       this.fillBezierArray(array, newIndex, n, middle, tn, p0, p1, p2, p3);
@@ -94,8 +94,7 @@ class ScarfPatternFactory {
       y: coordinates[1].y * this.centerWidthInput.numberValue()
     };
     const p3 = {x: this.rowsPerSide(), y: this.centerWidthInput.numberValue()};
-    this.fillBezierArray(
-        stitches, 0, this.rowsPerSide() + 1, 0, 1, p0, p1, p2, p3);
+    this.fillBezierArray(stitches, 0, this.rowsPerSide(), 0, 1, p0, p1, p2, p3);
     stitches.forEach((value, index) => this.addRow(output, value));
     for (let row = 0; row < this.centerLengthInput.numberValue(); row++)
       this.addRow(output, this.centerWidthInput.numberValue());
