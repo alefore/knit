@@ -33,7 +33,7 @@ In order to knit a new scarf using this software:
 1. Load it from Github pages:
    https://alefore.github.io/knit/
 
-2. Optionally, save a local copy.
+1. Optionally, save a local copy.
    I recommend using a local copy
    as a way to freeze the version you're working on.
    I may change the implementation.
@@ -41,35 +41,37 @@ In order to knit a new scarf using this software:
    and loaded from your copy
    (rather than just the `index.html` entry point).
 
-3. Configure your scarf:
-   play with the parameters until you're satisfied.
-   I recommend you knit a small swatch to inform
+1. Optionally, knit a small swatch to inform
    the length and width of your scarf in rows and stitches
    (e.g., if each of your rows measures 4mm,
    you'll need 250 rows for a 1m long scarf).
    This enables the software to be completely agnostic to your
    yarn width, needle size, and knitting tension.
 
-4. Unless you plan to knit your entire scarf
-   (which typically takes a few hours, depending on your parameters)
-   in a single sitting,
-   I'd recommend that you do a simple test before you start:
+1. Configure your scarf:
+   adjust the parameters until you're satisfied.
+   You can mouse over each input for more information.
+   When you're satisfied, click *Knit*.
+
+1. Knitting your scarf typically takes a few hours,
+   depending on your parameters.
+   Unless you plan to knit your entire scarf in a single sitting,
+   consider doing a simple test before you start:
    advance a few rows in the software (without knitting),
    put your phone (or computer) away (e.g., lock it or such),
    and come back to your browser.
    Confirm that your browser correctly remembers which row you were on.
 
-5. Start knitting.
+1. Start knitting.
    Cast-on 6 stitches.
    This is the left tip of your scarf.
 
-6. Work through the rows.
-   Start at row 0.
-   Whenever you finish a row, click "Next" to advance.
-   You can also press space, up or down;
-   on mobile devices, you can swipe left or right.
+1. Work through the rows, starting at row 0.
+   Whenever you finish a row, click "Next" to advance;
+   you can also press space, up or down or,
+   on mobile devices, swipe left or right.
 
-7. Bind-off the last 6 stitches.
+1. Bind-off the last 6 stitches.
 
 ### Display
 
