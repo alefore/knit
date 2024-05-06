@@ -70,10 +70,6 @@ function drawInputs(inputs, parsedHash, onChange) {
   onChange();
 }
 
-function hideInputHtml() {
-  $('#inputsDiv').css('display', 'none');
-}
-
 function parseHash() {
   const hash = window.location.hash.substring(1);  // Remove the '#' character
   const params = {};
