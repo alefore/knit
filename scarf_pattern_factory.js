@@ -110,29 +110,19 @@ class ScarfPatternFactory {
     const atEvenRow = pattern.rowsCount() % 2 == 0;
     const rowGenerator =
         this.textureInput.value() == 'Garter' ? garterRow : doubleMossStitchRow;
+
+    let growType = null;
     if (atEvenRow && previousStitches < desiredStitches)
-      pattern.addRow(borderWrapAdjust(
-          rowGenerator(pattern.rows.length, previousStitches), KnitFrontBack));
+      growType = KnitFrontBack;
     else if (atEvenRow && previousStitches > desiredStitches)
-      pattern.addRow(borderWrapAdjust(
-          rowGenerator(pattern.rows.length, previousStitches - 1),
-          KnitTwoTogether));
-    else
-      pattern.addRow(
-          rowGenerator(pattern.rows.length, previousStitches).borderWrap());
+      growType = KnitTwoTogether;
+    pattern.addRow(
+        rowGenerator(
+            pattern.rows.length,
+            previousStitches - (growType === KnitTwoTogether ? 1 : 0))
+            .borderWrap(growType));
   }
 }
-
-/*
-function Row1x1(pattern, stitches, startKnit) {
-  const finalStitch = new StitchSequence([startKnit ? Knit : Purl], 1);
-  let output = [new StitchSequence(startKnit
-                                       ? [Knit, Purl] : [Purl, Knit],
-                                   Math.floor(stitches / 2))];
-  if (stitches % 2 == 1) output.push(finalStitch);
-  return new Row(output);
-}
-*/
 
 function rightSide(rowId) {
   return rowId % 2 == 0;

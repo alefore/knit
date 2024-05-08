@@ -17,7 +17,7 @@ class PatternFactoryInput {
       tr.append($('<td>').append(
           $('<input/>',
             {id: this.id(), title: this.tooltip, value: defaultValue, size: 4})
-              .on('input', onChange)));
+              .on(eventIds.input, onChange)));
     } else {
       const select = $('<select>', {id: this.id()});
       this.selectValues.forEach(function(id) {
@@ -28,7 +28,7 @@ class PatternFactoryInput {
               .val(
                   this.selectValues.includes(defaultValue) ? defaultValue :
                                                              this.defaultValue)
-              .on('input', onChange)));
+              .on(eventIds.input, onChange)));
     }
     if (this.units !== null)
       tr.append($('<td>', {class: 'units'}).text(this.units));

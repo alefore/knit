@@ -26,13 +26,11 @@ class Row {
     const stitchDelta = this.countOutputStitches() - this.countInputStitches();
 
     const rowDiv =
-        $('<div>')
-            .attr('class', showDetails ? 'highlight row' : 'row')
+        $('<div>', {class: showDetails ? 'highlight row' : 'row'})
             .append(
                 $('<p>')
                     .append(
-                        $('<span>')
-                            .attr('class', 'rowIndex')
+                        $('<span>', {class: 'rowIndex'})
                             .append(
                                 index + (index % 2 == 0 ? '↓' : '↑') + ' (' +
                                 this.countOutputStitches() +
@@ -44,8 +42,7 @@ class Row {
       const previousStitches = pattern.rows.slice(0, index).reduce(
           (total, r) => total + r.countOutputStitches(), 0);
       const totalStitches = pattern.countTotalStitches();
-      rowDiv.append($('<p>')
-                        .attr('class', 'details')
+      rowDiv.append($('<p>', {class: 'details'})
                         .append(
                             Math.floor(100 * previousStitches / totalStitches) +
                             '% (' + previousStitches + ' of ' + totalStitches +
@@ -55,22 +52,16 @@ class Row {
     return rowDiv;
   }
 
-  borderWrap() {
+  borderWrap(growType) {
+    const prefix = growType === null ?
+        [new StitchSequence([Knit], 3)] :
+        [new StitchSequence([Knit], 2), new StitchSequence([growType], 1)];
     return new Row([
-      new StitchSequence([Knit], 3), ...this.stitchSequences,
+      ...prefix, ...this.stitchSequences,
       new StitchSequence([WithYarnInFront], 1),
       new StitchSequence([SlipStitchPurlwise], 3)
     ]);
   }
-}
-
-function borderWrapAdjust(rowWithoutBorder, growType) {
-  return new Row([
-    new StitchSequence([Knit], 2), new StitchSequence([growType], 1),
-    ...rowWithoutBorder.stitchSequences,
-    new StitchSequence([WithYarnInFront], 1),
-    new StitchSequence([SlipStitchPurlwise], 3)
-  ]);
 }
 
 function intersperse(array, value) {
