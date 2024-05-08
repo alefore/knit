@@ -14,7 +14,6 @@ class PatternFactoryInput {
         parsedHash[this.nameCamelCase()] :
         this.defaultValue;
     if (this.selectValues == null) {
-      const input = this;
       tr.append($('<td>').append(
           $('<input/>',
             {id: this.id(), title: this.tooltip, value: defaultValue, size: 4})
@@ -31,13 +30,9 @@ class PatternFactoryInput {
                                                              this.defaultValue)
               .on('input', onChange)));
     }
-    if (this.units != null)
+    if (this.units !== null)
       tr.append($('<td>', {class: 'units'}).text(this.units));
     return tr;
-  }
-
-  setFormInput(formInput) {
-    this.formInput = formInput;
   }
 
   value() {
