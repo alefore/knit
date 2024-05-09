@@ -20,6 +20,9 @@ This application state is contained entirely in the browser.
 There is no server-side component or communication
 (beyond just loading the static files).
 
+You can see it in action in Github pages:
+https://alefore.github.io/knit/
+
 ## Example
 
 The following is a scarf I knit ([parameters](https://alefore.github.io/knit/#TotalLength=654&CenterWidth=26&Shape=Thin)):
