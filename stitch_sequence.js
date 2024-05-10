@@ -9,10 +9,11 @@ class StitchSequence {
     if (this.repetitions == 0 || this.sequence === []) return '';
     const output = $('<span>', {class: 'stitchSequence'});
     const needParens = this.repetitions != 1 && this.sequence.length > 1;
-    if (this.repetitions != 1) output.append(this.repetitions);
+    if (this.repetitions != 1 && needParens) output.append(this.repetitions);
     if (needParens) output.append('(');
     output.append(this.sequence.map(stitch => stitch.html()).join(' '));
     if (needParens) output.append(')');
+    if (this.repetitions != 1 && !needParens) output.append(this.repetitions);
     return output;
   }
 
