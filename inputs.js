@@ -9,29 +9,33 @@ class PatternFactoryInput {
   }
 
   renderTableRow(parsedHash, onChange) {
-    const tr = $('<tr>').append($('<td>', {class: 'name'}).text(this.name));
+    const tr =
+        $(htmlTags.tr).append($(htmlTags.td, {class: 'name'}).text(this.name));
     let defaultValue = Object.keys(parsedHash).includes(this.nameCamelCase()) ?
         parsedHash[this.nameCamelCase()] :
         this.defaultValue;
     if (this.selectValues == null) {
-      tr.append($('<td>').append(
-          $('<input/>',
-            {id: this.id(), title: this.tooltip, value: defaultValue, size: 4})
-              .on(eventIds.input, onChange)));
+      tr.append($(htmlTags.td).append($(htmlTags.input, {
+                                        id: this.id(),
+                                        title: this.tooltip,
+                                        value: defaultValue,
+                                        size: 4
+                                      }).on(eventIds.input, onChange)));
     } else {
-      const select = $('<select>', {id: this.id()});
+      const select = $(htmlTags.select, {id: this.id()});
       this.selectValues.forEach(function(id) {
-        select.append($('<option>').text(id).attr('value', id))
+        select.append($(htmlTags.option, {value: id}).text(id))
       });
-      tr.append($('<td>').append(
-          select
-              .val(
-                  this.selectValues.includes(defaultValue) ? defaultValue :
-                                                             this.defaultValue)
-              .on(eventIds.input, onChange)));
+      tr.append($(htmlTags.td)
+                    .append(select
+                                .val(
+                                    this.selectValues.includes(defaultValue) ?
+                                        defaultValue :
+                                        this.defaultValue)
+                                .on(eventIds.input, onChange)));
     }
     if (this.units !== null)
-      tr.append($('<td>', {class: 'units'}).text(this.units));
+      tr.append($(htmlTags.td, {class: 'units'}).text(this.units));
     return tr;
   }
 
@@ -57,7 +61,7 @@ class PatternFactoryInput {
 }
 
 function drawInputs(inputs, parsedHash, onChange) {
-  const table = $('<table>').appendTo('#inputs form');
+  const table = $(htmlTags.table).appendTo('#inputs form');
   inputs.forEach(function(input) {
     table.append(
         input.renderTableRow(parsedHash == null ? {} : parsedHash, onChange));

@@ -85,8 +85,8 @@ function addRow(delta) {
 }
 
 function invertColor(color) {
-  if (color === 'black') return 'white';
-  if (color === 'white') return 'black';
+  if (color === colorIds.black) return colorIds.white;
+  if (color === colorIds.white) return colorIds.black;
   return color;
 }
 
@@ -96,20 +96,20 @@ function applyInputs() {
     pattern = patternFactory.build();
   } catch (error) {
     pattern = null;
-    warningsDiv.append($('<p>').text(error));
+    warningsDiv.append($(htmlTags.p).text(error));
   }
-  $('#' + objectIds.knitButton).prop('disabled', pattern === null);
+  $('#' + objectIds.knitButton).prop(htmlProps.disabled, pattern === null);
   selectRow(currentRow);
   return false;
 }
 
 function updateAllControls() {
-  $('#controls form input').prop('disabled', false);
+  $('#controls form input').prop(htmlProps.disabled, false);
   $('#' + objectIds.buttonPrev)
-      .prop('disabled', pattern === null || currentRow === 0);
+      .prop(htmlProps.disabled, pattern === null || currentRow === 0);
   $('#' + objectIds.buttonNext)
       .prop(
-          'disabled',
+          htmlProps.disabled,
           pattern === null || currentRow === pattern.rowsCount() - 1);
 }
 
@@ -125,83 +125,91 @@ document.addEventListener('DOMContentLoaded', (event) => {
   if ('row' in inputs) currentRow = Number(inputs['row']);
 
   $('body')
-      .append($('<canvas />', {id: 'knitCanvas'}))
+      .append($('<canvas>', {id: 'knitCanvas'}))
       .append(
-          $('<div/>', {id: 'controls'})
-              .append(
-                  $('<form/>')
-                      .submit(function(e) {
-                        return false;
-                      })
-                      .append($('<input/>', {type: 'submit', value: 'About'})
-                                  .click(function() {
-                                    window.open(
-                                        'http://github.com/alefore/knit',
-                                        '_blank');
-                                  }))
-                      .append($('<input/>', {
-                                type: 'submit',
-                                value: 'Configure',
-                                id: objectIds.configureButton
-                              }).click(function(e) {
-                        $('#inputs').css('display', 'inline');
-                        $('#patternContainer').css('display', 'none');
+          $(htmlTags.div, {id: 'controls'})
+              .append($(htmlTags.form)
+                          .submit(function(e) {
+                            return false;
+                          })
+                          .append($(htmlTags.input, {
+                                    type: htmlInputTypes.submit,
+                                    value: 'About'
+                                  }).click(function() {
+                            window.open(
+                                'http://github.com/alefore/knit', '_blank');
+                          }))
+                          .append($(htmlTags.input, {
+                                    type: htmlInputTypes.submit,
+                                    value: 'Configure',
+                                    id: objectIds.configureButton
+                                  }).click(function(e) {
+                            $('#inputs').css(
+                                cssProps.display, cssDisplayValues.inline);
+                            $('#patternContainer')
+                                .css(cssProps.display, cssDisplayValues.none);
 
-                        updateAllControls();
-                        $('#' + objectIds.configureButton)
-                            .prop('disabled', true);
-                      }))
-                      .append($('<input/>', {
-                                type: 'submit',
-                                value: 'Knit',
-                                id: objectIds.knitButton
-                              }).click(function(e) {
-                        $('#inputs').css('display', 'none');
-                        $('#patternContainer').css('display', 'inline');
-                        updateAllControls();
-                        $('#' + objectIds.knitButton).prop('disabled', true);
-                      }))
-                      .append($('<input/>', {
-                                type: 'submit',
-                                value: 'Prev',
-                                id: objectIds.buttonPrev
-                              }).click(function(e) {
-                        addRow(-1);
-                      }))
-                      .append($('<input/>', {
-                                type: 'submit',
-                                value: 'Next',
-                                id: objectIds.buttonNext
-                              }).click(function(e) {
-                        addRow(+1);
-                      }))))
-      .append($('<div />', {
-                id: 'inputs',
-                style: currentRow === 0 ? '' : 'display:none',
-              })
-                  .append($('<form/>').submit((e) => {
-                    applyInputs();
-                    if (pattern === null) {
-                      $('#controls').css('display', 'inline');
-                      $('#inputs').css('display', 'inline');
-                      $('#patternContainer').css('display', 'none');
-                    } else {
-                      $('#inputs').css('display', 'none');
-                      $('#controls').css('display', 'inline');
-                      $('#patternContainer').css('display', 'inline');
-                    }
-                  }))
-                  .append($('<div/>', {id: objectIds.factoryWarnings})))
-      .append($('<div/>', {
+                            updateAllControls();
+                            $('#' + objectIds.configureButton)
+                                .prop(htmlProps.disabled, true);
+                          }))
+                          .append($(htmlTags.input, {
+                                    type: htmlInputTypes.submit,
+                                    value: 'Knit',
+                                    id: objectIds.knitButton
+                                  }).click(function(e) {
+                            $('#inputs').css(
+                                cssProps.display, cssDisplayValues.none);
+                            $('#patternContainer')
+                                .css(cssProps.display, cssDisplayValues.inline);
+                            updateAllControls();
+                            $('#' + objectIds.knitButton)
+                                .prop(htmlProps.disabled, true);
+                          }))
+                          .append($(htmlTags.input, {
+                                    type: htmlInputTypes.submit,
+                                    value: 'Prev',
+                                    id: objectIds.buttonPrev
+                                  }).click(function(e) {
+                            addRow(-1);
+                          }))
+                          .append($(htmlTags.input, {
+                                    type: htmlInputTypes.submit,
+                                    value: 'Next',
+                                    id: objectIds.buttonNext
+                                  }).click(function(e) {
+                            addRow(+1);
+                          }))))
+      .append(
+          $(htmlTags.div, {
+            id: 'inputs',
+            style: currentRow === 0 ? '' : 'display:none',
+          })
+              .append($(htmlTags.form).submit((e) => {
+                applyInputs();
+                if (pattern === null) {
+                  $('#controls').css(cssProps.display, cssDisplayValues.inline);
+                  $('#inputs').css(cssProps.display, cssDisplayValues.inline);
+                  $('#patternContainer')
+                      .css(cssProps.display, cssDisplayValues.none);
+                } else {
+                  $('#inputs').css(cssProps.display, cssDisplayValues.none);
+                  $('#controls').css(cssProps.display, cssDisplayValues.inline);
+                  $('#patternContainer')
+                      .css(cssProps.display, cssDisplayValues.inline);
+                }
+              }))
+              .append($(htmlTags.div, {id: objectIds.factoryWarnings})))
+      .append($(htmlTags.div, {
         id: 'patternContainer',
         style: currentRow === 0 ? 'display:none' : 'display:inline'
       }));
 
   updateAllControls();
   $('#' + objectIds.configureButton)
-      .prop('disabled', currentRow === 0 || pattern === null);
+      .prop(htmlProps.disabled, currentRow === 0 || pattern === null);
   $('#' + objectIds.knitButton)
-      .prop('disabled', pattern != null && currentRow != 0);
+      .prop(htmlProps.disabled, pattern != null && currentRow != 0);
   drawInputs(patternFactory.getInputs(), inputs, applyInputs);
 });
 
