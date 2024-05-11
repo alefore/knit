@@ -29,7 +29,7 @@ const eventIds = createConstants('input');
 const colorIds = createConstants('black', 'cyan', 'white');
 
 const htmlTags = constantsMap([
-  'div', 'form', 'input', 'p', 'td', 'tr', 'table', 'select', 'option'
+  'div', 'form', 'input', 'p', 'span', 'td', 'tr', 'table', 'select', 'option'
 ].reduce(function(obj, tag) {
   obj[tag] = `<${tag}>`;
   return obj;
