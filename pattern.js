@@ -48,7 +48,7 @@ class Pattern {
         for (let i = 0; i < stitchSequence.repetitions; i++) {
           stitchSequence.sequence.forEach(stitch => {
             if (rowIndex == currentRow)
-              ctx.fillStyle = 'cyan';
+              ctx.fillStyle = colorIds.cyan;
             else
               ctx.fillStyle =
                   rowIndex % 2 == 0 ? stitch.color : invertColor(stitch.color);

@@ -26,11 +26,11 @@ class Row {
     const stitchDelta = this.countOutputStitches() - this.countInputStitches();
 
     const rowDiv =
-        $('<div>', {class: showDetails ? 'highlight row' : 'row'})
+        $(htmlTags.div, {class: showDetails ? 'highlight row' : 'row'})
             .append(
-                $('<p>')
+                $(htmlTags.p)
                     .append(
-                        $('<span>', {class: 'rowIndex'})
+                        $(htmlTags.span, {class: 'rowIndex'})
                             .append(
                                 index + (index % 2 == 0 ? '↓' : '↑') + ' (' +
                                 this.countOutputStitches() +
@@ -42,7 +42,7 @@ class Row {
       const previousStitches = pattern.rows.slice(0, index).reduce(
           (total, r) => total + r.countOutputStitches(), 0);
       const totalStitches = pattern.countTotalStitches();
-      rowDiv.append($('<p>', {class: 'details'})
+      rowDiv.append($(htmlTags.p, {class: 'details'})
                         .append(
                             Math.floor(100 * previousStitches / totalStitches) +
                             '% (' + previousStitches + ' of ' + totalStitches +

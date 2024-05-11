@@ -7,7 +7,7 @@ class StitchSequence {
 
   describe() {
     if (this.repetitions == 0 || this.sequence === []) return '';
-    const output = $('<span>', {class: 'stitchSequence'});
+    const output = $(htmlTags.span, {class: 'stitchSequence'});
     const needParens = this.repetitions != 1 && this.sequence.length > 1;
     if (this.repetitions != 1 && needParens) output.append(this.repetitions);
     if (needParens) output.append('(');

@@ -26,7 +26,7 @@ function constantsMap(entries = {}) {
 
 const eventIds = createConstants('input');
 
-const colorIds = createConstants('black', 'white');
+const colorIds = createConstants('black', 'cyan', 'white');
 
 const htmlTags = constantsMap([
   'div', 'form', 'input', 'p', 'td', 'tr', 'table', 'select', 'option'
