@@ -138,14 +138,14 @@ document.addEventListener('DOMContentLoaded', (event) => {
                           })
                           .append($(htmlTags.input, {
                                     type: htmlInputTypes.submit,
-                                    value: 'About'
+                                    value: '🛈'
                                   }).click(function() {
                             window.open(
                                 'http://github.com/alefore/knit', '_blank');
                           }))
                           .append($(htmlTags.input, {
                                     type: htmlInputTypes.submit,
-                                    value: 'Configure',
+                                    value: '⚙️',
                                     id: objectIds.configureButton
                                   }).click(function(e) {
                             $('#inputs').css(
@@ -156,7 +156,7 @@ document.addEventListener('DOMContentLoaded', (event) => {
                           }))
                           .append($(htmlTags.input, {
                                     type: htmlInputTypes.submit,
-                                    value: 'Knit',
+                                    value: '🚀',
                                     id: objectIds.knitButton
                                   }).click(function(e) {
                             $('#inputs').css(
@@ -167,14 +167,14 @@ document.addEventListener('DOMContentLoaded', (event) => {
                           }))
                           .append($(htmlTags.input, {
                                     type: htmlInputTypes.submit,
-                                    value: 'Prev',
+                                    value: '←',
                                     id: objectIds.buttonPrev
                                   }).click(function(e) {
                             addRow(-1);
                           }))
                           .append($(htmlTags.input, {
                                     type: htmlInputTypes.submit,
-                                    value: 'Next',
+                                    value: '→',
                                     id: objectIds.buttonNext
                                   }).click(function(e) {
                             addRow(+1);
