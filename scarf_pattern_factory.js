@@ -1,7 +1,6 @@
 class ScarfPatternFactory {
-  constructor(borderStitches, sizes) {
+  constructor(borderStitches) {
     this.borderStitches = borderStitches;
-    this.sizes = sizes;
     this.rowsInput = new PatternFactoryInput(
         'Total Length',
         'How long should the scarf measure from tip to top along its ' +

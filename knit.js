@@ -17,8 +17,7 @@ const objectIds = createConstants(
     'configureButton', 'factoryWarnings', 'knitButton', 'buttonNext',
     'buttonPrev');
 
-let patternFactory = new ScarfPatternFactory(
-    3, [16, 14, 14, 14, 14, 12, 12, 12, 12, 12, 10, 10, 8, 8, 10, 12, 16]);
+let patternFactory = new ScarfPatternFactory(3);
 
 let pattern = null;
 
