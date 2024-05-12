@@ -26,6 +26,7 @@ let pattern = null;
 var currentRow = 0;
 
 function selectRow(row) {
+  const updatedRow = currentRow != row;
   currentRow = row;
   const canvas = $('#knitCanvas')[0];
   canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
@@ -36,8 +37,10 @@ function selectRow(row) {
     $('#knitCanvas').empty();
   }
   renderPattern();
-  $('#' + objectIds.knitButton).click();
-  updateAllControls();
+  if (updatedRow) {
+    $('#' + objectIds.knitButton).click();
+    updateAllControls();
+  }
 }
 
 function updateLocationHash() {
