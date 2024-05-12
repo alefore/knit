@@ -138,7 +138,8 @@ document.addEventListener('DOMContentLoaded', (event) => {
                           })
                           .append($(htmlTags.input, {
                                     type: htmlInputTypes.submit,
-                                    value: '🛈'
+                                    value: '📖',
+                                    title: 'About this software'
                                   }).click(function() {
                             window.open(
                                 'http://github.com/alefore/knit', '_blank');
@@ -146,6 +147,7 @@ document.addEventListener('DOMContentLoaded', (event) => {
                           .append($(htmlTags.input, {
                                     type: htmlInputTypes.submit,
                                     value: '⚙️',
+                                    title: 'Configure the pattern',
                                     id: objectIds.configureButton
                                   }).click(function(e) {
                             $('#inputs').css(
@@ -157,6 +159,7 @@ document.addEventListener('DOMContentLoaded', (event) => {
                           .append($(htmlTags.input, {
                                     type: htmlInputTypes.submit,
                                     value: '🚀',
+                                    title: 'Start knitting',
                                     id: objectIds.knitButton
                                   }).click(function(e) {
                             $('#inputs').css(
@@ -168,6 +171,7 @@ document.addEventListener('DOMContentLoaded', (event) => {
                           .append($(htmlTags.input, {
                                     type: htmlInputTypes.submit,
                                     value: '←',
+                                    title: 'Previous row',
                                     id: objectIds.buttonPrev
                                   }).click(function(e) {
                             addRow(-1);
@@ -175,6 +179,7 @@ document.addEventListener('DOMContentLoaded', (event) => {
                           .append($(htmlTags.input, {
                                     type: htmlInputTypes.submit,
                                     value: '→',
+                                    title: 'Next row',
                                     id: objectIds.buttonNext
                                   }).click(function(e) {
                             addRow(+1);
