@@ -36,6 +36,8 @@ function selectRow(row) {
     $('#knitCanvas').empty();
   }
   renderPattern();
+  $('#' + objectIds.knitButton).click();
+  updateAllControls();
 }
 
 function updateLocationHash() {
@@ -73,14 +75,9 @@ function renderPattern() {
 }
 
 function addRow(delta) {
-  if (delta > 0 && currentRow < pattern.rows.length - 1) {
+  if (delta > 0 && currentRow < pattern.rows.length - 1)
     selectRow(currentRow + 1);
-    $('#' + objectIds.knitButton).click();
-  }
-  if (delta < 0 && currentRow > 0) {
-    selectRow(currentRow - 1);
-    $('#' + objectIds.knitButton).click();
-  }
+  if (delta < 0 && currentRow > 0) selectRow(currentRow - 1);
 }
 
 function invertColor(color) {
