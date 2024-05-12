@@ -46,16 +46,17 @@ class ScarfPatternFactory {
               .numberValue()}) must smaller than or equal to ${
           this.rowsInput.name} (${this.rowsInput.numberValue()})`);
 
-    const stitches = this.#computeStitches();
+    const stitchesPerRow = this.#computeStitchesPerRow();
     const output = new Pattern();
-    stitches.forEach((value, index) => this.#addRow(output, value));
+    stitchesPerRow.forEach((value, index) => this.#addRow(output, value));
     for (let row = 0; row < this.centerLengthInput.numberValue(); row++)
       this.#addRow(output, this.centerWidthInput.numberValue());
-    stitches.reverse().forEach((value, index) => this.#addRow(output, value));
+    stitchesPerRow.reverse().forEach(
+        (value, index) => this.#addRow(output, value));
     return output;
   }
 
-  #computeStitches() {
+  #computeStitchesPerRow() {
     const rowsPerSide = Math.floor(
         (this.rowsInput.numberValue() - this.centerLengthInput.numberValue()) /
         2);
