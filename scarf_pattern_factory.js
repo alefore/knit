@@ -1,10 +1,12 @@
 class ScarfPatternFactory {
   static cubicBezierFocalPoints = {
-    Thin: [{x: 0.75, y: 0.3}, {x: 0.5, y: 0.7}],
     Balanced: [{x: 0.6, y: 0.3}, {x: 0.4, y: 0.7}],
+    Thin: [{x: 0.75, y: 0.3}, {x: 0.5, y: 0.7}],
     Thick: [{x: 0.5, y: 0.3}, {x: 0.25, y: 0.7}],
     Straight: [{x: 0.5, y: 0.5}, {x: 0.5, y: 0.5}],
   };
+
+  static textures = {'Garter': garterRow, 'Double moss': doubleMossStitchRow};
 
   constructor(borderStitches) {
     this.borderStitches = borderStitches;
@@ -25,10 +27,12 @@ class ScarfPatternFactory {
             ' Does not include the 6 stitches for the i-cord border.',
         25, 'stitches');
     this.textureInput = new PatternFactoryInput(
-        'Texture', 'What type of texture do you want?', 'Garter', null,
-        ['Double moss', 'Garter']);
+        'Texture', 'What type of texture do you want?',
+        Object.keys(ScarfPatternFactory.textures)[0], null,
+        Object.keys(ScarfPatternFactory.textures));
     this.shapeInput = new PatternFactoryInput(
-        'Shape', 'What general shape would you like?', 'Balanced', null,
+        'Shape', 'What general shape would you like?',
+        Object.keys(ScarfPatternFactory.cubicBezierFocalPoints)[0], null,
         Object.keys(ScarfPatternFactory.cubicBezierFocalPoints));
   }
 
@@ -81,8 +85,6 @@ class ScarfPatternFactory {
         0 :
         pattern.lastRow().countOutputStitches() - totalBorderStitches;
     const atEvenRow = pattern.rowsCount() % 2 == 0;
-    const rowGenerator =
-        this.textureInput.value() == 'Garter' ? garterRow : doubleMossStitchRow;
 
     let growType = null;
     if (atEvenRow && previousStitches < desiredStitches)
@@ -90,9 +92,10 @@ class ScarfPatternFactory {
     else if (atEvenRow && previousStitches > desiredStitches)
       growType = KnitTwoTogether;
     pattern.addRow(
-        rowGenerator(
-            pattern.rows.length,
-            previousStitches - (growType === KnitTwoTogether ? 1 : 0))
+        ScarfPatternFactory
+            .textures[this.textureInput.value()](
+                pattern.rows.length,
+                previousStitches - (growType === KnitTwoTogether ? 1 : 0))
             .borderWrap(growType));
   }
 }
