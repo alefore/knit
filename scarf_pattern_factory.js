@@ -123,15 +123,12 @@ class ScarfPatternFactory {
   }
 }
 
-function rightSide(rowId) {
-  return rowId % 2 == 0;
-}
-
 function Row2x2(rowId, stitches) {
+  const rightSide = rowId % 2 == 0;
   const rowBottomKnit = (rowId + 1) % 4 < 2;
   let head = [new StitchSequence(
-      rightSide(rowId) != rowBottomKnit ? [Knit, Knit, Purl, Purl] :
-                                          [Purl, Purl, Knit, Knit],
+      rightSide != rowBottomKnit ? [Knit, Knit, Purl, Purl] :
+                                   [Purl, Purl, Knit, Knit],
       Math.floor(stitches / 4))];
   let tail = [];
   if (stitches % 4 >= 1)
@@ -141,7 +138,7 @@ function Row2x2(rowId, stitches) {
   if (stitches % 4 == 3)
     tail.push(new StitchSequence([rowBottomKnit ? Purl : Knit], 1));
   return new Row(
-      !rightSide(rowId) ? [...head, ...tail] : [...tail.reverse(), ...head]);
+      !rightSide ? [...head, ...tail] : [...tail.reverse(), ...head]);
 }
 
 function doubleMossStitchRow(rowId, stitches) {
