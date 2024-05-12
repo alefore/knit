@@ -40,35 +40,7 @@ class ScarfPatternFactory {
     ];
   }
 
-  bezier(t, p0, p1, p2, p3) {
-    const cx = 3 * (p1.x - p0.x);
-    const bx = 3 * (p2.x - p1.x) - cx;
-    const ax = p3.x - p0.x - cx - bx;
-
-    const cy = 3 * (p1.y - p0.y);
-    const by = 3 * (p2.y - p1.y) - cy;
-    const ay = p3.y - p0.y - cy - by;
-
-    const x = ax * t * t * t + bx * t * t + cx * t + p0.x;
-    const y = ay * t * t * t + by * t * t + cy * t + p0.y;
-
-    return {x: x, y: y};
-  }
-
-  // Fills all indices of array in range [i, n). At index x, stores a valid
-  // value for y at a value in [x, x+1).
-  fillBezierArray(array, i, n, ti, tn, p0, p1, p2, p3) {
-    const middle = (ti + tn) / 2;
-    const newPoint = this.bezier(middle, p0, p1, p2, p3);
-    const newIndex = Math.round(newPoint.x);
-    array[Math.floor(newPoint.x)] = Math.round(newPoint.y);
-    if (i < newIndex)
-      this.fillBezierArray(array, newIndex, n, middle, tn, p0, p1, p2, p3);
-    if (newIndex < n)
-      this.fillBezierArray(array, i, newIndex, ti, middle, p0, p1, p2, p3);
-  }
-
-  rowsPerSide() {
+  #rowsPerSide() {
     return Math.floor(
         (this.rowsInput.numberValue() - this.centerLengthInput.numberValue()) /
         2);
@@ -76,32 +48,36 @@ class ScarfPatternFactory {
 
   build() {
     if (this.centerLengthInput.numberValue() > this.rowsInput.numberValue())
-      throw new Error(
-          this.centerLengthInput.name + ' must smaller than or equal to ' +
-          this.rowsInput.name);
+      throw new Error(`${this.centerLengthInput.name} (${
+          this.centerLengthInput
+              .numberValue()}) must smaller than or equal to ${
+          this.rowsInput.name} (${this.rowsInput.numberValue()})`);
 
+    const stitches = this.#computeStitches();
     const output = new Pattern();
-    const stitches = Array(this.rowsPerSide()).fill(null);
-    const coordinates = this.bezierFocalPointFunctions[this.shapeInput.value()];
-    const p0 = {x: 0, y: 0};
-    const p1 = {
-      x: coordinates[0].x * this.rowsPerSide(),
-      y: coordinates[0].y * this.centerWidthInput.numberValue()
-    };
-    const p2 = {
-      x: coordinates[1].x * this.rowsPerSide(),
-      y: coordinates[1].y * this.centerWidthInput.numberValue()
-    };
-    const p3 = {x: this.rowsPerSide(), y: this.centerWidthInput.numberValue()};
-    this.fillBezierArray(stitches, 0, this.rowsPerSide(), 0, 1, p0, p1, p2, p3);
-    stitches.forEach((value, index) => this.addRow(output, value));
+    stitches.forEach((value, index) => this.#addRow(output, value));
     for (let row = 0; row < this.centerLengthInput.numberValue(); row++)
-      this.addRow(output, this.centerWidthInput.numberValue());
-    stitches.reverse().forEach((value, index) => this.addRow(output, value));
+      this.#addRow(output, this.centerWidthInput.numberValue());
+    stitches.reverse().forEach((value, index) => this.#addRow(output, value));
     return output;
   }
 
-  addRow(pattern, desiredStitches) {
+  #computeStitches() {
+    const coordinates = this.bezierFocalPointFunctions[this.shapeInput.value()];
+    const p0 = {x: 0, y: 0};
+    const p1 = {
+      x: coordinates[0].x * this.#rowsPerSide(),
+      y: coordinates[0].y * this.centerWidthInput.numberValue()
+    };
+    const p2 = {
+      x: coordinates[1].x * this.#rowsPerSide(),
+      y: coordinates[1].y * this.centerWidthInput.numberValue()
+    };
+    const p3 = {x: this.#rowsPerSide(), y: this.centerWidthInput.numberValue()};
+    return cubicBezierArray(this.#rowsPerSide(), p0, p1, p2, p3);
+  }
+
+  #addRow(pattern, desiredStitches) {
     const totalBorderStitches = this.borderStitches * 2;
     const previousStitches = pattern.isEmpty() ?
         0 :
@@ -123,7 +99,7 @@ class ScarfPatternFactory {
   }
 }
 
-function Row2x2(rowId, stitches) {
+function row2x2(rowId, stitches) {
   const rightSide = rowId % 2 == 0;
   const rowBottomKnit = (rowId + 1) % 4 < 2;
   let head = [new StitchSequence(
@@ -142,7 +118,7 @@ function Row2x2(rowId, stitches) {
 }
 
 function doubleMossStitchRow(rowId, stitches) {
-  return Row2x2(rowId, stitches);
+  return row2x2(rowId, stitches);
 }
 
 function garterRow(rowId, stitches) {

@@ -96,6 +96,7 @@ function applyInputs() {
   } catch (error) {
     pattern = null;
     warningsDiv.append($(htmlTags.p).text(error));
+    console.log(error);
   }
   $('#' + objectIds.knitButton).prop(htmlProps.disabled, pattern === null);
   selectRow(currentRow);
