@@ -1,4 +1,11 @@
 class ScarfPatternFactory {
+  static cubicBezierFocalPoints = {
+    Thin: [{x: 0.75, y: 0.3}, {x: 0.5, y: 0.7}],
+    Balanced: [{x: 0.6, y: 0.3}, {x: 0.4, y: 0.7}],
+    Thick: [{x: 0.5, y: 0.3}, {x: 0.25, y: 0.7}],
+    Straight: [{x: 0.5, y: 0.5}, {x: 0.5, y: 0.5}],
+  };
+
   constructor(borderStitches) {
     this.borderStitches = borderStitches;
     this.rowsInput = new PatternFactoryInput(
@@ -20,17 +27,9 @@ class ScarfPatternFactory {
     this.textureInput = new PatternFactoryInput(
         'Texture', 'What type of texture do you want?', 'Garter', null,
         ['Double moss', 'Garter']);
-
-    this.bezierFocalPointFunctions = {
-      Thin: [{x: 0.75, y: 0.3}, {x: 0.5, y: 0.7}],
-      Balanced: [{x: 0.6, y: 0.3}, {x: 0.4, y: 0.7}],
-      Thick: [{x: 0.5, y: 0.3}, {x: 0.25, y: 0.7}],
-      Straight: [{x: 0.5, y: 0.5}, {x: 0.5, y: 0.5}],
-    };
-
     this.shapeInput = new PatternFactoryInput(
         'Shape', 'What general shape would you like?', 'Balanced', null,
-        Object.keys(this.bezierFocalPointFunctions));
+        Object.keys(ScarfPatternFactory.cubicBezierFocalPoints));
   }
 
   getInputs() {
@@ -38,12 +37,6 @@ class ScarfPatternFactory {
       this.rowsInput, this.centerLengthInput, this.centerWidthInput,
       this.textureInput, this.shapeInput
     ];
-  }
-
-  #rowsPerSide() {
-    return Math.floor(
-        (this.rowsInput.numberValue() - this.centerLengthInput.numberValue()) /
-        2);
   }
 
   build() {
@@ -63,18 +56,22 @@ class ScarfPatternFactory {
   }
 
   #computeStitches() {
-    const coordinates = this.bezierFocalPointFunctions[this.shapeInput.value()];
+    const rowsPerSide = Math.floor(
+        (this.rowsInput.numberValue() - this.centerLengthInput.numberValue()) /
+        2);
+    const coordinates =
+        ScarfPatternFactory.cubicBezierFocalPoints[this.shapeInput.value()];
     const p0 = {x: 0, y: 0};
     const p1 = {
-      x: coordinates[0].x * this.#rowsPerSide(),
+      x: coordinates[0].x * rowsPerSide,
       y: coordinates[0].y * this.centerWidthInput.numberValue()
     };
     const p2 = {
-      x: coordinates[1].x * this.#rowsPerSide(),
+      x: coordinates[1].x * rowsPerSide,
       y: coordinates[1].y * this.centerWidthInput.numberValue()
     };
-    const p3 = {x: this.#rowsPerSide(), y: this.centerWidthInput.numberValue()};
-    return cubicBezierArray(this.#rowsPerSide(), p0, p1, p2, p3);
+    const p3 = {x: rowsPerSide, y: this.centerWidthInput.numberValue()};
+    return cubicBezierArray(rowsPerSide, p0, p1, p2, p3);
   }
 
   #addRow(pattern, desiredStitches) {
