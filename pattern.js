@@ -29,7 +29,7 @@ class Pattern {
     this.rows.forEach(func);
   }
 
-  drawToCanvas(canvas) {
+  drawToCanvas(canvas, currentRow) {
     const ctx = canvas.getContext('2d');
     canvas.width = window.innerWidth;
     canvas.height = 150;
@@ -50,8 +50,9 @@ class Pattern {
             if (rowIndex == currentRow)
               ctx.fillStyle = colorIds.cyan;
             else
-              ctx.fillStyle =
-                  rowIndex % 2 == 0 ? stitch.color : invertColor(stitch.color);
+              ctx.fillStyle = rowIndex % 2 == 0 ?
+                  stitch.color :
+                  this.#invertColor(stitch.color);
             for (let s = 0; s < stitch.outputs; s++) {
               const x = rowIndex * stitchSize;
               const y = stitchSize *
@@ -65,5 +66,11 @@ class Pattern {
         }
       });
     });
+  }
+
+  #invertColor(color) {
+    if (color === colorIds.black) return colorIds.white;
+    if (color === colorIds.white) return colorIds.black;
+    return color;
   }
 }
