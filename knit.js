@@ -2,69 +2,105 @@ const objectIds = createConstants(
     'configureButton', 'factoryWarnings', 'knitButton', 'buttonNext',
     'buttonPrev');
 
+class EventListener {
+  constructor() {
+    this.listeners = [];
+  }
+  addListener(l) {
+    this.listeners.push(l);
+  }
+  notify() {
+    this.listeners.forEach((l) => l());
+  }
+};
+
+class ControlButton {
+  constructor(id, text, description, action) {
+    this.text = text;
+    this.description = description;
+    this.htmlObject = $(htmlTags.input, {
+                        type: htmlInputTypes.submit,
+                        value: this.text,
+                        title: this.description,
+                      }).click(action);
+  }
+
+  appendHtml(container) {
+    container.append(this.htmlObject);
+    return this;
+  }
+
+  setEnabled(stateListener, value) {
+    const htmlObject = this.htmlObject;
+    stateListener.addListener(function() {
+      htmlObject.prop(htmlProps.disabled, !value());
+    });
+  }
+}
+
 class KnitState {
   constructor() {
     const knitState = this;
     this.inputs = parseHash();
     this.patternFactory = new ScarfPatternFactory(3);
-    this.currentRow = ('row' in this.inputs) ? Number(this.inputs['row']) : 0;
+    this.currentRow = 0;
+    this.configuringStateChange = new EventListener();
+    this.stateChange = new EventListener();
+    this.buttonsForm = $(htmlTags.form).submit(function(e) {
+      return false;
+    });
+    this.configuring = true;
+
+    this.configuringStateChange.addListener(function() {
+      $('#inputs').css(
+          cssProps.display,
+          knitState.configuring ? cssDisplayValues.inline :
+                                  cssDisplayValues.none);
+      $('#patternContainer')
+          .css(
+              cssProps.display,
+              knitState.configuring ? cssDisplayValues.none :
+                                      cssDisplayValues.inline);
+    });
+
+    new ControlButton(null, '📖', 'About this software', function() {
+      window.open('http://github.com/alefore/knit', '_blank');
+    }).appendHtml(this.buttonsForm);
+
+    new ControlButton(
+        objectIds.configureButton, '⚙️', 'Configure the pattern',
+        function(e) {
+          if (knitState.configuring) return;
+          knitState.configuring = true;
+          knitState.configuringStateChange.notify();
+        })
+        .appendHtml(this.buttonsForm)
+        .setEnabled(this.configuringStateChange, () => !knitState.configuring);
+    new ControlButton(
+        objectIds.knitButton, '🚀', 'Start knitting',
+        function(e) {
+          if (!knitState.configuring) return;
+          knitState.configuring = false;
+          knitState.configuringStateChange.notify();
+        })
+        .appendHtml(this.buttonsForm)
+        .setEnabled(this.configuringStateChange, () => knitState.configuring);
+    new ControlButton(
+        objectIds.buttonPrev, '←', 'Previous row', (e) => knitState.addRow(-1))
+        .appendHtml(this.buttonsForm)
+        .setEnabled(
+            this.stateChange,
+            () => knitState.pattern != null && knitState.currentRow > 0);
+    new ControlButton(
+        objectIds.buttonNext, '→', 'Next row', (e) => knitState.addRow(+1))
+        .appendHtml(this.buttonsForm)
+        .setEnabled(
+            this.stateChange,
+            () => this.pattern != null &&
+                this.currentRow < this.pattern.rowsCount() - 1);
     $('body')
         .append($('<canvas>', {id: 'knitCanvas'}))
-        .append(
-            $(htmlTags.div, {id: 'controls'})
-                .append(
-                    $(htmlTags.form)
-                        .submit(function(e) {
-                          return false;
-                        })
-                        .append($(htmlTags.input, {
-                                  type: htmlInputTypes.submit,
-                                  value: '📖',
-                                  title: 'About this software'
-                                }).click(function() {
-                          window.open(
-                              'http://github.com/alefore/knit', '_blank');
-                        }))
-                        .append($(htmlTags.input, {
-                                  type: htmlInputTypes.submit,
-                                  value: '⚙️',
-                                  title: 'Configure the pattern',
-                                  id: objectIds.configureButton
-                                }).click(function(e) {
-                          $('#inputs').css(
-                              cssProps.display, cssDisplayValues.inline);
-                          $('#patternContainer')
-                              .css(cssProps.display, cssDisplayValues.none);
-                          knitState.#updateAllControls();
-                        }))
-                        .append($(htmlTags.input, {
-                                  type: htmlInputTypes.submit,
-                                  value: '🚀',
-                                  title: 'Start knitting',
-                                  id: objectIds.knitButton
-                                }).click(function(e) {
-                          $('#inputs').css(
-                              cssProps.display, cssDisplayValues.none);
-                          $('#patternContainer')
-                              .css(cssProps.display, cssDisplayValues.inline);
-                          knitState.#updateAllControls();
-                        }))
-                        .append($(htmlTags.input, {
-                                  type: htmlInputTypes.submit,
-                                  value: '←',
-                                  title: 'Previous row',
-                                  id: objectIds.buttonPrev
-                                }).click(function(e) {
-                          knitState.addRow(-1);
-                        }))
-                        .append($(htmlTags.input, {
-                                  type: htmlInputTypes.submit,
-                                  value: '→',
-                                  title: 'Next row',
-                                  id: objectIds.buttonNext
-                                }).click(function(e) {
-                          knitState.addRow(+1);
-                        }))))
+        .append($(htmlTags.div, {id: 'controls'}).append(this.buttonsForm))
         .append($(htmlTags.div, {
                   id: 'inputs',
                   style: knitState.currentRow === 0 ? '' : 'display:none',
@@ -76,10 +112,21 @@ class KnitState {
           style: knitState.currentRow === 0 ? 'display:none' : 'display:inline'
         }));
 
-    drawInputs(this.patternFactory.getInputs(), this.inputs, function() {
-      knitState.applyInputs();
-    });
-    this.#updateAllControls();
+    drawInputs(
+        knitState.patternFactory.getInputs(), knitState.inputs, function() {
+          const warningsDiv = $('#' + objectIds.factoryWarnings).empty();
+          try {
+            knitState.pattern = knitState.patternFactory.build();
+          } catch (error) {
+            knitState.pattern = null;
+            warningsDiv.append($(htmlTags.p).text(error));
+            console.log(error);
+          }
+          knitState.selectRow(knitState.currentRow);
+          return false;
+        });
+    knitState.configuringStateChange.notify();
+    knitState.stateChange.notify();
   }
 
   #parseHash() {
@@ -100,6 +147,7 @@ class KnitState {
   }
 
   selectRow(row) {
+    console.log('Select!');
     const updatedRow = this.currentRow != row;
     this.currentRow = row;
     const canvas = $('#knitCanvas')[0];
@@ -113,8 +161,9 @@ class KnitState {
     }
     this.#renderPattern();
     if (updatedRow) {
-      $('#' + objectIds.knitButton).click();
-      this.#updateAllControls();
+      knitState.configuring = false;
+      knitState.configuringStateChange.notify();
+      this.stateChange.notify();
     }
   }
 
@@ -153,41 +202,14 @@ class KnitState {
     if (delta < 0 && this.currentRow > 0) this.selectRow(this.currentRow - 1);
   }
 
-  applyInputs() {
-    const warningsDiv = $('#' + objectIds.factoryWarnings).empty();
-    try {
-      this.pattern = this.patternFactory.build();
-    } catch (error) {
-      this.pattern = null;
-      warningsDiv.append($(htmlTags.p).text(error));
-      console.log(error);
-    }
-    $('#' + objectIds.knitButton)
-        .prop(htmlProps.disabled, this.pattern === null);
-    this.selectRow(this.currentRow);
-    return false;
-  }
-
   #updateAllControls() {
-    $('#controls form input').prop(htmlProps.disabled, false);
-    $('#' + objectIds.buttonPrev)
-        .prop(
-            htmlProps.disabled, this.pattern === null || this.currentRow === 0);
-    $('#' + objectIds.buttonNext)
-        .prop(
-            htmlProps.disabled,
-            this.pattern === null ||
-                this.currentRow === this.pattern.rowsCount() - 1);
-
-    const configuring =
-        $('#inputs').css(cssProps.display) != cssDisplayValues.none;
-    $('#' + objectIds.configureButton).prop(htmlProps.disabled, configuring);
-    $('#' + objectIds.knitButton).prop(htmlProps.disabled, !configuring);
+    // $('#controls form input').prop(htmlProps.disabled, false);
   }
 };
 
+const knitState = new KnitState();
+
 document.addEventListener('DOMContentLoaded', (event) => {
-  const knitState = new KnitState();
   new SwipeHandler(
       function() {
         knitState.addRow(1);
@@ -198,13 +220,13 @@ document.addEventListener('DOMContentLoaded', (event) => {
 });
 
 document.body.addEventListener('keydown', function(e) {
-  if (pattern == null) return;
+  if (knitState.pattern == null) return;
   if (e.code === 'Space' || e.code === 'ArrowDown') {
-    $('#' + objectIds.buttonNext).click();
+    knitState.addRow(1);
     e.preventDefault();
   }
   if (e.code === 'ArrowUp') {
-    $('#' + objectIds.buttonPrev).click();
+    knitState.addRow(-1);
     e.preventDefault();
   }
 });
