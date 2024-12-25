@@ -7,18 +7,19 @@ class PatternFactoryInput {
     this.formInput = null;
     this.selectValues = selectValues;
     this.listener = new EventListener();
+    this.tr = null;
   }
 
-  renderTableRow(parsedHash) {
+  setValuesFromHash(parsedHash) {
     const input = this;
-    const tr = $(htmlTags.tr, {
+    input.tr = $(htmlTags.tr, {
                  id: 'tr' + this.id()
                }).append($(htmlTags.td, {class: 'name'}).text(this.name));
     let defaultValue = Object.keys(parsedHash).includes(this.nameCamelCase()) ?
         parsedHash[this.nameCamelCase()] :
         this.defaultValue;
     if (this.selectValues == null) {
-      tr.append(
+      input.tr.append(
           $(htmlTags.td)
               .append($(htmlTags.input, {
                         id: this.id(),
@@ -31,7 +32,7 @@ class PatternFactoryInput {
       this.selectValues.forEach(function(id) {
         select.append($(htmlTags.option, {value: id}).text(id))
       });
-      tr.append(
+      input.tr.append(
           $(htmlTags.td)
               .append(select
                           .val(
@@ -41,8 +42,7 @@ class PatternFactoryInput {
                           .on(eventIds.input, () => input.listener.notify())));
     }
     if (this.units !== null)
-      tr.append($(htmlTags.td, {class: 'units'}).text(this.units));
-    return tr;
+      input.tr.append($(htmlTags.td, {class: 'units'}).text(this.units));
   }
 
   value() {
@@ -64,12 +64,23 @@ class PatternFactoryInput {
   nameCamelCase() {
     return this.name.replace(/\s+/g, '');
   }
+
+  setVisible(eventListener, valueSupplier) {
+    const tr = this.tr;
+    eventListener.addListener(function() {
+      if (valueSupplier())
+        tr.show();
+      else
+        tr.hide();
+    });
+  }
 }
 
 function drawInputs(inputs, parsedHash) {
   const table = $(htmlTags.table).appendTo('#inputs form');
   inputs.forEach(function(input) {
-    table.append(input.renderTableRow(parsedHash == null ? {} : parsedHash));
+    input.setValuesFromHash(parsedHash == null ? {} : parsedHash);
+    table.append(input.tr);
   });
 }
 

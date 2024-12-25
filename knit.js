@@ -30,8 +30,15 @@ class KnitState {
   constructor() {
     const knitState = this;
     this.inputs = parseHash();
-    this.patternFactories = [new ScarfPatternFactory(3)];
-    this.patternFactory = this.patternFactories[0].constructor.name;
+    this.patternFactories =
+        [new ScarfPatternFactory(3), new CablePatternFactory()];
+
+    const factoryNames = Array.from(new Set(this.patternFactories.map(
+        instance => Object.getPrototypeOf(instance).constructor.name)));
+    this.patternFactorySelector = new PatternFactoryInput(
+        'Pattern', 'Pattern', this.patternFactories[0].constructor.name, null,
+        factoryNames);
+
     this.currentRow = 0;
     this.configuringStateChange = new EventListener();
     this.stateChange = new EventListener();
@@ -101,7 +108,6 @@ class KnitState {
           style: knitState.currentRow === 0 ? 'display:none' : 'display:inline'
         }));
 
-
     drawInputs(this.#allFactoryInputs(), knitState.inputs);
     knitState.#allFactoryInputs().forEach(
         (input) => input.listener.addListener(
@@ -111,8 +117,16 @@ class KnitState {
     knitState.stateChange.notify();
   }
 
+  #currentPatternFactory() {
+    const value = this.patternFactorySelector.value();
+    const output = this.patternFactories.find(
+        i => Object.getPrototypeOf(i).constructor.name === value);
+    if (!output) throw new Error('Didn\'t find pattern: ' + value);
+    return output;
+  }
+
   #allFactoryInputs() {
-    const output = [];
+    const output = [this.patternFactorySelector];
     this.patternFactories.forEach(
         (factory) => output.push(...factory.getInputs()));
     return output;
@@ -122,7 +136,7 @@ class KnitState {
     const knitState = this;
     const warningsDiv = $('#' + objectIds.factoryWarnings).empty();
     try {
-      knitState.pattern = knitState.patternFactories[0].build();
+      knitState.pattern = knitState.#currentPatternFactory().build();
     } catch (error) {
       knitState.pattern = null;
       warningsDiv.append($(htmlTags.p).text(error));
@@ -203,10 +217,6 @@ class KnitState {
     if (delta > 0 && this.currentRow < this.pattern.rows.length - 1)
       this.selectRow(this.currentRow + 1);
     if (delta < 0 && this.currentRow > 0) this.selectRow(this.currentRow - 1);
-  }
-
-  #updateAllControls() {
-    // $('#controls form input').prop(htmlProps.disabled, false);
   }
 };
 
