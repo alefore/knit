@@ -30,7 +30,7 @@ const WithYarnInFront = new Stitch(0, 0, 'WYIF', '#f4cae4', 'WithYarnInFront');
 // Cable stitches
 // Order: slip count, [front, back], stitch count, [knit, purl]
 const CableOneBackKnitTwo = new Stitch(
-    2, 2, 'CBK', '#f4cae4',
+    2, 2, 'CBK2', '#f4cae4',
     'Slip 1 onto cable, hold in back, knit 2, return from cable to left needle');
 const CableTwoFrontPurlOne = new Stitch(
     1, 1, 'C2FP', '#f4cae4',
