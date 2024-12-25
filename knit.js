@@ -109,9 +109,17 @@ class KnitState {
         }));
 
     drawInputs(this.#allFactoryInputs(), knitState.inputs);
+    this.patternFactories.forEach(function(factory) {
+      factory.getInputs().forEach(
+          input => input.setVisible(
+              knitState.patternFactorySelector.listener,
+              () => knitState.patternFactorySelector.value() ===
+                  Object.getPrototypeOf(factory).constructor.name))
+    });
     knitState.#allFactoryInputs().forEach(
         (input) => input.listener.addListener(
             () => knitState.#configurationInputChanged()));
+    knitState.patternFactorySelector.listener.notify();
     knitState.configuringStateChange.notify();
     knitState.#configurationInputChanged();
     knitState.stateChange.notify();
@@ -126,9 +134,11 @@ class KnitState {
   }
 
   #allFactoryInputs() {
+    const knitState = this;
     const output = [this.patternFactorySelector];
-    this.patternFactories.forEach(
-        (factory) => output.push(...factory.getInputs()));
+    this.patternFactories.forEach(function(factory) {
+      output.push(...factory.getInputs());
+    });
     return output;
   }
 
