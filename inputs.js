@@ -6,33 +6,39 @@ class PatternFactoryInput {
     this.units = units;
     this.formInput = null;
     this.selectValues = selectValues;
+    this.listener = new EventListener();
   }
 
-  renderTableRow(parsedHash, onChange) {
-    const tr =
-        $(htmlTags.tr).append($(htmlTags.td, {class: 'name'}).text(this.name));
+  renderTableRow(parsedHash) {
+    const input = this;
+    const tr = $(htmlTags.tr, {
+                 id: 'tr' + this.id()
+               }).append($(htmlTags.td, {class: 'name'}).text(this.name));
     let defaultValue = Object.keys(parsedHash).includes(this.nameCamelCase()) ?
         parsedHash[this.nameCamelCase()] :
         this.defaultValue;
     if (this.selectValues == null) {
-      tr.append($(htmlTags.td).append($(htmlTags.input, {
-                                        id: this.id(),
-                                        title: this.tooltip,
-                                        value: defaultValue,
-                                        size: 4
-                                      }).on(eventIds.input, onChange)));
+      tr.append(
+          $(htmlTags.td)
+              .append($(htmlTags.input, {
+                        id: this.id(),
+                        title: this.tooltip,
+                        value: defaultValue,
+                        size: 4
+                      }).on(eventIds.input, () => input.listener.notify())));
     } else {
       const select = $(htmlTags.select, {id: this.id()});
       this.selectValues.forEach(function(id) {
         select.append($(htmlTags.option, {value: id}).text(id))
       });
-      tr.append($(htmlTags.td)
-                    .append(select
-                                .val(
-                                    this.selectValues.includes(defaultValue) ?
-                                        defaultValue :
-                                        this.defaultValue)
-                                .on(eventIds.input, onChange)));
+      tr.append(
+          $(htmlTags.td)
+              .append(select
+                          .val(
+                              this.selectValues.includes(defaultValue) ?
+                                  defaultValue :
+                                  this.defaultValue)
+                          .on(eventIds.input, () => input.listener.notify())));
     }
     if (this.units !== null)
       tr.append($(htmlTags.td, {class: 'units'}).text(this.units));
@@ -60,13 +66,11 @@ class PatternFactoryInput {
   }
 }
 
-function drawInputs(inputs, parsedHash, onChange) {
+function drawInputs(inputs, parsedHash) {
   const table = $(htmlTags.table).appendTo('#inputs form');
   inputs.forEach(function(input) {
-    table.append(
-        input.renderTableRow(parsedHash == null ? {} : parsedHash, onChange));
+    table.append(input.renderTableRow(parsedHash == null ? {} : parsedHash));
   });
-  onChange();
 }
 
 function parseHash() {

@@ -2,18 +2,6 @@ const objectIds = createConstants(
     'configureButton', 'factoryWarnings', 'knitButton', 'buttonNext',
     'buttonPrev');
 
-class EventListener {
-  constructor() {
-    this.listeners = [];
-  }
-  addListener(l) {
-    this.listeners.push(l);
-  }
-  notify() {
-    this.listeners.forEach((l) => l());
-  }
-};
-
 class ControlButton {
   constructor(id, text, description, action) {
     this.text = text;
@@ -42,7 +30,8 @@ class KnitState {
   constructor() {
     const knitState = this;
     this.inputs = parseHash();
-    this.patternFactory = new ScarfPatternFactory(3);
+    this.patternFactories = [new ScarfPatternFactory(3)];
+    this.patternFactory = this.patternFactories[0].constructor.name;
     this.currentRow = 0;
     this.configuringStateChange = new EventListener();
     this.stateChange = new EventListener();
@@ -112,21 +101,35 @@ class KnitState {
           style: knitState.currentRow === 0 ? 'display:none' : 'display:inline'
         }));
 
-    drawInputs(
-        knitState.patternFactory.getInputs(), knitState.inputs, function() {
-          const warningsDiv = $('#' + objectIds.factoryWarnings).empty();
-          try {
-            knitState.pattern = knitState.patternFactory.build();
-          } catch (error) {
-            knitState.pattern = null;
-            warningsDiv.append($(htmlTags.p).text(error));
-            console.log(error);
-          }
-          knitState.selectRow(knitState.currentRow);
-          return false;
-        });
+
+    drawInputs(this.#allFactoryInputs(), knitState.inputs);
+    knitState.#allFactoryInputs().forEach(
+        (input) => input.listener.addListener(
+            () => knitState.#configurationInputChanged()));
     knitState.configuringStateChange.notify();
+    knitState.#configurationInputChanged();
     knitState.stateChange.notify();
+  }
+
+  #allFactoryInputs() {
+    const output = [];
+    this.patternFactories.forEach(
+        (factory) => output.push(...factory.getInputs()));
+    return output;
+  }
+
+  #configurationInputChanged() {
+    const knitState = this;
+    const warningsDiv = $('#' + objectIds.factoryWarnings).empty();
+    try {
+      knitState.pattern = knitState.patternFactories[0].build();
+    } catch (error) {
+      knitState.pattern = null;
+      warningsDiv.append($(htmlTags.p).text(error));
+      console.log(error);
+    }
+    knitState.selectRow(knitState.currentRow);
+    return false;
   }
 
   #parseHash() {
@@ -140,7 +143,7 @@ class KnitState {
   }
 
   #updateLocationHash() {
-    let fragments = this.patternFactory.getInputs().map(
+    let fragments = this.#allFactoryInputs().map(
         i => i.hasDefaultValue() ? '' : `${i.nameCamelCase()}=${i.value()}`);
     if (this.currentRow != 0) fragments.push(`row=${this.currentRow}`);
     window.location.hash = fragments.filter(str => str !== '').join('&');

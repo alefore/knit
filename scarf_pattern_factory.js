@@ -8,6 +8,8 @@ class ScarfPatternFactory {
 
   static textures = {'Garter': garterRow, 'Double moss': doubleMossStitchRow};
 
+  static name = 'Sophie Scarf';
+
   constructor(borderStitches) {
     this.borderStitches = borderStitches;
     this.rowsInput = new PatternFactoryInput(
