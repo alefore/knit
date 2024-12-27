@@ -16,13 +16,14 @@ class CablePatternFactory {
   build() {
     const output = new Pattern();
     const evenRow = new Row([
-      new StitchSequence([SlipStitchPurlwise], 1),
+      new StitchSequence([WithYarnInFront, SlipStitchPurlwise], 1),
       new StitchSequence([StitchEcho], 23)
     ]);
     for (let i = 0; i < this.cableLengthInput.numberValue(); i++) {
       // Row 1
       output.addRow(new Row([
-        new StitchSequence([SlipStitchPurlwise, Purl, CableTwoBackKnitTwo], 1),
+        new StitchSequence(
+            [WithYarnInBack, SlipStitchPurlwise, Purl, CableTwoBackKnitTwo], 1),
         new StitchSequence([Knit], 2),
         new StitchSequence(
             [Purl, Purl, Purl, Purl, CableTwoBackKnitTwo, Knit, Knit], 2),
@@ -31,7 +32,8 @@ class CablePatternFactory {
       output.addRow(evenRow);
       // Row 3
       output.addRow(new Row([
-        new StitchSequence([SlipStitchPurlwise, CableOneBackKnitTwo, Purl], 1),
+        new StitchSequence(
+            [WithYarnInBack, SlipStitchPurlwise, CableOneBackKnitTwo, Purl], 1),
         new StitchSequence(
             [CableTwoFrontPurlTwo, Knit, Knit, CableTwoBackKnitTwo, Purl, Purl],
             2),
@@ -56,7 +58,7 @@ class CablePatternFactory {
       output.addRow(evenRow);
       // Row 7
       output.addRow(new Row([
-        new StitchSequence([SlipStitchPurlwise, Knit], 1),
+        new StitchSequence([WithYarnInBack, SlipStitchPurlwise, Knit], 1),
         new StitchSequence([Purl], 3),
         new StitchSequence([CableOneBackKnitTwo, Purl], 1),
         new StitchSequence([CableTwoFrontPurlTwo], 1),
@@ -71,7 +73,7 @@ class CablePatternFactory {
       output.addRow(evenRow);
       // Row 9
       output.addRow(new Row([
-        new StitchSequence([SlipStitchPurlwise, Knit], 1),
+        new StitchSequence([WithYarnInBack, SlipStitchPurlwise, Knit], 1),
         new StitchSequence([Purl], 3),
         new StitchSequence([Knit], 2),
         new StitchSequence([Purl], 3),
@@ -85,7 +87,7 @@ class CablePatternFactory {
       output.addRow(evenRow);
       // Row 11:
       output.addRow(new Row([
-        new StitchSequence([SlipStitchPurlwise, Knit], 1),
+        new StitchSequence([WithYarnInBack, SlipStitchPurlwise, Knit], 1),
         new StitchSequence([Purl], 3),
         new StitchSequence([CableTwoFrontPurlOne], 1),
         new StitchSequence([Knit], 2),
@@ -114,7 +116,7 @@ class CablePatternFactory {
       output.addRow(evenRow);
       // Row 15
       output.addRow(new Row([
-        new StitchSequence([SlipStitchPurlwise], 1),
+        new StitchSequence([WithYarnInBack, SlipStitchPurlwise], 1),
         new StitchSequence([CableTwoFrontPurlOne], 1),
         new StitchSequence([Knit], 2),
         new StitchSequence(
