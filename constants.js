@@ -39,3 +39,4 @@ const htmlProps = createConstants('disabled');
 const htmlInputTypes = createConstants('submit');
 const cssProps = createConstants('display');
 const cssDisplayValues = createConstants('inline', 'none');
+const urlParams = createConstants('row');

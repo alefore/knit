@@ -39,13 +39,13 @@ class KnitState {
         'Pattern', 'Pattern', this.patternFactories[0].constructor.name, null,
         factoryNames);
 
-    this.currentRow = 0;
+    this.currentRow = Number(this.inputs[urlParams.row] ?? 0);
     this.configuringStateChange = new EventListener();
     this.stateChange = new EventListener();
     this.buttonsForm = $(htmlTags.form).submit(function(e) {
       return false;
     });
-    this.configuring = true;
+    this.configuring = this.currentRow === 0;
 
     this.configuringStateChange.addListener(function() {
       $('#inputs').css(
@@ -123,6 +123,8 @@ class KnitState {
     knitState.configuringStateChange.notify();
     knitState.#configurationInputChanged();
     knitState.stateChange.notify();
+    knitState.selectRow(this.currentRow);
+    knitState.#renderPattern();
   }
 
   #currentPatternFactory() {
@@ -169,12 +171,12 @@ class KnitState {
   #updateLocationHash() {
     let fragments = this.#allFactoryInputs().map(
         i => i.hasDefaultValue() ? '' : `${i.nameCamelCase()}=${i.value()}`);
-    if (this.currentRow != 0) fragments.push(`row=${this.currentRow}`);
+    if (this.currentRow != 0)
+      fragments.push(`${urlParams.row}=${this.currentRow}`);
     window.location.hash = fragments.filter(str => str !== '').join('&');
   }
 
   selectRow(row) {
-    console.log('Select!');
     const updatedRow = this.currentRow != row;
     this.currentRow = row;
     const canvas = $('#knitCanvas')[0];
