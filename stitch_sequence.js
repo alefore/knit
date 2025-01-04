@@ -5,7 +5,7 @@ class StitchSequence {
     if (isNaN(repetitions)) throw Error('Nan repetitions');
   }
 
-  describe() {
+  html() {
     if (this.repetitions == 0 || this.sequence === []) return '';
     const output = $(htmlTags.span, {class: 'stitchSequence'});
     const needParens = this.repetitions != 1 && this.sequence.length > 1;
@@ -17,13 +17,15 @@ class StitchSequence {
     return output;
   }
 
-  countInputStitches() {
+  get inputStitches() {
     return this.repetitions *
-        this.sequence.reduce((total, stitch) => total + stitch.inputs, 0);
+        this.sequence.reduce(
+            (total, stitch) => total + stitch.inputStitches, 0);
   }
 
-  countOutputStitches() {
+  get outputStitches() {
     return this.repetitions *
-        this.sequence.reduce((total, stitch) => total + stitch.outputs, 0);
+        this.sequence.reduce(
+            (total, stitch) => total + stitch.outputStitches, 0);
   }
 }

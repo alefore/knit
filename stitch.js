@@ -1,16 +1,12 @@
 class Stitch {
-  constructor(inputs, outputs, representation, color, tooltip) {
-    if (isNaN(outputs)) throw Error('Nan outputs');
-    this.inputs = inputs;
-    this.outputs = outputs;
+  constructor(inputStitches, outputStitches, representation, color, tooltip) {
+    if (isNaN(inputStitches)) throw Error('Nan outputs');
+    if (isNaN(outputStitches)) throw Error('Nan outputs');
+    this.inputStitches = inputStitches;
+    this.outputStitches = outputStitches;
     this.representation = representation;
     this.color = color;
     this.tooltip = tooltip;  // Store the tooltip text
-  }
-
-  describe() {
-    return `${this.representation} (Inputs: ${this.inputs}, Outputs: ${
-        this.outputs})`;
   }
 
   html() {

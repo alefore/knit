@@ -12,9 +12,8 @@ class Pattern {
     return this.rows[this.rows.length - 1];
   }
 
-  countTotalStitches() {
-    return this.rows.reduce(
-        (total, row) => total + row.countOutputStitches(), 0);
+  get outputStitches() {
+    return this.rows.reduce((total, row) => total + row.outputStitches, 0);
   }
 
   isEmpty() {
@@ -34,8 +33,7 @@ class Pattern {
     canvas.width = window.innerWidth;
     canvas.height = 150;
 
-    const maxStitches =
-        Math.max(...this.rows.map(row => row.countOutputStitches()));
+    const maxStitches = Math.max(...this.rows.map(row => row.outputStitches));
 
     const stitchSizeWidth = canvas.width / this.rowsCount();
     const stitchSizeHeight = canvas.height / maxStitches;
@@ -43,7 +41,7 @@ class Pattern {
 
     this.forEachRow((row, rowIndex) => {
       let stitchIndex = 0;
-      let rowOutputStitches = row.countOutputStitches();
+      let rowOutputStitches = row.outputStitches;
       row.stitchSequences.forEach(stitchSequence => {
         for (let i = 0; i < stitchSequence.repetitions; i++) {
           stitchSequence.sequence.forEach(stitch => {
@@ -53,7 +51,7 @@ class Pattern {
               ctx.fillStyle = rowIndex % 2 == 0 ?
                   stitch.color :
                   this.#invertColor(stitch.color);
-            for (let s = 0; s < stitch.outputs; s++) {
+            for (let s = 0; s < stitch.outputStitches; s++) {
               const x = rowIndex * stitchSize;
               const y = stitchSize *
                   (maxStitches -

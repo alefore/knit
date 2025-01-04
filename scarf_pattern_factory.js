@@ -85,7 +85,7 @@ class ScarfPatternFactory {
     const totalBorderStitches = this.borderStitches * 2;
     const previousStitches = pattern.isEmpty() ?
         0 :
-        pattern.lastRow().countOutputStitches() - totalBorderStitches;
+        pattern.lastRow().outputStitches - totalBorderStitches;
     const atEvenRow = pattern.rowsCount() % 2 == 0;
 
     let growType = null;

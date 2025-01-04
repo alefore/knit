@@ -3,27 +3,27 @@ class Row {
     this.stitchSequences = stitchSequences;
   }
 
-  countInputStitches() {
+  get inputStitches() {
     return this.stitchSequences.reduce(
-        (total, sequence) => total + sequence.countInputStitches(), 0);
+        (total, sequence) => total + sequence.inputStitches, 0);
   }
 
-  countOutputStitches() {
+  get outputStitches() {
     return this.stitchSequences.reduce(
-        (total, sequence) => total + sequence.countOutputStitches(), 0);
+        (total, sequence) => total + sequence.outputStitches, 0);
   }
 
   describeStitches() {
     const zeroWidthSpace = '&#8203;';
     return intersperse(
         this.stitchSequences.map(sequence => {
-          return sequence.describe();
+          return sequence.html();
         }),
         zeroWidthSpace);
   }
 
   createDiv(index, showDetails, pattern) {
-    const stitchDelta = this.countOutputStitches() - this.countInputStitches();
+    const stitchDelta = this.outputStitches - this.inputStitches;
 
     const rowDiv =
         $(htmlTags.div, {class: showDetails ? 'highlight row' : 'row'})
@@ -33,15 +33,15 @@ class Row {
                         $(htmlTags.span, {class: 'rowIndex'})
                             .append(
                                 index + (index % 2 == 0 ? '↓' : '↑') + ' (' +
-                                this.countOutputStitches() +
+                                this.outputStitches +
                                 (stitchDelta == 0 ? '' : ' Δ' + stitchDelta) +
                                 ') '))
                     .append(this.describeStitches()));
 
     if (showDetails) {
       const previousStitches = pattern.rows.slice(0, index).reduce(
-          (total, r) => total + r.countOutputStitches(), 0);
-      const totalStitches = pattern.countTotalStitches();
+          (total, r) => total + r.outputStitches, 0);
+      const totalStitches = pattern.outputStitches;
       rowDiv.append($(htmlTags.p, {class: 'details'})
                         .append(
                             Math.floor(100 * previousStitches / totalStitches) +
