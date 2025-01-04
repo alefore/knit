@@ -42,25 +42,20 @@ class Pattern {
     this.forEachRow((row, rowIndex) => {
       let stitchIndex = 0;
       let rowOutputStitches = row.outputStitches;
-      row.stitchSequences.forEach(stitchSequence => {
-        for (let i = 0; i < stitchSequence.repetitions; i++) {
-          stitchSequence.sequence.forEach(stitch => {
-            if (rowIndex == currentRow)
-              ctx.fillStyle = colorIds.cyan;
-            else
-              ctx.fillStyle = rowIndex % 2 == 0 ?
-                  stitch.color :
-                  this.#invertColor(stitch.color);
-            for (let s = 0; s < stitch.outputStitches; s++) {
-              const x = rowIndex * stitchSize;
-              const y = stitchSize *
-                  (maxStitches -
-                   ((rowIndex % 2 == 0) ? rowOutputStitches - stitchIndex :
-                                          stitchIndex + 1));
-              ctx.fillRect(x, y, stitchSize, stitchSize);
-              stitchIndex++;
-            }
-          });
+      row.flatten().forEach(stitch => {
+        if (rowIndex == currentRow)
+          ctx.fillStyle = colorIds.cyan;
+        else
+          ctx.fillStyle = rowIndex % 2 == 0 ? stitch.color :
+                                              this.#invertColor(stitch.color);
+        for (let s = 0; s < stitch.outputStitches; s++) {
+          const x = rowIndex * stitchSize;
+          const y = stitchSize *
+              (maxStitches -
+               ((rowIndex % 2 == 0) ? rowOutputStitches - stitchIndex :
+                                      stitchIndex + 1));
+          ctx.fillRect(x, y, stitchSize, stitchSize);
+          stitchIndex++;
         }
       });
     });
