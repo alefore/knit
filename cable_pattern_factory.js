@@ -21,7 +21,8 @@
 //  11   2233    4455   66
 //   1122    3344    5566
 //   2211    4433    6655
-//
+//  22   1144    3366   55
+// 22    4411    6633    55
 //---
 // 11
 // 11
@@ -42,25 +43,36 @@
 //    11
 //  11
 // 11
+
+// 01234567890123456789012345
+// 00       33
+// 00         3311         33
+//   123456789
 class CableLayout {
   // @param {number} cableEdgeRows - The number of rows on the edge where the
   // cable stays without moving. Typically 2.
   // @param {number} smoothingRows - The number of rows around the edge where
   // the cable only jumps 1 stitch (per row). Typically 1 or 2.
-  constructor(cables, rowsBetweenCables, cableEdgeRows, smoothingRows) {
+  // @param {bool} innerCables - Should we add inner cables? They don't reach
+  // the edges, but oscillate between the normal cables.
+  constructor(
+      cables, rowsBetweenCables, cableEdgeRows, smoothingRows, innerCables) {
     // rowsBetweenCables: On the side, how much empty space should we leave
     // after one cable leaves the side before the next cable reaches it?
     this.cables = cables;
+    this.innerCables = innerCables;
     this.cableWidth = 2;  // Stitches.
     this.rowsBetweenCables = rowsBetweenCables;
     this.cableEdgeRows = cableEdgeRows;
     this.smoothingRows = smoothingRows;
     this.rowsCount = cables * (this.cableEdgeRows + this.rowsBetweenCables);
     this.rowsWidth = this.#rowsWidth();
-    console.log(this.rowsWidth);
     // positions[row][cable] stores the earliest position of the given cable at
     // a given row.
     this.positions = this.#cablePositions();
+    this.positionsInnerCables = this.#innerCablePositions();
+    console.log(this.positions);
+    console.log(this.positionsInnerCables);
   }
 
   #rowsWidth() {
@@ -72,7 +84,7 @@ class CableLayout {
 
   #cablePositions() {
     const output =
-        Array.from({length: this.rowsCount}, () => Array(this.cables).fill(-1))
+        Array.from({length: this.rowsCount}, () => Array(this.cables).fill(-1));
     for (let cable = 0; cable < this.cables; cable++) {
       const cableStartRow =
           cable * (this.cableEdgeRows + this.rowsBetweenCables);
@@ -92,17 +104,81 @@ class CableLayout {
           position += 2;
       }
     }
-    console.log(output);
+    return output;
+  }
+
+  #innerCablePositions() {
+    if (!this.innerCables)
+      return Array.from({length: this.rowsCount + 1}, () => []);
+    const cablesCount = this.cables - 2;
+    const output = Array.from(
+        {length: this.rowsCount + 1}, () => Array(cablesCount).fill(-1));
+    const cableIntersections = (this.cables - 2) / 2;
+    const cableStartStitch = Math.floor(
+        this.rowsWidth / (cableIntersections + 1) / 2 - this.cableWidth / 2);
+    for (let cable = 0; cable < cablesCount; cable += 2) {
+      const cableStartRow = (this.cableEdgeRows + this.rowsBetweenCables) *
+              Math.floor(cable / 2) +
+          Math.floor(this.cableEdgeRows / 4);
+      console.log(cableStartRow);
+      let direction = 1;  // 1 or -1.
+      let position = cableStartStitch;
+      for (let row = 0; row < this.rowsCount + 1; row++) {
+        if (cableStartRow - row >= 0) {
+          output[cableStartRow - row][cable] = position;
+          output[cableStartRow - row][cable + 1] =
+              this.rowsWidth - position - this.cableWidth;
+        }
+        if (cableStartRow + row + 1 < this.rowsCount + 1) {
+          output[cableStartRow + row + 1][cable] = position;
+          output[cableStartRow + row + 1][cable + 1] =
+              this.rowsWidth - position - this.cableWidth;
+        }
+        if (row < this.cableEdgeRows / 4 - 1)
+          continue;
+        else if (position == cableStartStitch) {
+          if (direction == 1)
+            position += 1;
+          else
+            direction = 1;
+        } else if (
+            direction == 1 &&
+            position + 1 == this.rowsWidth - cableStartStitch - this.cableWidth)
+          position += direction;
+        else if (direction == -1 && position - 1 == cableStartStitch)
+          position += direction;
+        else if (
+            position + this.cableWidth == this.rowsWidth - cableStartStitch)
+          if (direction == -1)
+            position += direction;
+          else
+            direction = -1;
+        else
+          position += 2 * direction;
+      }
+    }
     return output;
   }
 
   renderRowCables(row) {
     const output = Array(this.rowsWidth).fill(-1);
+    function Mark(cable, position) {
+      if (output[position] != -1)
+        throw new Error(
+            'Unable to render row cables: ' + cable + ' ' + output[position] +
+            ' at row ' + row + ' position ' + position);
+      output[position] = cable;
+    };
+
     for (let cable = 0; cable < this.cables; cable++) {
-      output[this.positions[row][cable]] = cable;
-      output[this.positions[row][cable] + 1] = cable;
+      Mark(cable, this.positions[row % this.positions.length][cable]);
+      Mark(cable, this.positions[row % this.positions.length][cable] + 1);
     }
-    console.log(output);
+    if (this.innerCables)
+      for (let cable = 0; cable < this.cables - 2; cable++) {
+        Mark(this.cables + cable, this.positionsInnerCables[row][cable]);
+        Mark(this.cables + cable, this.positionsInnerCables[row][cable] + 1);
+      }
     return output;
   }
 }
@@ -124,6 +200,15 @@ class CablePatternFactory {
         'Single-stitch jump rows',
         'For how many rows should cables only jump a single stitch?', 1,
         'rows');
+    this.innerCablesInput = new PatternFactoryInput(
+        'Inner Cables',
+        'Should we enable inner cables? These only works with few parameters.',
+        'Disable', null, ['Enable', 'Disable']);
+    this.marginDistanceInput = new PatternFactoryInput(
+        'Margin Distance',
+        'Number of purl stitches between the cable and its margin. ' +
+            'If zero, disables margin.',
+        2, 'stitches');
   }
 
   getInputs() {
@@ -133,6 +218,8 @@ class CablePatternFactory {
       this.rowsBetweenCablesInput,
       this.cableEdgeRowsInput,
       this.smoothingRowsInput,
+      this.innerCablesInput,
+      this.marginDistanceInput,
     ];
   }
 
@@ -142,13 +229,23 @@ class CablePatternFactory {
         this.cableCountInput.numberValue(),
         this.rowsBetweenCablesInput.numberValue(),
         this.cableEdgeRowsInput.numberValue(),
-        this.smoothingRowsInput.numberValue());
-    const evenRow =
-        new Row([new StitchSequence([StitchEcho], layout.rowsWidth)]);
+        this.smoothingRowsInput.numberValue(),
+        this.innerCablesInput.value() == 'Enable');
+    const marginDistance = this.marginDistanceInput.numberValue();
+    const evenRow = new Row([new StitchSequence(
+        [StitchEcho],
+        layout.rowsWidth +
+            (marginDistance > 0 ? 2 * (marginDistance + 2) : 0))]);
     for (let row = 0; row < layout.rowsCount; row++) {
       const state = layout.renderRowCables(row);
-      const stateNext = layout.renderRowCables((row + 1) % layout.rowsCount);
-      const rowOutput = [];
+      console.log(state);
+      const stateNext = layout.renderRowCables(row + 1);
+      const rowOutput = marginDistance > 0 ?
+          [
+            new StitchSequence([Knit], 2),
+            new StitchSequence([Purl], marginDistance)
+          ] :
+          [];
       let stitch = layout.rowsWidth - 1;
       while (stitch >= 0) {
         if (state[stitch] == -1 && stateNext[stitch] == -1) {
@@ -191,8 +288,16 @@ class CablePatternFactory {
           rowOutput.push(new StitchSequence([Purl], 2));
           stitch -= 4;
         } else {
-          throw new Error('Unhandled cable cross situation');
+          console.log(state);
+          console.log(stateNext);
+          console.log(`Row ${row}, stitch ${stitch}.`);
+          throw new Error(`Unhandled cable cross situation (row ${
+              row * 2}, stitch ${stitch}).`);
         }
+      }
+      if (marginDistance > 0) {
+        rowOutput.push(new StitchSequence([Purl], marginDistance));
+        rowOutput.push(new StitchSequence([Knit], 2));
       }
       output.addRow(new Row(rowOutput));
       output.addRow(evenRow);
