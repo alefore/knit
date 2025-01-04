@@ -13,6 +13,11 @@ class Stitch {
     return `<span style="color: ${this.color};" title="${this.tooltip}">${
         this.representation}</span>`;
   }
+
+  flatten(output = []) {
+    output.push(this);
+    return output;
+  }
 }
 
 const Knit = new Stitch(1, 1, 'K', '#b3e2cd', 'Knit');

@@ -13,6 +13,11 @@ class Row {
         (total, sequence) => total + sequence.outputStitches, 0);
   }
 
+  flatten(output = []) {
+    this.stitchSequences.forEach((sequence) => sequence.flatten(output));
+    return output;
+  }
+
   describeStitches() {
     const zeroWidthSpace = '&#8203;';
     return intersperse(

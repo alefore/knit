@@ -28,4 +28,10 @@ class StitchSequence {
         this.sequence.reduce(
             (total, stitch) => total + stitch.outputStitches, 0);
   }
+
+  flatten(output = []) {
+    for (let i = 0; i < this.repetitions; i++)
+      this.sequence.forEach((stitch) => stitch.flatten(output));
+    return output;
+  }
 }
