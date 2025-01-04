@@ -10,8 +10,8 @@ class Stitch {
   }
 
   html() {
-    return `<span style="color: ${this.color};" title="${this.tooltip}">${
-        this.representation}</span>`;
+    return `<span style="color: ${this.color};" title="${
+        this.tooltip}" class=stitch>${this.representation}</span>`;
   }
 
   flatten(output = []) {

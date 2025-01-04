@@ -64,16 +64,9 @@ class CableLayout {
   }
 
   #rowsWidth() {
-    // If we have more than 4 rows, compute all the moves the first cable can
-    // make before reaching the end (and having to bounce back at half of the
-    // rows).
-    console.log(this.rowsCount);
     const moveRows = 1 + this.rowsCount / 2 - this.cableEdgeRows;
     const singleMoveRows = Math.min(moveRows, 2 * this.smoothingRows);
     const doubleMoveRows = moveRows - singleMoveRows;
-    console.log(moveRows);
-    console.log(singleMoveRows);
-    console.log(doubleMoveRows);
     return this.cableWidth + singleMoveRows + 2 * doubleMoveRows;
   }
 
@@ -159,7 +152,7 @@ class CablePatternFactory {
       let stitch = layout.rowsWidth - 1;
       while (stitch >= 0) {
         if (state[stitch] == -1 && stateNext[stitch] == -1) {
-          rowOutput.push(new StitchSequence([Purl], 1));
+          rowOutput.push(Purl);
           stitch--;
         } else if (
             stitch > 0 && state[stitch] == stateNext[stitch] &&
@@ -169,31 +162,32 @@ class CablePatternFactory {
         } else if (
             stitch >= 2 && state[stitch] != -1 && stateNext[stitch] == -1 &&
             state[stitch] == stateNext[stitch - 1]) {
-          rowOutput.push(new StitchSequence([CableTwoFrontPurlOne], 1));
+          rowOutput.push(CableTwoFrontPurlOne);
           rowOutput.push(new StitchSequence([Knit], 2));
           stitch -= 3;
         } else if (
             stitch >= 2 && state[stitch] == -1 && stateNext[stitch] != -1 &&
             state[stitch - 1] == stateNext[stitch]) {
-          rowOutput.push(new StitchSequence([CableOneBackKnitTwo, Purl], 1));
+          rowOutput.push(CableOneBackKnitTwo);
+          rowOutput.push(Purl);
           stitch -= 3;
         } else if (
             stitch >= 3 && state[stitch] != -1 && state[stitch - 2] != -1 &&
             state[stitch - 2] == stateNext[stitch] &&
             state[stitch] == stateNext[stitch - 3]) {
-          rowOutput.push(new StitchSequence([CableTwoBackKnitTwo], 1));
+          rowOutput.push(CableTwoBackKnitTwo);
           rowOutput.push(new StitchSequence([Knit], 2));
           stitch -= 4;
         } else if (
             stitch >= 3 && state[stitch] != -1 && state[stitch - 2] == -1 &&
             state[stitch] == stateNext[stitch - 2]) {
-          rowOutput.push(new StitchSequence([CableTwoFrontPurlTwo], 1));
+          rowOutput.push(CableTwoFrontPurlTwo);
           rowOutput.push(new StitchSequence([Knit], 2));
           stitch -= 4;
         } else if (
             stitch >= 3 && state[stitch] == -1 && state[stitch - 2] != -1 &&
             stateNext[stitch] == state[stitch - 2]) {
-          rowOutput.push(new StitchSequence([CableTwoBackKnitTwo], 1));
+          rowOutput.push(CableTwoBackKnitTwo);
           rowOutput.push(new StitchSequence([Purl], 2));
           stitch -= 4;
         } else {

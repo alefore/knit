@@ -110,12 +110,9 @@ function row2x2(rowId, stitches) {
                                    [Purl, Purl, Knit, Knit],
       Math.floor(stitches / 4))];
   let tail = [];
-  if (stitches % 4 >= 1)
-    tail.push(new StitchSequence([rowBottomKnit ? Knit : Purl], 1));
-  if (stitches % 4 >= 2)
-    tail.push(new StitchSequence([rowBottomKnit ? Knit : Purl], 1));
-  if (stitches % 4 == 3)
-    tail.push(new StitchSequence([rowBottomKnit ? Purl : Knit], 1));
+  if (stitches % 4 >= 1) tail.push(rowBottomKnit ? Knit : Purl);
+  if (stitches % 4 >= 2) tail.push(rowBottomKnit ? Knit : Purl);
+  if (stitches % 4 == 3) tail.push(rowBottomKnit ? Purl : Knit);
   return new Row(
       !rightSide ? [...head, ...tail] : [...tail.reverse(), ...head]);
 }

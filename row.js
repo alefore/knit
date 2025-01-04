@@ -1,27 +1,27 @@
 class Row {
-  constructor(stitchSequences = []) {
-    this.stitchSequences = stitchSequences;
+  constructor(stitches = []) {
+    this.stitches = stitches;
   }
 
   get inputStitches() {
-    return this.stitchSequences.reduce(
+    return this.stitches.reduce(
         (total, sequence) => total + sequence.inputStitches, 0);
   }
 
   get outputStitches() {
-    return this.stitchSequences.reduce(
+    return this.stitches.reduce(
         (total, sequence) => total + sequence.outputStitches, 0);
   }
 
   flatten(output = []) {
-    this.stitchSequences.forEach((sequence) => sequence.flatten(output));
+    this.stitches.forEach((sequence) => sequence.flatten(output));
     return output;
   }
 
   describeStitches() {
     const zeroWidthSpace = '&#8203;';
     return intersperse(
-        this.stitchSequences.map(sequence => {
+        this.stitches.map(sequence => {
           return sequence.html();
         }),
         zeroWidthSpace);
@@ -62,8 +62,7 @@ class Row {
         [new StitchSequence([Knit], 3)] :
         [new StitchSequence([Knit], 2), new StitchSequence([growType], 1)];
     return new Row([
-      ...prefix, ...this.stitchSequences,
-      new StitchSequence([WithYarnInFront], 1),
+      ...prefix, ...this.stitches, new StitchSequence([WithYarnInFront], 1),
       new StitchSequence([SlipStitchPurlwise], 3)
     ]);
   }
