@@ -204,11 +204,13 @@ class CablePatternFactory {
         'Inner Cables',
         'Should we enable inner cables? These only works with few parameters.',
         'Disable', null, ['Enable', 'Disable']);
+    this.marginTypeInput = new PatternFactoryInput(
+        'Margin Type', 'Type of margin to use.', 'None', null,
+        ['None', 'ICord', 'Knit']);
     this.marginDistanceInput = new PatternFactoryInput(
         'Margin Distance',
-        'Number of purl stitches between the cable and its margin. ' +
-            'If zero, disables margin.',
-        2, 'stitches');
+        'Number of purl stitches between the cable and its margin.', 2,
+        'stitches');
   }
 
   getInputs() {
@@ -219,6 +221,7 @@ class CablePatternFactory {
       this.cableEdgeRowsInput,
       this.smoothingRowsInput,
       this.innerCablesInput,
+      this.marginTypeInput,
       this.marginDistanceInput,
     ];
   }
@@ -231,21 +234,34 @@ class CablePatternFactory {
         this.cableEdgeRowsInput.numberValue(),
         this.smoothingRowsInput.numberValue(),
         this.innerCablesInput.value() == 'Enable');
-    const marginDistance = this.marginDistanceInput.numberValue();
-    const evenRow = new Row([new StitchSequence(
-        [StitchEcho],
-        layout.rowsWidth +
-            (marginDistance > 0 ? 2 * (marginDistance + 2) : 0))]);
+    const marginType = this.marginTypeInput.value();
+    const marginDistance =
+        marginType == 'None' ? 0 : this.marginDistanceInput.numberValue();
+    const marginEnd =
+        (marginType == 'ICord' ?
+             new StitchSequence(
+                 [WithYarnInFront, new StitchSequence([SlipStitchPurlwise], 3)],
+                 1) :
+             new StitchSequence([], 0));
+    const evenRow = new Row([
+      (marginType == 'ICord' ? new StitchSequence([Knit], 3) :
+                               new StitchSequence([], 0)),
+      new StitchSequence(
+          [StitchEcho],
+          layout.rowsWidth +
+              (marginDistance > 0 ?
+                   2 * marginDistance + (marginType == 'Knit' ? 4 : 0) :
+                   0)),
+      marginEnd
+    ]);
     for (let row = 0; row < layout.rowsCount; row++) {
       const state = layout.renderRowCables(row);
       console.log(state);
       const stateNext = layout.renderRowCables(row + 1);
-      const rowOutput = marginDistance > 0 ?
-          [
-            new StitchSequence([Knit], 2),
-            new StitchSequence([Purl], marginDistance)
-          ] :
-          [];
+      const rowOutput = marginType == 'None' ? [] : [
+        new StitchSequence([Knit], marginType == 'Knit' ? 2 : 3),
+        new StitchSequence([Purl], marginDistance)
+      ];
       let stitch = layout.rowsWidth - 1;
       while (stitch >= 0) {
         if (state[stitch] == -1 && stateNext[stitch] == -1) {
@@ -295,10 +311,11 @@ class CablePatternFactory {
               row * 2}, stitch ${stitch}).`);
         }
       }
-      if (marginDistance > 0) {
-        rowOutput.push(new StitchSequence([Purl], marginDistance));
+      rowOutput.push(new StitchSequence([Purl], marginDistance));
+      if (marginType == 'ICord')
+        rowOutput.push(marginEnd);
+      else if (marginType == 'Knit')
         rowOutput.push(new StitchSequence([Knit], 2));
-      }
       output.addRow(new Row(rowOutput));
       output.addRow(evenRow);
     }

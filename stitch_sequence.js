@@ -11,7 +11,7 @@ class StitchSequence {
     const needParens = this.repetitions != 1 && this.sequence.length > 1;
     if (this.repetitions != 1 && needParens) output.append(this.repetitions);
     if (needParens) output.append('(');
-    output.append(this.sequence.map(stitch => stitch.html()).join(' '));
+    this.sequence.forEach(stitch => output.append(stitch.html()));
     if (needParens) output.append(')');
     if (this.repetitions != 1 && !needParens) output.append(this.repetitions);
     return output;
