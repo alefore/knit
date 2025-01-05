@@ -62,7 +62,7 @@ class PatternFactoryInput {
   }
 
   nameCamelCase() {
-    return this.name.replace(/\s+/g, '');
+    return this.name.replace(/[\s:]+/g, '');
   }
 
   setVisible(eventListener, valueSupplier) {
