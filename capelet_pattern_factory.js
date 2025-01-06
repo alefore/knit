@@ -45,10 +45,8 @@ class CapeletPatternFactory {
     const cable = this.cableInput.value() == 'Enable' ?
         new CableLayout(4, 4, 4, 2, true, 'Knit', 4) :
         null;
-    for (let row = 0; row < this.borderLengthInput.numberValue(); row++)
-      pattern.addRow(new Row(
-          [new StitchSequence([Purl], this.baseWidthInput.numberValue())]));
 
+    this.#addBorder(this.baseWidthInput.numberValue(), pattern);
     this.buildPart(
         pattern, 'Base', this.baseWidthInput.numberValue(),
         this.shoulderWidthInput.numberValue(),
@@ -60,7 +58,13 @@ class CapeletPatternFactory {
     this.buildPart(
         pattern, 'Neck', this.neckWidthInput.numberValue(),
         this.neckWidthInput.numberValue(), this.neckLengthInput.numberValue());
+    this.#addBorder(pattern.lastRow().outputStitches, pattern);
     return pattern;
+  }
+
+  #addBorder(width, outputPattern) {
+    for (let row = 0; row < this.borderLengthInput.numberValue(); row++)
+      outputPattern.addRow(new Row([new StitchSequence([Purl], width)]));
   }
 
   buildPart(pattern, partName, startWidth, endWidth, length, cable) {
