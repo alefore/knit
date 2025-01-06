@@ -30,8 +30,10 @@ class KnitState {
   constructor() {
     const knitState = this;
     this.inputs = parseHash();
-    this.patternFactories =
-        [new ScarfPatternFactory(3), new CablePatternFactory()];
+    this.patternFactories = [
+      new ScarfPatternFactory(3), new CablePatternFactory(),
+      new CapeletPatternFactory()
+    ];
 
     const factoryNames = Array.from(new Set(this.patternFactories.map(
         instance => Object.getPrototypeOf(instance).constructor.name)));
