@@ -37,8 +37,11 @@ class Row {
                     .append(
                         $(htmlTags.span, {class: 'rowIndex'})
                             .append(
-                                index + (index % 2 == 0 ? '↓' : '↑') + ' (' +
-                                this.outputStitches +
+                                index +
+                                (pattern.showRowDirection ?
+                                     (index % 2 == 0 ? '↓ ' : '↑ ') :
+                                     '') +
+                                '(' + this.outputStitches +
                                 (stitchDelta == 0 ? '' : ' Δ' + stitchDelta) +
                                 ') '))
                     .append(this.describeStitches()));
