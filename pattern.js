@@ -1,6 +1,14 @@
 class Pattern {
+  static rowSwitchStyles = createConstants('round', 'backAndForth');
+
   constructor() {
     this.rows = [];
+    this.rowSwitchStyle = Pattern.rowSwitchStyles.backAndForth;
+  }
+
+  setRound() {
+    this.rowSwitchStyle = Pattern.rowSwitchStyles.round;
+    return this;
   }
 
   rowsCount() {
@@ -18,6 +26,10 @@ class Pattern {
 
   isEmpty() {
     return this.rowsCount() == 0;
+  }
+
+  get showRowDirection() {
+    return this.rowSwitchStyle == Pattern.rowSwitchStyles.backAndForth;
   }
 
   addRow(row) {
@@ -46,14 +58,19 @@ class Pattern {
         if (rowIndex == currentRow)
           ctx.fillStyle = colorIds.cyan;
         else
-          ctx.fillStyle = rowIndex % 2 == 0 ? stitch.color :
-                                              this.#invertColor(stitch.color);
+          ctx.fillStyle =
+              this.rowSwitchStyle == Pattern.rowSwitchStyles.round ||
+                  rowIndex % 2 == 0 ?
+              stitch.color :
+              this.#invertColor(stitch.color);
         for (let s = 0; s < stitch.outputStitches; s++) {
           const x = rowIndex * stitchSize;
           const y = stitchSize *
               (maxStitches -
-               ((rowIndex % 2 == 0) ? rowOutputStitches - stitchIndex :
-                                      stitchIndex + 1));
+               ((this.rowSwitchStyle == Pattern.rowSwitchStyles.round ||
+                 rowIndex % 2 == 0) ?
+                    rowOutputStitches - stitchIndex :
+                    stitchIndex + 1));
           ctx.fillRect(x, y, stitchSize, stitchSize);
           stitchIndex++;
         }
