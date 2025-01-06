@@ -56,7 +56,8 @@ class CableLayout {
   // @param {bool} innerCables - Should we add inner cables? They don't reach
   // the edges, but oscillate between the normal cables.
   constructor(
-      cables, rowsBetweenCables, cableEdgeRows, smoothingRows, innerCables) {
+      cables, rowsBetweenCables, cableEdgeRows, smoothingRows, innerCables,
+      marginType, marginDistance) {
     // rowsBetweenCables: On the side, how much empty space should we leave
     // after one cable leaves the side before the next cable reaches it?
     this.cables = cables;
@@ -71,8 +72,8 @@ class CableLayout {
     // a given row.
     this.positions = this.#cablePositions();
     this.positionsInnerCables = this.#innerCablePositions();
-    console.log(this.positions);
-    console.log(this.positionsInnerCables);
+    this.marginType = marginType;
+    this.marginDistance = marginDistance;
   }
 
   #rowsWidth() {
@@ -182,14 +183,18 @@ class CableLayout {
     return output;
   }
 
-  computeRow(row, marginType, marginDistance) {
+  computeRow(row) {
+    return (row % 2 == 0) ? this.#cablesRow(row / 2) : this.#lameRow();
+  }
+
+  #cablesRow(row) {
     if (row >= this.positions.length)
       throw new Error('Row too large for cable!');
     const state = this.renderRowCables(row);
     const stateNext = this.renderRowCables(row + 1);
-    const rowOutput = marginType == 'None' ? [] : [
-      new StitchSequence([Knit], marginType == 'Knit' ? 2 : 3),
-      new StitchSequence([Purl], marginDistance)
+    const rowOutput = this.marginType == 'None' ? [] : [
+      new StitchSequence([Knit], this.marginType == 'Knit' ? 2 : 3),
+      new StitchSequence([Purl], this.marginDistance)
     ];
     let stitch = this.rowsWidth - 1;
     while (stitch >= 0) {
@@ -240,12 +245,32 @@ class CableLayout {
             row * 2}, stitch ${stitch}).`);
       }
     }
-    rowOutput.push(new StitchSequence([Purl], marginDistance));
-    if (marginType == 'ICord')
-      rowOutput.push(marginEnd);
-    else if (marginType == 'Knit')
+    rowOutput.push(new StitchSequence([Purl], this.marginDistance));
+    if (this.marginType == 'ICord')
+      rowOutput.push(this.marginEnd);
+    else if (this.marginType == 'Knit')
       rowOutput.push(new StitchSequence([Knit], 2));
-    return rowOutput;
+    return new Row(rowOutput);
+  }
+
+  #lameRow() {
+    const marginEnd =
+        (this.marginType == 'ICord' ?
+             new StitchSequence(
+                 [WithYarnInFront, new StitchSequence([SlipStitchPurlwise], 3)],
+                 1) :
+             new StitchSequence([], 0));
+    return new Row([
+      (this.marginType == 'ICord' ? new StitchSequence([Knit], 3) :
+                                    new StitchSequence([], 0)),
+      new StitchSequence(
+          [StitchEcho],
+          this.rowsWidth +
+              (this.marginDistance > 0 ? 2 * this.marginDistance +
+                       (this.marginType == 'Knit' ? 4 : 0) :
+                                         0)),
+      marginEnd
+    ]);
   }
 }
 
@@ -294,154 +319,17 @@ class CablePatternFactory {
 
   build() {
     const output = new Pattern();
+    const marginType = this.marginTypeInput.value();
+    const marginDistance =
+        marginType == 'None' ? 0 : this.marginDistanceInput.numberValue();
     const layout = new CableLayout(
         this.cableCountInput.numberValue(),
         this.rowsBetweenCablesInput.numberValue(),
         this.cableEdgeRowsInput.numberValue(),
         this.smoothingRowsInput.numberValue(),
-        this.innerCablesInput.value() == 'Enable');
-    const marginType = this.marginTypeInput.value();
-    const marginDistance =
-        marginType == 'None' ? 0 : this.marginDistanceInput.numberValue();
-    const marginEnd =
-        (marginType == 'ICord' ?
-             new StitchSequence(
-                 [WithYarnInFront, new StitchSequence([SlipStitchPurlwise], 3)],
-                 1) :
-             new StitchSequence([], 0));
-    const evenRow = new Row([
-      (marginType == 'ICord' ? new StitchSequence([Knit], 3) :
-                               new StitchSequence([], 0)),
-      new StitchSequence(
-          [StitchEcho],
-          layout.rowsWidth +
-              (marginDistance > 0 ?
-                   2 * marginDistance + (marginType == 'Knit' ? 4 : 0) :
-                   0)),
-      marginEnd
-    ]);
-    for (let row = 0; row < layout.rowsCount; row++) {
-      output.addRow(
-          new Row(layout.computeRow(row, marginType, marginDistance)));
-      output.addRow(evenRow);
-    }
-    return output;
-  }
-
-  buildOld() {
-    const output = new Pattern();
-    const evenRow = new Row([
-      new StitchSequence([WithYarnInFront, SlipStitchPurlwise], 1),
-      new StitchSequence([StitchEcho], 23)
-    ]);
-    for (let i = 0; i < this.cableLengthInput.numberValue(); i++) {
-      // Row 1
-      output.addRow(new Row([
-        new StitchSequence(
-            [WithYarnInBack, SlipStitchPurlwise, Purl, CableTwoBackKnitTwo], 1),
-        new StitchSequence([Knit], 2),
-        new StitchSequence(
-            [Purl, Purl, Purl, Purl, CableTwoBackKnitTwo, Knit, Knit], 2),
-        new StitchSequence([Purl], 2)
-      ]));
-      output.addRow(evenRow);
-      // Row 3
-      output.addRow(new Row([
-        new StitchSequence(
-            [WithYarnInBack, SlipStitchPurlwise, CableOneBackKnitTwo, Purl], 1),
-        new StitchSequence(
-            [CableTwoFrontPurlTwo, Knit, Knit, CableTwoBackKnitTwo, Purl, Purl],
-            2),
-        new StitchSequence([CableTwoFrontPurlOne], 1),
-        new StitchSequence([Knit], 2),
-        new StitchSequence([Purl], 1),
-      ]));
-      output.addRow(evenRow);
-      // Row 5
-      output.addRow(new Row([
-        new StitchSequence([CableOneBackKnitTwo], 1),
-        new StitchSequence([Purl], 4),
-        new StitchSequence([CableTwoFrontKnitTwo], 1),
-        new StitchSequence([Knit], 2),
-        new StitchSequence([Purl], 4),
-        new StitchSequence([CableTwoFrontKnitTwo], 1),
-        new StitchSequence([Knit], 2),
-        new StitchSequence([Purl], 3),
-        new StitchSequence([CableTwoFrontPurlOne], 1),
-        new StitchSequence([Knit], 2),
-      ]));
-      output.addRow(evenRow);
-      // Row 7
-      output.addRow(new Row([
-        new StitchSequence([WithYarnInBack, SlipStitchPurlwise, Knit], 1),
-        new StitchSequence([Purl], 3),
-        new StitchSequence([CableOneBackKnitTwo, Purl], 1),
-        new StitchSequence([CableTwoFrontPurlTwo], 1),
-        new StitchSequence([Knit], 2),
-        new StitchSequence([CableTwoBackKnitTwo], 1),
-        new StitchSequence([Purl], 2),
-        new StitchSequence([CableTwoFrontPurlOne], 1),
-        new StitchSequence([Knit], 2),
-        new StitchSequence([Purl], 3),
-        new StitchSequence([Knit], 2),
-      ]));
-      output.addRow(evenRow);
-      // Row 9
-      output.addRow(new Row([
-        new StitchSequence([WithYarnInBack, SlipStitchPurlwise, Knit], 1),
-        new StitchSequence([Purl], 3),
-        new StitchSequence([Knit], 2),
-        new StitchSequence([Purl], 3),
-        new StitchSequence([CableTwoBackKnitTwo], 1),
-        new StitchSequence([Knit], 2),
-        new StitchSequence([Purl], 3),
-        new StitchSequence([Knit], 2),
-        new StitchSequence([Purl], 3),
-        new StitchSequence([Knit], 2),
-      ]));
-      output.addRow(evenRow);
-      // Row 11:
-      output.addRow(new Row([
-        new StitchSequence([WithYarnInBack, SlipStitchPurlwise, Knit], 1),
-        new StitchSequence([Purl], 3),
-        new StitchSequence([CableTwoFrontPurlOne], 1),
-        new StitchSequence([Knit], 2),
-        new StitchSequence(
-            [CableTwoBackKnitTwo, Purl, Purl, CableTwoFrontPurlTwo, Knit, Knit],
-            1),
-        new StitchSequence([CableOneBackKnitTwo], 1),
-        new StitchSequence([Purl], 4),
-        new StitchSequence([Knit], 2),
-      ]));
-      output.addRow(evenRow);
-      // Row 13
-      output.addRow(new Row([
-        new StitchSequence([CableTwoFrontPurlOne], 1),
-        new StitchSequence([Knit], 2),
-        new StitchSequence([Purl], 3),
-        new StitchSequence([CableTwoFrontKnitTwo], 1),
-        new StitchSequence([Knit], 2),
-        new StitchSequence([Purl], 4),
-        new StitchSequence([CableTwoFrontKnitTwo], 1),
-        new StitchSequence([Knit], 2),
-        new StitchSequence([Purl], 3),
-        new StitchSequence([CableOneBackKnitTwo], 1),
-        new StitchSequence([Purl], 1),
-      ]));
-      output.addRow(evenRow);
-      // Row 15
-      output.addRow(new Row([
-        new StitchSequence([WithYarnInBack, SlipStitchPurlwise], 1),
-        new StitchSequence([CableTwoFrontPurlOne], 1),
-        new StitchSequence([Knit], 2),
-        new StitchSequence(
-            [CableTwoBackKnitTwo, Purl, Purl, CableTwoFrontPurlTwo, Knit, Knit],
-            2),
-        new StitchSequence([CableOneBackKnitTwo], 1),
-        new StitchSequence([Purl], 2),
-      ]));
-      output.addRow(evenRow);
-    }
+        this.innerCablesInput.value() == 'Enable', marginType, marginDistance);
+    for (let row = 0; row < 2 * layout.rowsCount; row++)
+      output.addRow(layout.computeRow(row));
     return output;
   }
 }

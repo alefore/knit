@@ -2,6 +2,8 @@ class CapeletPatternFactory {
   static name = 'Capelet';
 
   constructor() {
+    this.borderLengthInput = new PatternFactoryInput(
+        'Length: Border', 'Width of the border (under the base).', 3, 'rows');
     this.baseWidthInput = new PatternFactoryInput(
         'Width: Base', 'Width of the capelet be at the base.', 120, 'stitches');
     this.shoulderWidthInput = new PatternFactoryInput(
@@ -27,6 +29,7 @@ class CapeletPatternFactory {
 
   getInputs() {
     return [
+      this.borderLengthInput,
       this.baseWidthInput,
       this.shoulderWidthInput,
       this.neckWidthInput,
@@ -40,23 +43,27 @@ class CapeletPatternFactory {
   build() {
     const pattern = new Pattern().setRound();
     const cable = this.cableInput.value() == 'Enable' ?
-        new CableLayout(4, 4, 4, 2, true) :
+        new CableLayout(4, 4, 4, 2, true, 'Knit', 4) :
         null;
+    for (let row = 0; row < this.borderLengthInput.numberValue(); row++)
+      pattern.addRow(new Row(
+          [new StitchSequence([Purl], this.baseWidthInput.numberValue())]));
+
     this.buildPart(
-        pattern, this.baseWidthInput.numberValue(),
+        pattern, 'Base', this.baseWidthInput.numberValue(),
         this.shoulderWidthInput.numberValue(),
         this.baseToShoulderLengthInput.numberValue(), cable);
     this.buildPart(
-        pattern, this.shoulderWidthInput.numberValue(),
+        pattern, 'Shoulder', this.shoulderWidthInput.numberValue(),
         this.neckWidthInput.numberValue(),
         this.shoulderToNeckLengthInput.numberValue(), cable);
     this.buildPart(
-        pattern, this.neckWidthInput.numberValue(),
+        pattern, 'Neck', this.neckWidthInput.numberValue(),
         this.neckWidthInput.numberValue(), this.neckLengthInput.numberValue());
     return pattern;
   }
 
-  buildPart(pattern, startWidth, endWidth, length, cable) {
+  buildPart(pattern, partName, startWidth, endWidth, length, cable) {
     if (startWidth % 2 != 0) throw new Error('Width must be even.');
     if (endWidth % 2 != 0) throw new Error('Width must be even.');
     if (endWidth > startWidth)
@@ -72,40 +79,39 @@ class CapeletPatternFactory {
           Math.round((startWidth - endWidth) * (row / length) / 2);
       const cableRow = cable == null ?
           null :
-          new Row(
-              pattern.rowsCount() % 2 == 0 ?
-                  cable.computeRow(
-                      pattern.rowsCount() % cable.rowsCount, 'None', 0) :
-                  [new StitchSequence([StitchEcho], cable.rowsWidth)]);
+          cable.computeRow(pattern.rowsCount() % cable.rowsCount, 'None', 0);
       const rowOutput = [];
       if (desiredHalfWidth + 2 <= currentHalfWidth)
         for (let i = 0; i < 2; i++) {
           rowOutput.push(Knit);
           rowOutput.push(KnitTwoTogether);
           this.#maybeAddCableRow(
-              currentHalfWidth - 6, i == 0 ? cableRow : null, rowOutput);
+              partName, currentHalfWidth - 6, i == 0 ? cableRow : null,
+              rowOutput);
           rowOutput.push(SlipSlipKnit);
           rowOutput.push(Knit);
         }
       else {
-        this.#maybeAddCableRow(currentHalfWidth, cableRow, rowOutput);
+        this.#maybeAddCableRow(partName, currentHalfWidth, cableRow, rowOutput);
         rowOutput.push(new StitchSequence([Knit], currentHalfWidth));
       }
       pattern.addRow(new Row(rowOutput));
     }
   }
 
-  #maybeAddCableRow(outputSize, cableRow, rowOutput) {
-    if (outputSize % 2 == 1)
-      throw new Error('Invalid row output size (expected even).');
-    if (cableRow == null || cableRow.outputStitches > outputSize) {
-      rowOutput.push(new StitchSequence([Knit], outputSize));
+  #maybeAddCableRow(partName, outputStitches, cableRow, rowOutput) {
+    if (outputStitches % 2 == 1)
+      throw new Error(
+          `${partName}: Invalid row output stitches (expected even): ${
+              outputStitches}`);
+    if (cableRow == null || cableRow.outputStitches > outputStitches) {
+      rowOutput.push(new StitchSequence([Knit], outputStitches));
       return;
     }
     if (cableRow.outputStitches % 2 == 1)
       throw new Error('Invalid cable row output size (expected even).');
-    const padding =
-        new StitchSequence([Knit], (outputSize - cableRow.outputStitches) / 2);
+    const padding = new StitchSequence(
+        [Knit], (outputStitches - cableRow.outputStitches) / 2);
     rowOutput.push(padding);
     rowOutput.push(new StitchSequence(cableRow.stitches, 1));
     rowOutput.push(padding);
