@@ -30,6 +30,7 @@ const KnitFrontBack = new Stitch(1, 2, 'KFB', '#cbd5e8', 'KnitFrontBack');
 const SlipStitchPurlwise =
     new Stitch(1, 1, 'SLP', '#f4cae4', 'SpliStitchPurlwise');
 const KnitTwoTogether = new Stitch(2, 1, 'K2Tog', '#e6f5c9', 'KnitTwoTogether');
+const SlipSlipKnit = new Stitch(2, 1, 'SSK', '#e6f5c9', 'SlipSlipKnit');
 const WithYarnInFront = new Stitch(0, 0, 'WYF', '#f4cae4', 'WithYarnInFront');
 const WithYarnInBack = new Stitch(0, 0, 'WYB', '#f4cae4', 'WithYarnInBack');
 
