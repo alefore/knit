@@ -181,6 +181,72 @@ class CableLayout {
       }
     return output;
   }
+
+  computeRow(row, marginType, marginDistance) {
+    if (row >= this.positions.length)
+      throw new Error('Row too large for cable!');
+    const state = this.renderRowCables(row);
+    const stateNext = this.renderRowCables(row + 1);
+    const rowOutput = marginType == 'None' ? [] : [
+      new StitchSequence([Knit], marginType == 'Knit' ? 2 : 3),
+      new StitchSequence([Purl], marginDistance)
+    ];
+    let stitch = this.rowsWidth - 1;
+    while (stitch >= 0) {
+      if (state[stitch] == -1 && stateNext[stitch] == -1) {
+        rowOutput.push(Purl);
+        stitch--;
+      } else if (
+          stitch > 0 && state[stitch] == stateNext[stitch] &&
+          state[stitch - 1] == stateNext[stitch - 1]) {
+        rowOutput.push(new StitchSequence([Knit], 2));
+        stitch -= 2;
+      } else if (
+          stitch >= 2 && state[stitch] != -1 && stateNext[stitch] == -1 &&
+          state[stitch] == stateNext[stitch - 1]) {
+        rowOutput.push(CableTwoFrontPurlOne);
+        rowOutput.push(new StitchSequence([Knit], 2));
+        stitch -= 3;
+      } else if (
+          stitch >= 2 && state[stitch] == -1 && stateNext[stitch] != -1 &&
+          state[stitch - 1] == stateNext[stitch]) {
+        rowOutput.push(CableOneBackKnitTwo);
+        rowOutput.push(Purl);
+        stitch -= 3;
+      } else if (
+          stitch >= 3 && state[stitch] != -1 && state[stitch - 2] != -1 &&
+          state[stitch - 2] == stateNext[stitch] &&
+          state[stitch] == stateNext[stitch - 3]) {
+        rowOutput.push(CableTwoBackKnitTwo);
+        rowOutput.push(new StitchSequence([Knit], 2));
+        stitch -= 4;
+      } else if (
+          stitch >= 3 && state[stitch] != -1 && state[stitch - 2] == -1 &&
+          state[stitch] == stateNext[stitch - 2]) {
+        rowOutput.push(CableTwoFrontPurlTwo);
+        rowOutput.push(new StitchSequence([Knit], 2));
+        stitch -= 4;
+      } else if (
+          stitch >= 3 && state[stitch] == -1 && state[stitch - 2] != -1 &&
+          stateNext[stitch] == state[stitch - 2]) {
+        rowOutput.push(CableTwoBackKnitTwo);
+        rowOutput.push(new StitchSequence([Purl], 2));
+        stitch -= 4;
+      } else {
+        console.log(state);
+        console.log(stateNext);
+        console.log(`Row ${row}, stitch ${stitch}.`);
+        throw new Error(`Unhandled cable cross situation (row ${
+            row * 2}, stitch ${stitch}).`);
+      }
+    }
+    rowOutput.push(new StitchSequence([Purl], marginDistance));
+    if (marginType == 'ICord')
+      rowOutput.push(marginEnd);
+    else if (marginType == 'Knit')
+      rowOutput.push(new StitchSequence([Knit], 2));
+    return rowOutput;
+  }
 }
 
 class CablePatternFactory {
@@ -255,68 +321,8 @@ class CablePatternFactory {
       marginEnd
     ]);
     for (let row = 0; row < layout.rowsCount; row++) {
-      const state = layout.renderRowCables(row);
-      console.log(state);
-      const stateNext = layout.renderRowCables(row + 1);
-      const rowOutput = marginType == 'None' ? [] : [
-        new StitchSequence([Knit], marginType == 'Knit' ? 2 : 3),
-        new StitchSequence([Purl], marginDistance)
-      ];
-      let stitch = layout.rowsWidth - 1;
-      while (stitch >= 0) {
-        if (state[stitch] == -1 && stateNext[stitch] == -1) {
-          rowOutput.push(Purl);
-          stitch--;
-        } else if (
-            stitch > 0 && state[stitch] == stateNext[stitch] &&
-            state[stitch - 1] == stateNext[stitch - 1]) {
-          rowOutput.push(new StitchSequence([Knit], 2));
-          stitch -= 2;
-        } else if (
-            stitch >= 2 && state[stitch] != -1 && stateNext[stitch] == -1 &&
-            state[stitch] == stateNext[stitch - 1]) {
-          rowOutput.push(CableTwoFrontPurlOne);
-          rowOutput.push(new StitchSequence([Knit], 2));
-          stitch -= 3;
-        } else if (
-            stitch >= 2 && state[stitch] == -1 && stateNext[stitch] != -1 &&
-            state[stitch - 1] == stateNext[stitch]) {
-          rowOutput.push(CableOneBackKnitTwo);
-          rowOutput.push(Purl);
-          stitch -= 3;
-        } else if (
-            stitch >= 3 && state[stitch] != -1 && state[stitch - 2] != -1 &&
-            state[stitch - 2] == stateNext[stitch] &&
-            state[stitch] == stateNext[stitch - 3]) {
-          rowOutput.push(CableTwoBackKnitTwo);
-          rowOutput.push(new StitchSequence([Knit], 2));
-          stitch -= 4;
-        } else if (
-            stitch >= 3 && state[stitch] != -1 && state[stitch - 2] == -1 &&
-            state[stitch] == stateNext[stitch - 2]) {
-          rowOutput.push(CableTwoFrontPurlTwo);
-          rowOutput.push(new StitchSequence([Knit], 2));
-          stitch -= 4;
-        } else if (
-            stitch >= 3 && state[stitch] == -1 && state[stitch - 2] != -1 &&
-            stateNext[stitch] == state[stitch - 2]) {
-          rowOutput.push(CableTwoBackKnitTwo);
-          rowOutput.push(new StitchSequence([Purl], 2));
-          stitch -= 4;
-        } else {
-          console.log(state);
-          console.log(stateNext);
-          console.log(`Row ${row}, stitch ${stitch}.`);
-          throw new Error(`Unhandled cable cross situation (row ${
-              row * 2}, stitch ${stitch}).`);
-        }
-      }
-      rowOutput.push(new StitchSequence([Purl], marginDistance));
-      if (marginType == 'ICord')
-        rowOutput.push(marginEnd);
-      else if (marginType == 'Knit')
-        rowOutput.push(new StitchSequence([Knit], 2));
-      output.addRow(new Row(rowOutput));
+      output.addRow(
+          new Row(layout.computeRow(row, marginType, marginDistance)));
       output.addRow(evenRow);
     }
     return output;
