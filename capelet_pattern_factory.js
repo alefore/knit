@@ -47,15 +47,15 @@ class CapeletPatternFactory {
         null;
 
     this.#addBorder(this.baseWidthInput.numberValue(), pattern);
-    this.buildPart(
+    this.#buildPart(
         pattern, 'Base', this.baseWidthInput.numberValue(),
         this.shoulderWidthInput.numberValue(),
         this.baseToShoulderLengthInput.numberValue(), cable);
-    this.buildPart(
+    this.#buildPart(
         pattern, 'Shoulder', this.shoulderWidthInput.numberValue(),
         this.neckWidthInput.numberValue(),
         this.shoulderToNeckLengthInput.numberValue(), cable);
-    this.buildPart(
+    this.#buildPart(
         pattern, 'Neck', this.neckWidthInput.numberValue(),
         this.neckWidthInput.numberValue(), this.neckLengthInput.numberValue());
     this.#addBorder(pattern.lastRow().outputStitches, pattern);
@@ -67,7 +67,7 @@ class CapeletPatternFactory {
       outputPattern.addRow(new Row([new StitchSequence([Purl], width)]));
   }
 
-  buildPart(pattern, partName, startWidth, endWidth, length, cable) {
+  #buildPart(pattern, partName, startWidth, endWidth, length, cable) {
     if (startWidth % 2 != 0) throw new Error('Width must be even.');
     if (endWidth % 2 != 0) throw new Error('Width must be even.');
     if (endWidth > startWidth)
