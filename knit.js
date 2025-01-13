@@ -236,6 +236,30 @@ class KnitState {
 
 const knitState = new KnitState();
 
+let wakeLock = null;
+
+async function requestWakeLock() {
+  try {
+    if (wakeLock === null) {
+      wakeLock = await navigator.wakeLock.request('screen');
+      console.log('Screen Wake Lock acquired');
+      wakeLock.addEventListener('release', () => {
+        console.log('Screen Wake Lock released');
+        wakeLock = null;
+      });
+    }
+  } catch (err) {
+    console.error(`Failed to acquire wake lock: ${err.message}`);
+  }
+}
+
+document.addEventListener('DOMContentLoaded', requestWakeLock);
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible') {
+    requestWakeLock();
+  }
+});
+
 document.addEventListener('DOMContentLoaded', (event) => {
   new SwipeHandler(
       function() {
