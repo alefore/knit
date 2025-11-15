@@ -1,4 +1,7 @@
-class ScarfPatternFactory {
+import {Pattern} from './pattern.js';
+import {Row} from './row.js';
+
+export class ScarfPatternFactory {
   static cubicBezierFocalPoints = {
     Balanced: [{x: 0.6, y: 0.3}, {x: 0.4, y: 0.7}],
     Thin: [{x: 0.75, y: 0.3}, {x: 0.5, y: 0.7}],

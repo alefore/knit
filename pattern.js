@@ -1,4 +1,4 @@
-class Pattern {
+export class Pattern {
   static rowSwitchStyles = createConstants('round', 'backAndForth');
 
   constructor() {

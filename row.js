@@ -1,6 +1,9 @@
-class Row {
+import {createTimestampView} from './timestamps.js';
+
+export class Row {
   constructor(stitches = []) {
     this.stitches = stitches;
+    this.firstVisit = null;
   }
 
   get inputStitches() {
@@ -47,6 +50,9 @@ class Row {
                     .append(this.describeStitches()));
 
     if (showDetails) {
+      if (this.firstVisit == null) {
+        this.firstVisit = new Date();
+      }
       const previousStitches = pattern.rows.slice(0, index).reduce(
           (total, r) => total + r.outputStitches, 0);
       const totalStitches = pattern.outputStitches;
@@ -55,6 +61,9 @@ class Row {
                             Math.floor(100 * previousStitches / totalStitches) +
                             '% (' + previousStitches + ' of ' + totalStitches +
                             ' st)'));
+      rowDiv.append($(htmlTags.p, {
+                      class: 'details'
+                    }).append(createTimestampView(this.firstVisit)));
     }
 
     return rowDiv;

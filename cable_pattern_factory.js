@@ -1,3 +1,6 @@
+import {Pattern} from './pattern.js';
+import {Row} from './row.js';
+
 // 33     11          22      44
 // 33     11          22      44
 //  33     11        22      44
@@ -48,7 +51,7 @@
 // 00       33
 // 00         3311         33
 //   123456789
-class CableLayout {
+export class CableLayout {
   // @param {number} cableEdgeRows - The number of rows on the edge where the
   // cable stays without moving. Typically 2.
   // @param {number} smoothingRows - The number of rows around the edge where
@@ -274,7 +277,7 @@ class CableLayout {
   }
 }
 
-class CablePatternFactory {
+export class CablePatternFactory {
   static name = 'Cables';
 
   constructor() {

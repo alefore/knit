@@ -1,4 +1,8 @@
-class AnthophoraNeckPatternFactory {
+import {CableLayout} from './cable_pattern_factory.js';
+import {Pattern} from './pattern.js';
+import {Row} from './row.js';
+
+export class AnthophoraNeckPatternFactory {
   static name = 'Anthophora Neck';
 
   constructor() {
