@@ -2,7 +2,7 @@ function positionFromTouch(touch) {
   return {x: touch.clientX, y: touch.clientY};
 }
 
-class SwipeHandler {
+export class SwipeHandler {
   constructor(onLeft, onRight) {
     this.onLeft = onLeft;
     this.onRight = onRight;
@@ -22,7 +22,6 @@ class SwipeHandler {
   }
 
   touchMove(event) {
-    console.log(this.onLeft);
     if (this.start == null) return;
     const release = positionFromTouch(event.touches[0]);
 

@@ -1,3 +1,5 @@
+import {SwipeHandler} from './swipe.js';
+
 const objectIds = createConstants(
     'configureButton', 'factoryWarnings', 'knitButton', 'buttonNext',
     'buttonPrev');
