@@ -33,8 +33,13 @@ class KnitState {
     const knitState = this;
     this.inputs = parseHash();
     this.patternFactories = [
-      new ScarfPatternFactory(3), new CablePatternFactory(),
-      new CapeletPatternFactory()
+      new ScarfPatternFactory(3),
+      new CablePatternFactory(),
+      new CapeletPatternFactory(),
+      new ScarfPatternFactory(3),
+      new CablePatternFactory(),
+      new CapeletPatternFactory(),
+      new AnthophoraNeckPatternFactory(),
     ];
 
     const factoryNames = Array.from(new Set(this.patternFactories.map(
