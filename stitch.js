@@ -34,6 +34,9 @@ const SlipSlipKnit = new Stitch(2, 1, 'SSK', '#e6f5c9', 'SlipSlipKnit');
 const WithYarnInFront = new Stitch(0, 0, 'WYF', '#f4cae4', 'WithYarnInFront');
 const WithYarnInBack = new Stitch(0, 0, 'WYB', '#f4cae4', 'WithYarnInBack');
 
+const M1L = new Stitch(0, 1, 'M1L', '#000', 'M1L');
+const M1R = new Stitch(0, 1, 'M1R', '#000', 'M1R');
+
 // Cable stitches
 // Order: slip count, [front, back], stitch count, [knit, purl]
 const CableOneBackKnitTwo = new Stitch(
