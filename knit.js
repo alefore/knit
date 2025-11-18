@@ -1,6 +1,6 @@
-import {AnthophoraNeckPatternFactory} from './anthophora_neck_pattern_factory.js';
 import {CablePatternFactory} from './cable_pattern_factory.js';
 import {CapeletPatternFactory} from './capelet_pattern_factory.js';
+import {CylinderPatternFactory} from './cylinder_pattern_factory.js';
 import {ScarfPatternFactory} from './scarf_pattern_factory.js';
 import {SwipeHandler} from './swipe.js';
 
@@ -40,6 +40,7 @@ class KnitState {
       new ScarfPatternFactory(3),
       new CablePatternFactory(),
       new CapeletPatternFactory(),
+      new CylinderPatternFactory,
     ];
 
     const factoryNames = Array.from(new Set(this.patternFactories.map(
