@@ -37,7 +37,7 @@ export class CylinderPatternFactory {
         'stitches');
     this.frontTextureInput = new PatternFactoryInput(
         'Front Texture', 'What type of pattern to use at the front?',
-        'RibMistake', null, [
+        textures.Honeycomb, null, [
           textures.Stockinette, textures.Rib2x2, textures.RibMistake,
           textures.Honeycomb
         ]);
@@ -62,22 +62,32 @@ export class CylinderPatternFactory {
     if (width > 0) stitches.push(new StitchSequence([Knit], width));
   }
 
-  #addSection(
-      widthTop, widthBottom, stitchesFactory, rowIndex, currentWidth,
-      stitches) {
-    const rowRatio = rowIndex / (this.lengthInput.numberValue() - 1);
-    const desiredWidth = (1 - rowRatio) * widthTop + rowRatio * widthBottom;
-    if (desiredWidth < currentWidth + 2) {
-      stitches.push(...stitchesFactory(rowIndex, currentWidth));
-      return currentWidth;
-    }
-    stitches.push(M1R);
-    stitches.push(...stitchesFactory(rowIndex, currentWidth));
-    stitches.push(M1L);
-    return currentWidth + 2;
+  #getRowWidth(widthTop, widthBottom, index, total) {
+    const rowRatio = index / (total - 1);
+    const desiredWidth =
+        Math.floor((1 - rowRatio) * widthTop + rowRatio * widthBottom);
+    const desiredGrowth = desiredWidth - widthTop;
+    return widthTop + (2 * Math.floor(desiredGrowth / 2));
   }
 
-  #frontStitches(texture, index, width) {
+  #addSection(widthTop, widthBottom, stitchesFactory, rowIndex, stitches) {
+    const previousWidth = rowIndex === 0 ?
+        widthTop :
+        this.#getRowWidth(
+            widthTop, widthBottom, rowIndex - 1,
+            this.lengthInput.numberValue());
+    const desiredWidth = this.#getRowWidth(
+        widthTop, widthBottom, rowIndex, this.lengthInput.numberValue());
+    if (desiredWidth < previousWidth + 2) {
+      stitches.push(...stitchesFactory(rowIndex, previousWidth));
+    } else {
+      stitches.push(M1R);
+      stitches.push(...stitchesFactory(rowIndex, previousWidth));
+      stitches.push(M1L);
+    }
+  }
+
+  #getStitches(texture, index, width) {
     if (texture === textures.Stockinette)
       return [new StitchSequence([Knit], width)];
     else if (texture === textures.Rib2x2) {
@@ -93,43 +103,40 @@ export class CylinderPatternFactory {
             `Width must be a multiple of 4 for texture ${texture}.`);
       const sequence =
           [new StitchSequence([Knit], 2), new StitchSequence([Purl], 2)];
-      var st;
       if (index % 2 == 0) return listRepeating(sequence, width / 2);
       return [Knit].concat(listRepeating(sequence, width / 2).slice(1)).concat([
         Knit
       ]);
     } else if (texture === textures.Honeycomb) {
-      return honeycomb(index, width)
+      const topWidth = this.topFrontWidthInput.value();
+      const honeycombWidth = Math.floor((topWidth - 6) / 8) * 8 + 6;
+      const sideWidth = (width - honeycombWidth) / 2;
+      const side = sideWidth > 0 ? [new StitchSequence([Knit], sideWidth)] : [];
+      return side.concat(honeycomb(index, honeycombWidth)).concat(side);
     } else {
       throw new Error(`Invalid texture: ${texture}`);
     }
   }
 
-  #backStitches(index, width) {
-    return [new StitchSequence([Knit], width)];
-  }
-
   build() {
     const output = new Pattern().setRound();
 
-    let frontWidth = this.topFrontWidthInput.numberValue();
-    let backWidth = this.topBackWidthInput.numberValue();
-    const ratioFront = frontWidth / (frontWidth + backWidth);
     for (let i = 0; i < this.lengthInput.numberValue(); i++) {
       let stitches = [];
 
       this.#addSeparator(stitches);
-      frontWidth = this.#addSection(
+      this.#addSection(
           this.topFrontWidthInput.numberValue(),
           this.bottomFrontWidthInput.numberValue(), (index, width) => {
-            return this.#frontStitches(
+            return this.#getStitches(
                 this.frontTextureInput.value(), index, width);
-          }, i, frontWidth, stitches);
+          }, i, stitches);
       this.#addSeparator(stitches);
-      backWidth = this.#addSection(
+      this.#addSection(
           this.topBackWidthInput.numberValue(),
-          this.bottomBackWidthInput.numberValue(), this.#backStitches, i,
-          backWidth, stitches);
+          this.bottomBackWidthInput.numberValue(), (index, width) => {
+            return this.#getStitches(textures.Stockinette, index, width);
+          }, i, stitches);
 
       output.addRow(new Row(stitches));
     }
