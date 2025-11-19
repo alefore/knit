@@ -109,7 +109,7 @@ export class CylinderPatternFactory {
       ]);
     } else if (texture === textures.Honeycomb) {
       const topWidth = this.topFrontWidthInput.value();
-      const honeycombWidth = Math.floor((topWidth - 6) / 8) * 8 + 6;
+      const honeycombWidth = Math.floor(topWidth / 8) * 8;
       const sideWidth = (width - honeycombWidth) / 2;
       const side = sideWidth > 0 ? [new StitchSequence([Knit], sideWidth)] : [];
       return side.concat(honeycomb(index, honeycombWidth)).concat(side);
