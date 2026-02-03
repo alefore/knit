@@ -8,6 +8,9 @@ class PatternFactoryInput {
     this.selectValues = selectValues;
     this.listener = new EventListener();
     this.tr = null;
+    // Callbacks that return a boolean. All must return true in order for the
+    // input to be visible.
+    this.visibilityRequirements = [];
   }
 
   setValuesFromHash(parsedHash) {
@@ -65,14 +68,15 @@ class PatternFactoryInput {
     return this.name.replace(/[\s:]+/g, '');
   }
 
-  setVisible(eventListener, valueSupplier) {
-    const tr = this.tr;
-    eventListener.addListener(function() {
-      if (valueSupplier())
-        tr.show();
-      else
-        tr.hide();
-    });
+  addVisibilityRequirement(callback) {
+    this.visibilityRequirements.push(callback);
+  }
+
+  adjustVisibility() {
+    if (this.visibilityRequirements.every((fn) => fn()))
+      this.tr.show();
+    else
+      this.tr.hide();
   }
 }
 

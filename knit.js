@@ -49,6 +49,24 @@ class KnitState {
         'Pattern', 'Pattern', this.patternFactories[0].constructor.name, null,
         factoryNames);
 
+    this.patternFactoryInputs = [this.patternFactorySelector];
+    this.patternFactories.forEach((factory) => {
+      const newInputs = factory.getInputs();
+      console.log(newInputs);
+      newInputs.forEach(
+          (input) => input.addVisibilityRequirement(
+              () => this.patternFactorySelector.value() ===
+                  Object.getPrototypeOf(factory).constructor.name));
+      this.patternFactoryInputs.push(...newInputs);
+    });
+    this.patternFactorySelector.listener.addListener(() => {
+      this.patternFactoryInputs.forEach((input) => input.adjustVisibility());
+    });
+
+    this.patternFactoryInputs.forEach(
+        (input) => input.listener.addListener(
+            () => knitState.#configurationInputChanged()));
+
     this.currentRow = Number(this.inputs[urlParams.row] ?? 0);
     this.configuringStateChange = new EventListener();
     this.stateChange = new EventListener();
@@ -118,17 +136,7 @@ class KnitState {
           style: knitState.currentRow === 0 ? 'display:none' : 'display:inline'
         }));
 
-    drawInputs(this.#allFactoryInputs(), knitState.inputs);
-    this.patternFactories.forEach(function(factory) {
-      factory.getInputs().forEach(
-          input => input.setVisible(
-              knitState.patternFactorySelector.listener,
-              () => knitState.patternFactorySelector.value() ===
-                  Object.getPrototypeOf(factory).constructor.name))
-    });
-    knitState.#allFactoryInputs().forEach(
-        (input) => input.listener.addListener(
-            () => knitState.#configurationInputChanged()));
+    drawInputs(this.patternFactoryInputs, knitState.inputs);
     knitState.patternFactorySelector.listener.notify();
     knitState.configuringStateChange.notify();
     knitState.#configurationInputChanged();
@@ -142,15 +150,6 @@ class KnitState {
     const output = this.patternFactories.find(
         i => Object.getPrototypeOf(i).constructor.name === value);
     if (!output) throw new Error('Didn\'t find pattern: ' + value);
-    return output;
-  }
-
-  #allFactoryInputs() {
-    const knitState = this;
-    const output = [this.patternFactorySelector];
-    this.patternFactories.forEach(function(factory) {
-      output.push(...factory.getInputs());
-    });
     return output;
   }
 
@@ -179,7 +178,7 @@ class KnitState {
   }
 
   #updateLocationHash() {
-    let fragments = this.#allFactoryInputs().map(
+    let fragments = this.patternFactoryInputs.map(
         i => i.hasDefaultValue() ? '' : `${i.nameCamelCase()}=${i.value()}`);
     if (this.currentRow != 0)
       fragments.push(`${urlParams.row}=${this.currentRow}`);
