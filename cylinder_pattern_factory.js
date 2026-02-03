@@ -9,94 +9,75 @@ function listRepeating(input, desiredLen) {
       {length: desiredLen}, (_, index) => input[index % input.length]);
 }
 
-export class CylinderPatternFactory {
-  static name = 'Cylinder';
-
-  constructor() {
-    this.lengthInput = new PatternFactoryInput(
-        'Length', 'How long should the cylinder be?', 30, 'rows');
-    this.separatorWidthInput = new PatternFactoryInput(
-        'Separator Width',
-        'How wide should the separator (between front and back parts) be?', 2,
+class Section {
+  constructor(sectionId, sectionCountInput) {
+    this.widthTop = new PatternFactoryInput(
+        `${sectionId}: Top Width`,
+        `How wide should section ${sectionId} be at the top?`, 3, 'stitches');
+    this.widthBottom = new PatternFactoryInput(
+        `${sectionId}: Bottom Width`,
+        `How wide should section ${sectionId} be at the bottom?`, 30,
         'stitches');
-    this.topFrontWidthInput = new PatternFactoryInput(
-        'Top Front Width',
-        'How wide should the pattern be at the top in the front?', 20,
-        'stitches');
-    this.topBackWidthInput = new PatternFactoryInput(
-        'Top Back Width',
-        'How wide should the pattern be at the top in the back?', 20,
-        'stitches');
-    this.bottomFrontWidthInput = new PatternFactoryInput(
-        'Bottom Front Width',
-        'How wide should the pattern be at the bottom in the front?', 20,
-        'stitches');
-    this.bottomBackWidthInput = new PatternFactoryInput(
-        'Bottom Back Width',
-        'How wide should the pattern be at the bottom in the back?', 20,
-        'stitches');
-    this.frontTextureInput = new PatternFactoryInput(
-        'Front Texture', 'What type of pattern to use at the front?',
-        textures.Honeycomb, null, [
+    this.texture = new PatternFactoryInput(
+        `${sectionId}: Texture`,
+        `What type of pattern should section ${sectionId} use?`,
+        textures.Stockinette, null, [
           textures.Stockinette, textures.Rib2x2, textures.RibMistake,
           textures.Honeycomb
         ]);
+    this.inputs = [this.widthTop, this.widthBottom, this.texture];
+    this.inputs.forEach(
+        (i) => i.addVisibilityRequirement(
+            () => sectionCountInput.numberValue() > sectionId));
+    sectionCountInput.listener.addListener(
+        () => this.inputs.forEach((i) => i.adjustVisibility()));
   }
 
   getInputs() {
-    return [
-      this.lengthInput,
-      this.separatorWidthInput,
-      this.topFrontWidthInput,
-      this.topBackWidthInput,
-      this.bottomFrontWidthInput,
-      this.bottomBackWidthInput,
-      this.frontTextureInput,
-    ];
+    return this.inputs;
   }
 
-  #addSeparator(stitches) {
-    const width = this.separatorWidthInput.numberValue();
-    if (width < 0)
-      throw new Error('Invalid separator width (must be greater than 0).');
-    if (width > 0) stitches.push(new StitchSequence([Knit], width));
+  getStitches(rowIndex, rowLength) {
+    const widthTop = this.widthTop.numberValue();
+    const widthBottom = this.widthBottom.numberValue();
+    const previousWidth =
+        rowIndex === 0 ? widthTop : this.#getRowWidth(rowIndex - 1, rowLength);
+    const desiredWidth = this.#getRowWidth(rowIndex, rowLength);
+    const output =
+        this.#applyTexture(this.texture.value(), rowIndex, previousWidth);
+    if (desiredWidth >= previousWidth + 2) return [M1R, ...output, M1L];
+    return output;
   }
 
-  #getRowWidth(widthTop, widthBottom, index, total) {
+  #getRowWidth(index, total) {
+    const widthTop = this.widthTop.numberValue();
+    const widthBottom = this.widthBottom.numberValue();
     const rowRatio = index / (total - 1);
     const desiredWidth =
-        Math.floor((1 - rowRatio) * widthTop + rowRatio * widthBottom);
+        Math.round((1 - rowRatio) * widthTop + rowRatio * widthBottom);
+    // Total since the top.
     const desiredGrowth = desiredWidth - widthTop;
+    // We can only grow by multiples of 2, so round it.
     return widthTop + (2 * Math.floor(desiredGrowth / 2));
   }
 
-  #addSection(widthTop, widthBottom, stitchesFactory, rowIndex, stitches) {
-    const previousWidth = rowIndex === 0 ?
-        widthTop :
-        this.#getRowWidth(
-            widthTop, widthBottom, rowIndex - 1,
-            this.lengthInput.numberValue());
-    const desiredWidth = this.#getRowWidth(
-        widthTop, widthBottom, rowIndex, this.lengthInput.numberValue());
-    if (desiredWidth < previousWidth + 2) {
-      stitches.push(...stitchesFactory(rowIndex, previousWidth));
-    } else {
-      stitches.push(M1R);
-      stitches.push(...stitchesFactory(rowIndex, previousWidth));
-      stitches.push(M1L);
-    }
+  #getStitchesRib2x2(width) {
+    const widthTop = this.widthTop.numberValue();
+    const gap = (width - widthTop) / 2;
+    const center = listRepeating([Knit, Knit, Purl, Purl], widthTop + gap);
+    const start = listRepeating([Purl, Purl, Knit, Knit], gap).toReversed()
+    const output = [...start, ...center];
+    if (output.length != width)
+      throw new Error(
+          `"Internal error: unexpected length ${output.length} vs ${width}`);
+    return output;
   }
 
-  #getStitches(texture, index, width) {
+  #applyTexture(texture, index, width) {
     if (texture === textures.Stockinette)
       return [new StitchSequence([Knit], width)];
     else if (texture === textures.Rib2x2) {
-      if (this.separatorWidthInput.numberValue() === 0 && width % 4 != 0)
-        throw new Error(
-            `Width must be a multiple of 4 for texture ${texture}.`);
-      return listRepeating(
-          [new StitchSequence([Knit], 2), new StitchSequence([Purl], 2)],
-          width / 2);
+      return this.#getStitchesRib2x2(width);
     } else if (texture === textures.RibMistake) {
       if (this.separatorWidthInput.numberValue() === 0 && width % 4 != 0)
         throw new Error(
@@ -108,8 +89,8 @@ export class CylinderPatternFactory {
         Knit
       ]);
     } else if (texture === textures.Honeycomb) {
-      const topWidth = this.topFrontWidthInput.value();
-      const honeycombWidth = Math.floor(topWidth / 8) * 8;
+      const widthTop = this.widthTop.value();
+      const honeycombWidth = Math.floor(widthTop / 8) * 8;
       const sideWidth = (width - honeycombWidth) / 2;
       const side = sideWidth > 0 ? [new StitchSequence([Knit], sideWidth)] : [];
       return side.concat(honeycomb(index, honeycombWidth)).concat(side);
@@ -117,30 +98,52 @@ export class CylinderPatternFactory {
       throw new Error(`Invalid texture: ${texture}`);
     }
   }
+}
+
+export class CylinderPatternFactory {
+  static name = 'Cylinder';
+
+  constructor() {
+    this.lengthInput = new PatternFactoryInput(
+        'Length', 'How long should the cylinder be?', 30, 'rows');
+    this.separatorWidthInput = new PatternFactoryInput(
+        'Separator Width',
+        'How wide should the separator (between front and back parts) be?', 2,
+        'stitches');
+    this.sectionCountInput = new PatternFactoryInput(
+        'Sections', 'How many sections should the polygon have?', 4,
+        'sections');
+    this.sections = Array.from(
+        {length: 10}, (_, index) => new Section(index, this.sectionCountInput));
+  }
+
+  getInputs() {
+    return [
+      this.lengthInput, this.separatorWidthInput, this.sectionCountInput,
+      ...this.sections.flatMap((s) => s.getInputs())
+    ];
+  }
+
+  #addSeparator(stitches) {
+    const width = this.separatorWidthInput.numberValue();
+    if (width <= 0)
+      throw new Error('Invalid separator width (must be greater than 0).');
+    stitches.push(new StitchSequence([Knit], width));
+  }
 
   build() {
     const output = new Pattern().setRound();
-
-    for (let i = 0; i < this.lengthInput.numberValue(); i++) {
+    for (let rowIndex = 0; rowIndex < this.lengthInput.numberValue();
+         rowIndex++) {
       let stitches = [];
-
-      this.#addSeparator(stitches);
-      this.#addSection(
-          this.topFrontWidthInput.numberValue(),
-          this.bottomFrontWidthInput.numberValue(), (index, width) => {
-            return this.#getStitches(
-                this.frontTextureInput.value(), index, width);
-          }, i, stitches);
-      this.#addSeparator(stitches);
-      this.#addSection(
-          this.topBackWidthInput.numberValue(),
-          this.bottomBackWidthInput.numberValue(), (index, width) => {
-            return this.#getStitches(textures.Stockinette, index, width);
-          }, i, stitches);
-
+      for (let section = 0; section < this.sectionCountInput.numberValue();
+           section++) {
+        this.#addSeparator(stitches);
+        stitches.push(...this.sections[section].getStitches(
+            rowIndex, this.lengthInput.numberValue()));
+      }
       output.addRow(new Row(stitches));
     }
-
     return output;
   }
 }
