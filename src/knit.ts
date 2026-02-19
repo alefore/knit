@@ -120,8 +120,8 @@ class KnitState {
     this.configuringStateChange.notify();
     this.configurationInputChanged();
     this.stateChange.notify();
-    this.selectRow(this.currentRow);
     this.renderPattern();
+    this.selectRow(this.currentRow);
   }
 
   private setupUI(): void {
@@ -219,7 +219,18 @@ class KnitState {
       $('#knitCanvas').empty();
     }
 
-    this.renderPattern();
+    const container = $('#patternContainer');
+    container.children().removeClass('highlight');
+    const rowData = this.pattern!.rows[this.currentRow];
+    if (rowData)
+      rowData.visit();
+    const selectedRow = container.children().eq(this.currentRow);
+    if (selectedRow.length) {
+      selectedRow.addClass('highlight');
+      const rowTop = selectedRow.position().top + (container.scrollTop() ?? 0);
+      const paddingTop = Math.max(0, (container.innerHeight() ?? 0) - (selectedRow.outerHeight() ?? 0)) / 3;
+      container.scrollTop(Math.max(0, rowTop - paddingTop));
+    }
 
     if (isNewRow) {
       this.configuring = false;
@@ -233,23 +244,14 @@ class KnitState {
     container.empty();
 
     if (this.pattern === null) return;
-    let selectedRow: any = null;
-
     this.pattern.forEachRow((rowData: any, index: number) => {
-      const divNormal = rowData.createDiv(index, index === this.currentRow, this.pattern);
-      if (index === this.currentRow) {
-        selectedRow = divNormal;
-      }
+      const divNormal = rowData.createDiv(index, this.pattern);
       container.append(divNormal);
       divNormal.click(() => this.selectRow(index));
     });
+  }
 
-    if (selectedRow === null) selectedRow = container.children().first();
-    if (!selectedRow.length) return;
-
-    const rowTop = selectedRow.position().top + container.scrollTop();
-    const paddingTop = Math.max(0, (container.innerHeight() ?? 0) - (selectedRow.outerHeight() ?? 0)) / 3;
-    container.scrollTop(Math.max(0, rowTop - paddingTop));
+  private scrollToRow(selectedRow: JQuery<HTMLElement>): void {
   }
 
   public addRow(delta: number): void {

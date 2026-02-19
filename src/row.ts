@@ -48,6 +48,7 @@ function optimizeStitches(input: Stitch[]): StitchSequence[] {
 export class Row {
   public stitches: StitchSequence[];
   public firstVisit: Date | null;
+  private rowDiv: JQuery<HTMLElement>;
 
   constructor(stitches: StitchSequence[] = []) {
     const flatStitches : Stitch[] = [];
@@ -88,10 +89,10 @@ export class Row {
   /**
    * Creates the visual representation of the row.
    */
-  createDiv(index: number, showDetails: boolean, pattern: IPattern): JQuery<HTMLElement> {
+  createDiv(index: number, pattern: IPattern): JQuery<HTMLElement> {
     const stitchDelta = this.outputStitches - this.inputStitches;
 
-    const rowDiv = $(htmlTags.div, { class: showDetails ? 'highlight row' : 'row' })
+    this.rowDiv = $(htmlTags.div, { class: 'row' })
       .append(
         $(htmlTags.p)
           .append(
@@ -109,28 +110,32 @@ export class Row {
           .append(...this.describeStitches())
       );
 
-    if (showDetails) {
-      if (this.firstVisit === null) {
-        this.firstVisit = new Date();
-      }
-
-      const previousStitches = pattern.rows.slice(0, index).reduce(
+    const previousStitches = pattern.rows.slice(0, index).reduce(
         (total, r) => total + r.outputStitches, 0);
-      const totalStitches = pattern.outputStitches;
+    const totalStitches = pattern.outputStitches;
 
-      rowDiv.append($(htmlTags.p, { class: 'details' })
-        .append(
-          Math.floor(100 * previousStitches / totalStitches) +
-          '% (' + previousStitches + ' of ' + totalStitches + ' st)'
-        )
-      );
+    this.rowDiv.append($(htmlTags.p, { class: 'details' })
+      .append(
+        Math.floor(100 * previousStitches / totalStitches) +
+        '% (' + previousStitches + ' of ' + totalStitches + ' st)'
+      )
+    );
 
-      rowDiv.append($(htmlTags.p, {
-        class: 'details'
-      }).append(createTimestampView(this.firstVisit)));
-    }
+    if (this.firstVisit !== null) this.showVisitTime();
 
-    return rowDiv;
+    return this.rowDiv;
+  }
+
+  visit() {
+    if (this.firstVisit !== null) return;
+    this.firstVisit = new Date();
+    if (this.rowDiv) this.showVisitTime();
+  }
+
+  private showVisitTime() {
+    this.rowDiv.append($(htmlTags.p, {
+      class: 'details'
+    }).append(createTimestampView(this.firstVisit)));
   }
 
   /**
