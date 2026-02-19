@@ -2,7 +2,7 @@ import {CableLayout} from './cable_pattern_factory.js';
 import {PatternFactoryInput} from './inputs.js';
 import {Pattern} from './pattern.js';
 import {Row} from './row.js';
-import {Knit, KnitTwoTogether, Purl} from './stitch.js';
+import {Knit, KnitTwoTogether, Purl, SlipSlipKnit} from './stitch.js';
 import {StitchSequence} from './stitch_sequence.js';
 
 export class CapeletPatternFactory {

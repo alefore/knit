@@ -18,6 +18,7 @@
   },
   "homepage": "https://github.com/alefore/knit#readme",
   "devDependencies": {
+    "@types/jquery": "^3.5.33",
     "typescript": "^5.9.3"
   }
 }

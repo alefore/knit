@@ -7,8 +7,9 @@
     // Environment Settings
     // See also https://aka.ms/tsconfig/module
     "module": "ESNext",
-    "target": "ES2015",
-    "types": [],
+    "target": "ES2020",
+    "lib": ["DOM", "DOM.Iterable", "ESNext"],
+    "types": ["jquery"],
 
     "sourceMap": true,
     "declaration": true,
@@ -27,6 +28,8 @@
 
     "allowJs": true,
     "strict": false, // true,
+    "strictNullChecks": true,
+    "noImplicitAny": true,
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
     "jsx": "react-jsx",
