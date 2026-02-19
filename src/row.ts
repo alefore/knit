@@ -13,12 +13,46 @@ interface IPattern {
   outputStitches: number;
 }
 
+function optimizeStitches(input: Stitch[]): StitchSequence[] {
+  const n = input.length;
+  // The best list of StitchSequence for input[i...n]:
+  const bestFound = new Map<number, { sequence: StitchSequence[], cost: number}>();
+  function solve(start:number): { sequence: StitchSequence[], cost:number } {
+    if (start >= n) return {sequence:[], cost:0};
+    if (bestFound.has(start)) return bestFound.get(start)!;
+    let best = {sequence: [] as StitchSequence[], cost: Infinity };
+
+    // Cap the length of the nested sequences; when they become very long, they are harder to read.
+    const maxPatternLen = 8;
+    for (let len=1; start + len <= n && len <= maxPatternLen; len++) {
+      const pattern = input.slice(start, start + len);
+      // How many times `pattern` repeats:
+      for (let repetitions = 1; start + repetitions * len <= n; repetitions++) {
+        if (repetitions > 1) {
+          const nextBlock = input.slice(start + (repetitions - 1) * len, start + repetitions * len);
+          if (!nextBlock.every((s, i) => s === pattern[i])) break;
+        }
+        const remaining = solve(start + repetitions * len);
+        const currentCost = len + remaining.cost + (repetitions == 1 ? 0 : 0.99);
+        if (currentCost < best.cost)
+          best = { sequence: [new StitchSequence(pattern, repetitions), ...remaining.sequence],
+                   cost: currentCost };
+      }
+    }
+    bestFound.set(start, best);
+    return best;
+  }
+  return solve(0).sequence;
+}
+
 export class Row {
   public stitches: StitchSequence[];
   public firstVisit: Date | null;
 
   constructor(stitches: StitchSequence[] = []) {
-    this.stitches = stitches;
+    const flatStitches : Stitch[] = [];
+    stitches.forEach((sequence) => sequence.flatten(flatStitches));
+    this.stitches = optimizeStitches(flatStitches);
     this.firstVisit = null;
   }
 
