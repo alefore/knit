@@ -1,6 +1,9 @@
 import {CablePatternFactory} from './cable_pattern_factory.js';
 import {CapeletPatternFactory} from './capelet_pattern_factory.js';
+import {createConstants, cssDisplayValues, cssProps, htmlInputTypes, htmlProps, htmlTags, urlParams} from './constants.js';
 import {CylinderPatternFactory} from './cylinder_pattern_factory.js';
+import {drawInputs, parseHash, PatternFactoryInput} from './inputs.js';
+import {EventListener} from './listener.js';
 import {ScarfPatternFactory} from './scarf_pattern_factory.js';
 import {SwipeHandler} from './swipe.js';
 
@@ -44,10 +47,10 @@ class KnitState {
     ];
 
     const factoryNames = Array.from(new Set(this.patternFactories.map(
-        instance => Object.getPrototypeOf(instance).constructor.name)));
+        instance => Object.getPrototypeOf(instance).constructor.factoryName)));
     this.patternFactorySelector = new PatternFactoryInput(
-        'Pattern', 'Pattern', this.patternFactories[0].constructor.name, null,
-        factoryNames);
+        'Pattern', 'Pattern', this.patternFactories[0].constructor.factoryName,
+        null, factoryNames);
 
     this.patternFactoryInputs = [this.patternFactorySelector];
     this.patternFactories.forEach((factory) => {
@@ -56,7 +59,7 @@ class KnitState {
       newInputs.forEach(
           (input) => input.addVisibilityRequirement(
               () => this.patternFactorySelector.value() ===
-                  Object.getPrototypeOf(factory).constructor.name));
+                  Object.getPrototypeOf(factory).constructor.factoryName));
       this.patternFactoryInputs.push(...newInputs);
     });
     this.patternFactorySelector.listener.addListener(() => {
@@ -148,7 +151,7 @@ class KnitState {
   #currentPatternFactory() {
     const value = this.patternFactorySelector.value();
     const output = this.patternFactories.find(
-        i => Object.getPrototypeOf(i).constructor.name === value);
+        i => Object.getPrototypeOf(i).constructor.factoryName === value);
     if (!output) throw new Error('Didn\'t find pattern: ' + value);
     return output;
   }

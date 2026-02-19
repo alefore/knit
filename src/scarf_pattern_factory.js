@@ -1,5 +1,9 @@
+import {PatternFactoryInput} from './inputs.js';
+import {cubicBezierArray} from './math.js';
 import {Pattern} from './pattern.js';
 import {Row} from './row.js';
+import {Knit, KnitFrontBack, KnitTwoTogether, Purl} from './stitch.js';
+import {StitchSequence} from './stitch_sequence.js';
 
 export class ScarfPatternFactory {
   static cubicBezierFocalPoints = {
@@ -11,7 +15,7 @@ export class ScarfPatternFactory {
 
   static textures = {'Garter': garterRow, 'Double moss': doubleMossStitchRow};
 
-  static name = 'Sophie Scarf';
+  static factoryName = 'Sophie Scarf';
 
   constructor(borderStitches) {
     this.borderStitches = borderStitches;

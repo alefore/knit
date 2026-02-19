@@ -1,3 +1,6 @@
+import {htmlTags} from './constants.js';
+import {Knit, SlipStitchPurlwise, WithYarnInFront} from './stitch.js';
+import {StitchSequence} from './stitch_sequence.js';
 import {createTimestampView} from './timestamps.js';
 
 export class Row {

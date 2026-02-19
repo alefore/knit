@@ -1,3 +1,5 @@
+import {colorIds, createConstants} from './constants.js';
+
 export class Pattern {
   static rowSwitchStyles = createConstants('round', 'backAndForth');
 

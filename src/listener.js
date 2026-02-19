@@ -1,4 +1,4 @@
-class EventListener {
+export class EventListener {
   constructor() {
     this.listeners = [];
   }

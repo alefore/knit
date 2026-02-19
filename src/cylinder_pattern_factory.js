@@ -1,5 +1,9 @@
+import {createConstants} from './constants.js';
+import {PatternFactoryInput} from './inputs.js';
 import {Pattern} from './pattern.js';
 import {Row} from './row.js';
+import {CableTwoBackKnitTwo, CableTwoFrontKnitTwo, Knit, M1L, M1R, Purl} from './stitch.js';
+import {StitchSequence} from './stitch_sequence.js';
 
 const textures =
     createConstants('Stockinette', 'Rib2x2', 'RibMistake', 'Honeycomb');
@@ -101,7 +105,7 @@ class Section {
 }
 
 export class CylinderPatternFactory {
-  static name = 'Cylinder';
+  static factoryName = 'Cylinder';
 
   constructor() {
     this.lengthInput = new PatternFactoryInput(

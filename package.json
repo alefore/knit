@@ -1,0 +1,23 @@
+{
+  "name": "knit",
+  "version": "1.0.0",
+  "description": "Knit software",
+  "main": "knit.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/alefore/knit.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/alefore/knit/issues"
+  },
+  "homepage": "https://github.com/alefore/knit#readme",
+  "devDependencies": {
+    "typescript": "^5.9.3"
+  }
+}

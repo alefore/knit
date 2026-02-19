@@ -1,4 +1,7 @@
-class PatternFactoryInput {
+import {eventIds, htmlTags} from './constants.js';
+import {EventListener} from './listener.js';
+
+export class PatternFactoryInput {
   constructor(name, tooltip, defaultValue, units, selectValues) {
     this.name = name;
     this.tooltip = tooltip;
@@ -80,7 +83,7 @@ class PatternFactoryInput {
   }
 }
 
-function drawInputs(inputs, parsedHash) {
+export function drawInputs(inputs, parsedHash) {
   const table = $(htmlTags.table).appendTo('#inputs form');
   inputs.forEach(function(input) {
     input.setValuesFromHash(parsedHash == null ? {} : parsedHash);
@@ -88,7 +91,7 @@ function drawInputs(inputs, parsedHash) {
   });
 }
 
-function parseHash() {
+export function parseHash() {
   const hash = window.location.hash.substring(1);  // Remove the '#' character
   const params = {};
   hash.split('&').forEach(part => {

@@ -33,7 +33,7 @@ function fillCubicBezierArray(array, i, n, ti, tn, p0, p1, p2, p3) {
   }
 }
 
-function cubicBezierArray(n, p0, p1, p2, p3) {
+export function cubicBezierArray(n, p0, p1, p2, p3) {
   const output = Array(n).fill(null);
   fillCubicBezierArray(output, 0, n, 0, 1, p0, p1, p2, p3);
   return output;

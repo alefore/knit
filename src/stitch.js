@@ -1,3 +1,5 @@
+import {htmlTags} from './constants.js';
+
 class Stitch {
   constructor(inputStitches, outputStitches, representation, color, tooltip) {
     if (isNaN(inputStitches)) throw Error('Nan outputs');
@@ -24,37 +26,41 @@ class Stitch {
   }
 }
 
-const Knit = new Stitch(1, 1, 'K', '#b3e2cd', 'Knit');
-const Purl = new Stitch(1, 1, 'P', '#fdcdac', 'Purl');
-const KnitFrontBack = new Stitch(1, 2, 'KFB', '#cbd5e8', 'KnitFrontBack');
-const SlipStitchPurlwise =
+export const Knit = new Stitch(1, 1, 'K', '#b3e2cd', 'Knit');
+export const Purl = new Stitch(1, 1, 'P', '#fdcdac', 'Purl');
+export const KnitFrontBack =
+    new Stitch(1, 2, 'KFB', '#cbd5e8', 'KnitFrontBack');
+export const SlipStitchPurlwise =
     new Stitch(1, 1, 'SLP', '#f4cae4', 'SpliStitchPurlwise');
-const KnitTwoTogether = new Stitch(2, 1, 'K2Tog', '#e6f5c9', 'KnitTwoTogether');
-const SlipSlipKnit = new Stitch(2, 1, 'SSK', '#e6f5c9', 'SlipSlipKnit');
-const WithYarnInFront = new Stitch(0, 0, 'WYF', '#f4cae4', 'WithYarnInFront');
-const WithYarnInBack = new Stitch(0, 0, 'WYB', '#f4cae4', 'WithYarnInBack');
+export const KnitTwoTogether =
+    new Stitch(2, 1, 'K2Tog', '#e6f5c9', 'KnitTwoTogether');
+export const SlipSlipKnit = new Stitch(2, 1, 'SSK', '#e6f5c9', 'SlipSlipKnit');
+export const WithYarnInFront =
+    new Stitch(0, 0, 'WYF', '#f4cae4', 'WithYarnInFront');
+export const WithYarnInBack =
+    new Stitch(0, 0, 'WYB', '#f4cae4', 'WithYarnInBack');
 
-const M1L = new Stitch(0, 1, 'M1L', '#000', 'M1L');
-const M1R = new Stitch(0, 1, 'M1R', '#000', 'M1R');
+export const M1L = new Stitch(0, 1, 'M1L', '#000', 'M1L');
+export const M1R = new Stitch(0, 1, 'M1R', '#000', 'M1R');
 
 // Cable stitches
 // Order: slip count, [front, back], stitch count, [knit, purl]
-const CableOneBackKnitTwo = new Stitch(
+export const CableOneBackKnitTwo = new Stitch(
     2, 2, 'CBK2', '#f4cae4',
     'Slip 1 onto cable, hold in back, knit 2, return from cable to left needle');
-const CableTwoFrontPurlOne = new Stitch(
+export const CableTwoFrontPurlOne = new Stitch(
     1, 1, 'C2FP', '#f4cae4',
     'Slip 2 onto cable, hold in front, purl 1, return from cable to left needle');
-const CableTwoFrontKnitTwo = new Stitch(
+export const CableTwoFrontKnitTwo = new Stitch(
     2, 2, 'C2FK2', '#f4cae4',
     'Slip 2 onto cable, hold in front, knit 2, return from cable to left needle');
-const CableTwoFrontPurlTwo = new Stitch(
+export const CableTwoFrontPurlTwo = new Stitch(
     2, 2, 'C2FP2', '#f4cae4',
     'Slip 2 onto cable, hold in front, purl 2, return from cable to left needle');
-const CableTwoBackKnitTwo = new Stitch(
+export const CableTwoBackKnitTwo = new Stitch(
     2, 2, 'C2BK2', '#f4cae4',
     'Slip 2 onto cable, hold in back, knit 2, return from cable to left needle');
 
 // Other stitches
-const StitchEcho =
+export const StitchEcho =
     new Stitch(1, 1, 'R', '#b3e2cd', 'Knit the knits and purl the purls');

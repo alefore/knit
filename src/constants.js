@@ -1,4 +1,4 @@
-function createConstants(...keys) {
+export function createConstants(...keys) {
   const constants = keys.reduce((obj, key) => {
     obj[key] = key;
     return obj;
@@ -24,19 +24,19 @@ function constantsMap(entries = {}) {
   });
 }
 
-const eventIds = createConstants('input');
+export const eventIds = createConstants('input');
 
-const colorIds = createConstants('black', 'cyan', 'white');
+export const colorIds = createConstants('black', 'cyan', 'white');
 
-const htmlTags = constantsMap([
+export const htmlTags = constantsMap([
   'div', 'form', 'input', 'p', 'span', 'td', 'tr', 'table', 'select', 'option'
 ].reduce(function(obj, tag) {
   obj[tag] = `<${tag}>`;
   return obj;
 }, {}));
 
-const htmlProps = createConstants('disabled');
-const htmlInputTypes = createConstants('submit');
-const cssProps = createConstants('display');
-const cssDisplayValues = createConstants('inline', 'none');
-const urlParams = createConstants('row');
+export const htmlProps = createConstants('disabled');
+export const htmlInputTypes = createConstants('submit');
+export const cssProps = createConstants('display');
+export const cssDisplayValues = createConstants('inline', 'none');
+export const urlParams = createConstants('row');

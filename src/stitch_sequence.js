@@ -1,4 +1,6 @@
-class StitchSequence {
+import {htmlTags} from './constants.js';
+
+export class StitchSequence {
   constructor(sequence, repetitions) {
     this.sequence = sequence;
     this.repetitions = repetitions;
@@ -6,7 +8,7 @@ class StitchSequence {
   }
 
   html() {
-    if (this.repetitions == 0 || this.sequence === []) return '';
+    if (this.repetitions == 0) return '';
     const output = $(htmlTags.span, {class: 'stitchSequence'});
     const needParens = this.repetitions != 1 && this.sequence.length > 1;
     if (this.repetitions != 1 && needParens) output.append(this.repetitions);
