@@ -281,7 +281,7 @@ export class CableLayout {
 }
 
 export class CablePatternFactory {
-  static factoryName = 'Cables';
+  factoryName = 'Cables';
 
   constructor() {
     this.cableLengthInput = new PatternFactoryInput(

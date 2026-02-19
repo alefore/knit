@@ -15,7 +15,7 @@ export class ScarfPatternFactory {
 
   static textures = {'Garter': garterRow, 'Double moss': doubleMossStitchRow};
 
-  static factoryName = 'Sophie Scarf';
+  factoryName = 'Sophie Scarf';
 
   constructor(borderStitches) {
     this.borderStitches = borderStitches;

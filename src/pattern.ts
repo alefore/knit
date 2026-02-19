@@ -11,8 +11,8 @@ const RowSwitchStyles = createConstants('round', 'backAndForth') as {
 export class Pattern {
   public static readonly rowSwitchStyles = RowSwitchStyles;
 
-  private rows: Row[];
-  private rowSwitchStyle: string;
+  public rows: Row[];
+  public rowSwitchStyle: string;
 
   constructor() {
     this.rows = [];

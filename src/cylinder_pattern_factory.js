@@ -105,7 +105,7 @@ class Section {
 }
 
 export class CylinderPatternFactory {
-  static factoryName = 'Cylinder';
+  factoryName = 'Cylinder';
 
   constructor() {
     this.lengthInput = new PatternFactoryInput(

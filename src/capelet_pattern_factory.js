@@ -6,7 +6,7 @@ import {Knit, KnitTwoTogether, Purl, SlipSlipKnit} from './stitch.js';
 import {StitchSequence} from './stitch_sequence.js';
 
 export class CapeletPatternFactory {
-  static factoryName = 'Capelet';
+  factoryName = 'Capelet';
 
   constructor() {
     this.borderLengthInput = new PatternFactoryInput(
