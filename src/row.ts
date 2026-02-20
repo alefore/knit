@@ -135,7 +135,7 @@ export class Row {
   private showVisitTime() {
     this.rowDiv.append($(htmlTags.p, {
       class: 'details'
-    }).append(createTimestampView(this.firstVisit)));
+    }).append(createTimestampView(this.firstVisit!.getTime())));
   }
 
   /**

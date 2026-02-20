@@ -1,7 +1,9 @@
-export function createTimestampView(timestamp) {
+declare var $: JQueryStatic; // Declare jQuery
+
+export function createTimestampView(timestamp: number): JQuery<HTMLElement> {
   const $element = $('<span>').addClass('timestamp');
 
-  function formatTime(value, unit) {
+  function formatTime(value: number, unit: string): string {
     if (value === 1) {
       return `1 ${unit} ago`;
     }
@@ -11,8 +13,8 @@ export function createTimestampView(timestamp) {
   function updateText() {
     const nowMs = new Date().getTime();
     const diffSeconds = Math.floor((nowMs - timestamp) / 1000);
-    let text;
-    let nextUpdateInMs;
+    let text: string;
+    let nextUpdateInMs: number;
 
     if (diffSeconds < 5) {
       text = 'now';
@@ -46,7 +48,8 @@ export function createTimestampView(timestamp) {
     if (nextUpdateInMs !== -1) {
       setTimeout(() => {
         // Only update if the element is still in the DOM.
-        if ($.contains(document.documentElement, $element[0])) {
+        // Ensure $element[0] is an HTMLElement
+        if ($element[0] && $.contains(document.documentElement, $element[0])) {
           updateText();
         }
       }, nextUpdateInMs);
