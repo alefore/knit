@@ -2,22 +2,44 @@ import {PatternFactoryInput} from './inputs.js';
 import {cubicBezierArray} from './math.js';
 import {Pattern} from './pattern.js';
 import {Row} from './row.js';
-import {Knit, KnitFrontBack, KnitTwoTogether, Purl} from './stitch.js';
+import {Knit, KnitFrontBack, KnitTwoTogether, Purl, Stitch} from './stitch.js';
 import {StitchSequence} from './stitch_sequence.js';
 
+interface Point {
+  x: number;
+  y: number;
+}
+
+type CubicBezierFocalPoints = {
+  [key: string]: [Point, Point];
+};
+
+type TextureFunction = (rowId: number, stitches: number) => Row;
+
+type Textures = {
+  [key: string]: TextureFunction;
+};
+
 export class ScarfPatternFactory {
-  static cubicBezierFocalPoints = {
+  static cubicBezierFocalPoints: CubicBezierFocalPoints = {
     Balanced: [{x: 0.6, y: 0.3}, {x: 0.4, y: 0.7}],
     Thin: [{x: 0.75, y: 0.3}, {x: 0.5, y: 0.7}],
     Thick: [{x: 0.5, y: 0.3}, {x: 0.25, y: 0.7}],
     Straight: [{x: 0.5, y: 0.5}, {x: 0.5, y: 0.5}],
   };
 
-  static textures = {'Garter': garterRow, 'Double moss': doubleMossStitchRow};
+  static textures: Textures = {'Garter': garterRow, 'Double moss': doubleMossStitchRow};
 
   factoryName = 'Sophie Scarf';
 
-  constructor(borderStitches) {
+  borderStitches: number;
+  rowsInput: PatternFactoryInput;
+  centerLengthInput: PatternFactoryInput;
+  centerWidthInput: PatternFactoryInput;
+  textureInput: PatternFactoryInput;
+  shapeInput: PatternFactoryInput;
+
+  constructor(borderStitches: number) {
     this.borderStitches = borderStitches;
     this.rowsInput = new PatternFactoryInput(
         'Total Length',
@@ -37,22 +59,22 @@ export class ScarfPatternFactory {
         25, 'stitches');
     this.textureInput = new PatternFactoryInput(
         'Texture', 'What type of texture do you want?',
-        Object.keys(ScarfPatternFactory.textures)[0], null,
+        Object.keys(ScarfPatternFactory.textures)[0] as string, null,
         Object.keys(ScarfPatternFactory.textures));
     this.shapeInput = new PatternFactoryInput(
         'Shape', 'What general shape would you like?',
-        Object.keys(ScarfPatternFactory.cubicBezierFocalPoints)[0], null,
+        Object.keys(ScarfPatternFactory.cubicBezierFocalPoints)[0] as string, null,
         Object.keys(ScarfPatternFactory.cubicBezierFocalPoints));
   }
 
-  getInputs() {
+  getInputs(): PatternFactoryInput[] {
     return [
       this.rowsInput, this.centerLengthInput, this.centerWidthInput,
       this.textureInput, this.shapeInput
     ];
   }
 
-  build() {
+  build(): Pattern {
     if (this.centerLengthInput.numberValue() > this.rowsInput.numberValue())
       throw new Error(`${this.centerLengthInput.name} (${
           this.centerLengthInput
@@ -61,73 +83,73 @@ export class ScarfPatternFactory {
 
     const stitchesPerRow = this.#computeStitchesPerRow();
     const output = new Pattern();
-    stitchesPerRow.forEach((value, index) => this.#addRow(output, value));
+    stitchesPerRow.forEach((value: number) => this.#addRow(output, value));
     for (let row = 0; row < this.centerLengthInput.numberValue(); row++)
       this.#addRow(output, this.centerWidthInput.numberValue());
     stitchesPerRow.reverse().forEach(
-        (value, index) => this.#addRow(output, value));
+        (value: number) => this.#addRow(output, value));
     return output;
   }
 
-  #computeStitchesPerRow() {
+  #computeStitchesPerRow(): number[] {
     const rowsPerSide = Math.floor(
         (this.rowsInput.numberValue() - this.centerLengthInput.numberValue()) /
         2);
     const coordinates =
-        ScarfPatternFactory.cubicBezierFocalPoints[this.shapeInput.value()];
+        ScarfPatternFactory.cubicBezierFocalPoints[this.shapeInput.value() as string];
     const p0 = {x: 0, y: 0};
     const p1 = {
-      x: coordinates[0].x * rowsPerSide,
-      y: coordinates[0].y * this.centerWidthInput.numberValue()
+      x: coordinates![0].x * rowsPerSide,
+      y: coordinates![0].y * this.centerWidthInput.numberValue()
     };
     const p2 = {
-      x: coordinates[1].x * rowsPerSide,
-      y: coordinates[1].y * this.centerWidthInput.numberValue()
+      x: coordinates![1].x * rowsPerSide,
+      y: coordinates![1].y * this.centerWidthInput.numberValue()
     };
     const p3 = {x: rowsPerSide, y: this.centerWidthInput.numberValue()};
     return cubicBezierArray(rowsPerSide, p0, p1, p2, p3);
   }
 
-  #addRow(pattern, desiredStitches) {
+  #addRow(pattern: Pattern, desiredStitches: number) {
     const totalBorderStitches = this.borderStitches * 2;
     const previousStitches = pattern.isEmpty() ?
         0 :
         pattern.lastRow().outputStitches - totalBorderStitches;
     const atEvenRow = pattern.rowsCount() % 2 == 0;
 
-    let growType = null;
+    let growType: Stitch | null = null;
     if (atEvenRow && previousStitches < desiredStitches)
       growType = KnitFrontBack;
     else if (atEvenRow && previousStitches > desiredStitches)
       growType = KnitTwoTogether;
     pattern.addRow(
         ScarfPatternFactory
-            .textures[this.textureInput.value()](
+            .textures[this.textureInput.value() as string]!(
                 pattern.rows.length,
                 previousStitches - (growType === KnitTwoTogether ? 1 : 0))
             .borderWrap(growType));
   }
 }
 
-function row2x2(rowId, stitches) {
+function row2x2(rowId: number, stitches: number): Row {
   const rightSide = rowId % 2 == 0;
   const rowBottomKnit = (rowId + 1) % 4 < 2;
   let head = [new StitchSequence(
       rightSide != rowBottomKnit ? [Knit, Knit, Purl, Purl] :
                                    [Purl, Purl, Knit, Knit],
       Math.floor(stitches / 4))];
-  let tail = [];
-  if (stitches % 4 >= 1) tail.push(rowBottomKnit ? Knit : Purl);
-  if (stitches % 4 >= 2) tail.push(rowBottomKnit ? Knit : Purl);
-  if (stitches % 4 == 3) tail.push(rowBottomKnit ? Purl : Knit);
+  let tail: StitchSequence[] = [];
+  if (stitches % 4 >= 1) tail.push(new StitchSequence([rowBottomKnit ? Knit : Purl], 1));
+  if (stitches % 4 >= 2) tail.push(new StitchSequence([rowBottomKnit ? Knit : Purl], 1));
+  if (stitches % 4 == 3) tail.push(new StitchSequence([rowBottomKnit ? Purl : Knit], 1));
   return new Row(
       !rightSide ? [...head, ...tail] : [...tail.reverse(), ...head]);
 }
 
-function doubleMossStitchRow(rowId, stitches) {
+function doubleMossStitchRow(rowId: number, stitches: number): Row {
   return row2x2(rowId, stitches);
 }
 
-function garterRow(rowId, stitches) {
+function garterRow(rowId: number, stitches: number): Row {
   return new Row([new StitchSequence([Knit], stitches)]);
 }
