@@ -3,7 +3,6 @@ import {PatternFactoryInput} from './inputs.js';
 import {Pattern} from './pattern.js';
 import {Row} from './row.js';
 import {Knit, KnitTwoTogether, Purl, SlipSlipKnit} from './stitch.js';
-import {StitchSequence} from './stitch_sequence.js';
 
 export class CapeletPatternFactory {
   factoryName: string = 'Capelet';
@@ -79,7 +78,7 @@ export class CapeletPatternFactory {
 
   #addBorder(width: number, outputPattern: Pattern): void {
     for (let row = 0; row < this.borderLengthInput.numberValue(); row++)
-      outputPattern.addRow(new Row([new StitchSequence([Purl], width)]));
+      outputPattern.addRow(new Row(Array(width).fill(Purl)));
   }
 
   #buildPart(pattern: Pattern, partName: string, startWidth: number, endWidth: number, length: number, cable: CableLayout | null): void {
@@ -112,7 +111,7 @@ export class CapeletPatternFactory {
         }
       else {
         this.#maybeAddCableRow(partName, currentHalfWidth, cableRow, rowOutput);
-        rowOutput.push(new StitchSequence([Knit], currentHalfWidth));
+        rowOutput.push(...Array(currentHalfWidth).fill(Knit));
       }
       pattern.addRow(new Row(rowOutput));
     }
@@ -124,15 +123,14 @@ export class CapeletPatternFactory {
           `${partName}: Invalid row output stitches (expected even): ${
               outputStitches}`);
     if (cableRow == null || cableRow.outputStitches > outputStitches) {
-      rowOutput.push(new StitchSequence([Knit], outputStitches));
+      rowOutput.push(...Array(outputStitches).fill(Knit));
       return;
     }
     if (cableRow.outputStitches % 2 == 1)
       throw new Error('Invalid cable row output size (expected even).');
-    const padding = new StitchSequence(
-        [Knit], (outputStitches - cableRow.outputStitches) / 2);
-    rowOutput.push(padding);
-    rowOutput.push(new StitchSequence(cableRow.flatten(), 1));
-    rowOutput.push(padding);
+    const padding = Array((outputStitches - cableRow.outputStitches) / 2).fill(Knit);
+    rowOutput.push(...padding);
+    rowOutput.push(...cableRow.flatten());
+    rowOutput.push(...padding);
   }
 }
