@@ -2,7 +2,6 @@ import {PatternFactoryInput} from './inputs.js';
 import {Pattern} from './pattern.js';
 import {Row} from './row.js';
 import {CableOneBackKnitTwo, CableTwoBackKnitTwo, CableTwoFrontPurlOne, CableTwoFrontPurlTwo, Knit, Purl, SlipStitchPurlwise, StitchEcho, WithYarnInFront, Stitch} from './stitch.js';
-import {StitchSequence} from './stitch_sequence.js';
 
 export class CableLayout {
   cables: number;
@@ -174,50 +173,50 @@ export class CableLayout {
       throw new Error('Row too large for cable!');
     const state = this.renderRowCables(row);
     const stateNext = this.renderRowCables(row + 1);
-    const rowOutput: StitchSequence[] = this.marginType == 'None' ? [] : [
-      new StitchSequence([Knit], this.marginType == 'Knit' ? 2 : 3),
-      new StitchSequence([Purl], this.marginDistance)
+    const rowOutput: Stitch[] = this.marginType == 'None' ? [] : [
+      ...Array(this.marginType == 'Knit' ? 2 : 3).fill(Knit),
+      ...Array(this.marginDistance).fill(Purl)
     ];
     let stitch = this.rowsWidth - 1;
     while (stitch >= 0) {
       if (state[stitch] === -1 && stateNext[stitch] === -1) {
-        rowOutput.push(new StitchSequence([Purl], 1));
+        rowOutput.push(Purl);
         stitch--;
       } else if (
           stitch > 0 && state[stitch] === stateNext[stitch] &&
           state[stitch - 1] === stateNext[stitch - 1]) {
-        rowOutput.push(new StitchSequence([Knit], 2));
+        rowOutput.push(Knit, Knit);
         stitch -= 2;
       } else if (
           stitch >= 2 && state[stitch] !== -1 && stateNext[stitch] === -1 &&
           state[stitch] === stateNext[stitch - 1]) {
-        rowOutput.push(new StitchSequence([CableTwoFrontPurlOne], 1));
-        rowOutput.push(new StitchSequence([Knit], 2));
+        rowOutput.push(CableTwoFrontPurlOne);
+        rowOutput.push(Knit, Knit);
         stitch -= 3;
       } else if (
           stitch >= 2 && state[stitch] === -1 && stateNext[stitch] !== -1 &&
           state[stitch - 1] === stateNext[stitch]) {
-        rowOutput.push(new StitchSequence([CableOneBackKnitTwo], 1));
-        rowOutput.push(new StitchSequence([Purl], 1));
+        rowOutput.push(CableOneBackKnitTwo);
+        rowOutput.push(Purl);
         stitch -= 3;
       } else if (
           stitch >= 3 && state[stitch] !== -1 && state[stitch - 2] !== -1 &&
           state[stitch - 2] === stateNext[stitch] &&
           state[stitch] === stateNext[stitch - 3]) {
-        rowOutput.push(new StitchSequence([CableTwoBackKnitTwo], 1));
-        rowOutput.push(new StitchSequence([Knit], 2));
+        rowOutput.push(CableTwoBackKnitTwo);
+        rowOutput.push(Knit, Knit);
         stitch -= 4;
       } else if (
           stitch >= 3 && state[stitch] !== -1 && state[stitch - 2] === -1 &&
           state[stitch] === stateNext[stitch - 2]) {
-        rowOutput.push(new StitchSequence([CableTwoFrontPurlTwo], 1));
-        rowOutput.push(new StitchSequence([Knit], 2));
+        rowOutput.push(CableTwoFrontPurlTwo);
+        rowOutput.push(Knit, Knit);
         stitch -= 4;
       } else if (
           stitch >= 3 && state[stitch] === -1 && state[stitch - 2] !== -1 &&
           stateNext[stitch] === state[stitch - 2]) {
-        rowOutput.push(new StitchSequence([CableTwoBackKnitTwo], 1));
-        rowOutput.push(new StitchSequence([Purl], 2));
+        rowOutput.push(CableTwoBackKnitTwo);
+        rowOutput.push(Purl, Purl);
         stitch -= 4;
       } else {
         console.log(state);
@@ -227,13 +226,13 @@ export class CableLayout {
             row * 2}, stitch ${stitch}).`);
       }
     }
-    rowOutput.push(new StitchSequence([Purl], this.marginDistance));
+    rowOutput.push(...Array(this.marginDistance).fill(Purl));
     if (this.marginType == 'ICord') {
       const slipStitches: Stitch[] = [];
       for (let i = 0; i < 3; i++) slipStitches.push(SlipStitchPurlwise);
-      rowOutput.push(new StitchSequence([WithYarnInFront, ...slipStitches], 1));
+      rowOutput.push(WithYarnInFront, ...slipStitches);
     } else if (this.marginType == 'Knit')
-      rowOutput.push(new StitchSequence([Knit], 2));
+      rowOutput.push(Knit, Knit);
     return new Row(rowOutput);
   }
 
@@ -243,20 +242,17 @@ export class CableLayout {
 
     const marginEnd =
         (this.marginType == 'ICord' ?
-             new StitchSequence(
-                 [WithYarnInFront, ...slipStitches],
-                 1) :
-             new StitchSequence([] as Stitch[], 0));
+             [WithYarnInFront, ...slipStitches] :
+             [] as Stitch[]);
     return new Row([
-      (this.marginType == 'ICord' ? new StitchSequence([Knit], 3) :
-                                    new StitchSequence([] as Stitch[], 0)),
-      new StitchSequence(
-          [StitchEcho],
+      ...(this.marginType == 'ICord' ? Array(3).fill(Knit) :
+                                    [] as Stitch[]),
+      ...Array(
           this.rowsWidth +
-              (this.marginDistance > 0 ? 2 * this.marginDistance +
-                       (this.marginType == 'Knit' ? 4 : 0) :
-                                         0)),
-      marginEnd
+          (this.marginDistance > 0 ? 2 * this.marginDistance +
+                   (this.marginType == 'Knit' ? 4 : 0) : 0))
+          .fill(StitchEcho),
+      ...marginEnd
     ]);
   }
 }
