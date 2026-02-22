@@ -50,10 +50,18 @@ export class Row {
   public firstVisit: Date | null;
   private rowDiv: JQuery<HTMLElement>;
 
-  constructor(stitches: StitchSequence[] = []) {
-    const flatStitches : Stitch[] = [];
-    stitches.forEach((sequence) => sequence.flatten(flatStitches));
-    this.stitches = optimizeStitches(flatStitches);
+  constructor(stitches: StitchSequence[] | Stitch[] = []) {
+    let optimizedStitches: StitchSequence[];
+    if (stitches.length > 0 && stitches[0] instanceof Stitch) {
+      // Input is Stitch[], optimize it.
+      optimizedStitches = optimizeStitches(stitches as Stitch[]);
+    } else {
+      // Input is StitchSequence[] (or empty), flatten and optimize.
+      const flatStitches : Stitch[] = [];
+      (stitches as StitchSequence[]).forEach((sequence) => sequence.flatten(flatStitches));
+      optimizedStitches = optimizeStitches(flatStitches);
+    }
+    this.stitches = optimizedStitches;
     this.firstVisit = null;
   }
 
