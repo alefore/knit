@@ -3,7 +3,6 @@ import {cubicBezierArray} from './math.js';
 import {Pattern} from './pattern.js';
 import {Row} from './row.js';
 import {Knit, KnitFrontBack, KnitTwoTogether, Purl, Stitch} from './stitch.js';
-import {StitchSequence} from './stitch_sequence.js';
 
 interface Point {
   x: number;
@@ -134,14 +133,13 @@ export class ScarfPatternFactory {
 function row2x2(rowId: number, stitches: number): Row {
   const rightSide = rowId % 2 == 0;
   const rowBottomKnit = (rowId + 1) % 4 < 2;
-  let head = [new StitchSequence(
-      rightSide != rowBottomKnit ? [Knit, Knit, Purl, Purl] :
-                                   [Purl, Purl, Knit, Knit],
-      Math.floor(stitches / 4))];
-  let tail: StitchSequence[] = [];
-  if (stitches % 4 >= 1) tail.push(new StitchSequence([rowBottomKnit ? Knit : Purl], 1));
-  if (stitches % 4 >= 2) tail.push(new StitchSequence([rowBottomKnit ? Knit : Purl], 1));
-  if (stitches % 4 == 3) tail.push(new StitchSequence([rowBottomKnit ? Purl : Knit], 1));
+  const patternStitches = rightSide != rowBottomKnit ? [Knit, Knit, Purl, Purl] : [Purl, Purl, Knit, Knit];
+  const count = Math.floor(stitches / 4);
+  let head = Array(count).fill(patternStitches).flat();
+  let tail: Stitch[] = [];
+  if (stitches % 4 >= 1) tail.push(rowBottomKnit ? Knit : Purl);
+  if (stitches % 4 >= 2) tail.push(rowBottomKnit ? Knit : Purl);
+  if (stitches % 4 == 3) tail.push(rowBottomKnit ? Purl : Knit);
   return new Row(
       !rightSide ? [...head, ...tail] : [...tail.reverse(), ...head]);
 }
@@ -151,5 +149,5 @@ function doubleMossStitchRow(rowId: number, stitches: number): Row {
 }
 
 function garterRow(rowId: number, stitches: number): Row {
-  return new Row([new StitchSequence([Knit], stitches)]);
+  return new Row(Array(stitches).fill(Knit));
 }
