@@ -125,11 +125,13 @@ export function parseHash(): HashParams {
   const params: HashParams = {};
   if (!hash) return params;
 
-  hash.split('&').forEach(part => {
-    const item = part.split('=');
-    if (item[0]) {
-      params[item[0]] = decodeURIComponent(item[1] || '');
-    }
+  // Create URLSearchParams instance from the hash string
+  const searchParams = new URLSearchParams(hash);
+
+  // Iterate over the parameters and populate the HashParams object
+  searchParams.forEach((value, key) => {
+    params[key] = value;
   });
+
   return params;
 }
