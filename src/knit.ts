@@ -5,6 +5,12 @@ import { SwipeHandler } from './swipe.js';
 import { Pattern, type PatternFactory } from './pattern.js';
 import { PatternFactoryRegistry } from './pattern_factory_registry.js';
 
+// Import pattern factories to ensure they are registered.
+import './cable_pattern_factory.js';
+import './capelet_pattern_factory.js';
+import './cylinder_pattern_factory.js';
+import './scarf_pattern_factory.js';
+
 const objectIds = createConstants(
   'configureButton', 'factoryWarnings', 'knitButton', 'buttonNext',
   'buttonPrev'
