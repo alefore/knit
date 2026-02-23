@@ -207,6 +207,7 @@ class KnitState {
       warningsDiv.appendChild(pElement);
       console.error(error);
     }
+    this.renderPattern();
     this.selectRow(this.currentRow);
     return false;
   }
