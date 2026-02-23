@@ -2,6 +2,7 @@ import {PatternFactoryInput} from './inputs.js';
 import {Pattern} from './pattern.js';
 import {Row} from './row.js';
 import {CableOneBackKnitTwo, CableTwoBackKnitTwo, CableTwoFrontPurlOne, CableTwoFrontPurlTwo, Knit, Purl, SlipStitchPurlwise, StitchEcho, WithYarnInFront, Stitch} from './stitch.js';
+import {PatternFactoryRegistry} from './pattern_factory_registry.js';
 
 export class CableLayout {
   cables: number;
@@ -257,7 +258,7 @@ export class CableLayout {
   }
 }
 
-export class CablePatternFactory {
+class CablePatternFactory {
   factoryName: string = 'Cables';
 
   cableLengthInput: PatternFactoryInput;
@@ -326,3 +327,5 @@ export class CablePatternFactory {
     return output;
   }
 }
+
+PatternFactoryRegistry.register('Cables', CablePatternFactory);

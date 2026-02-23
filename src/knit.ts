@@ -1,18 +1,9 @@
-import { CablePatternFactory } from './cable_pattern_factory.js';
-import { CapeletPatternFactory } from './capelet_pattern_factory.js';
 import { createConstants, cssDisplayValues, cssProps, htmlInputTypes, htmlProps, htmlTags, urlParams } from './constants.js';
-import { CylinderPatternFactory } from './cylinder_pattern_factory.js';
 import { drawInputs, parseHash, PatternFactoryInput } from './inputs.js';
 import { EventListener } from './listener.js';
-import { ScarfPatternFactory } from './scarf_pattern_factory.js';
 import { SwipeHandler } from './swipe.js';
-import { Pattern } from './pattern.js';
-
-interface PatternFactory {
-  factoryName: string;
-  getInputs(): PatternFactoryInput[];
-  build(): Pattern;
-}
+import { Pattern, type PatternFactory } from './pattern.js';
+import { PatternFactoryRegistry } from './pattern_factory_registry.js';
 
 const objectIds = createConstants(
   'configureButton', 'factoryWarnings', 'knitButton', 'buttonNext',
@@ -62,12 +53,7 @@ class KnitState {
 
   constructor() {
     this.inputs = parseHash();
-    this.patternFactories = [
-      new ScarfPatternFactory(3),
-      new CablePatternFactory(),
-      new CapeletPatternFactory(),
-      new CylinderPatternFactory(),
-    ];
+    this.patternFactories = PatternFactoryRegistry.getAllFactories().map(Factory => new Factory());
 
     const factoryNames = Array.from(new Set(this.patternFactories.map(
       instance => instance.factoryName)));

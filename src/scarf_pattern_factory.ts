@@ -3,6 +3,7 @@ import {cubicBezierArray} from './math.js';
 import {Pattern} from './pattern.js';
 import {Row} from './row.js';
 import {Knit, KnitFrontBack, KnitTwoTogether, Purl, Stitch} from './stitch.js';
+import {PatternFactoryRegistry} from './pattern_factory_registry.js';
 
 interface Point {
   x: number;
@@ -19,7 +20,7 @@ type Textures = {
   [key: string]: TextureFunction;
 };
 
-export class ScarfPatternFactory {
+class ScarfPatternFactory {
   static cubicBezierFocalPoints: CubicBezierFocalPoints = {
     Balanced: [{x: 0.6, y: 0.3}, {x: 0.4, y: 0.7}],
     Thin: [{x: 0.75, y: 0.3}, {x: 0.5, y: 0.7}],
@@ -31,15 +32,14 @@ export class ScarfPatternFactory {
 
   factoryName = 'Sophie Scarf';
 
-  borderStitches: number;
+  borderStitches: number = 3;
   rowsInput: PatternFactoryInput;
   centerLengthInput: PatternFactoryInput;
   centerWidthInput: PatternFactoryInput;
   textureInput: PatternFactoryInput;
   shapeInput: PatternFactoryInput;
 
-  constructor(borderStitches: number) {
-    this.borderStitches = borderStitches;
+  constructor() {
     this.rowsInput = new PatternFactoryInput(
         'Total Length',
         'How long should the scarf measure from tip to top along its ' +
@@ -129,6 +129,8 @@ export class ScarfPatternFactory {
             .borderWrap(growType));
   }
 }
+
+PatternFactoryRegistry.register('Scarf', ScarfPatternFactory);
 
 function row2x2(rowId: number, stitches: number): Row {
   const rightSide = rowId % 2 == 0;

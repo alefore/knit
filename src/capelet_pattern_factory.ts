@@ -3,8 +3,9 @@ import {PatternFactoryInput} from './inputs.js';
 import {Pattern} from './pattern.js';
 import {Row} from './row.js';
 import {Knit, KnitTwoTogether, Purl, SlipSlipKnit} from './stitch.js';
+import {PatternFactoryRegistry} from './pattern_factory_registry.js';
 
-export class CapeletPatternFactory {
+class CapeletPatternFactory {
   factoryName: string = 'Capelet';
   borderLengthInput: PatternFactoryInput;
   baseWidthInput: PatternFactoryInput;
@@ -134,3 +135,5 @@ export class CapeletPatternFactory {
     rowOutput.push(...padding);
   }
 }
+
+PatternFactoryRegistry.register('Capelet', CapeletPatternFactory);

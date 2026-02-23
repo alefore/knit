@@ -3,6 +3,7 @@ import {PatternFactoryInput} from './inputs.js';
 import {Pattern} from './pattern.js';
 import {Row} from './row.js';
 import {CableTwoBackKnitTwo, CableTwoFrontKnitTwo, Knit, M1L, M1R, Purl, Stitch} from './stitch.js';
+import {PatternFactoryRegistry} from './pattern_factory_registry.js';
 
 const textures: { [key: string]: string } = createConstants('Stockinette', 'Rib2x2', 'RibMistake', 'Honeycomb');
 
@@ -118,7 +119,7 @@ class Section {
   }
 }
 
-export class CylinderPatternFactory {
+class CylinderPatternFactory {
   factoryName: string = 'Cylinder';
   lengthInput: PatternFactoryInput;
   separatorWidthInput: PatternFactoryInput;
@@ -169,6 +170,8 @@ export class CylinderPatternFactory {
     return output;
   }
 }
+
+PatternFactoryRegistry.register('Cylinder', CylinderPatternFactory);
 
 function honeycomb(rowId: number, width: number): Stitch[] {
   const step = rowId % 8;
