@@ -82,12 +82,14 @@ export class PatternFactoryInput {
   }
 
   value(): string|number|string[]|undefined {
-    const element = document.getElementById(this.id()) as HTMLInputElement | HTMLSelectElement;
-    return element?.value;
+    return this.formInput?.value;
   }
 
   numberValue(): number {
-    return Number(this.value());
+    if (this.formInput) {
+      return Number(this.formInput.value);
+    }
+    return 0;
   }
 
   hasDefaultValue(): boolean {
