@@ -50,18 +50,8 @@ export class Row {
   public firstVisit: Date | null;
   private rowDiv: JQuery<HTMLElement>;
 
-  constructor(stitches: StitchSequence[] | Stitch[] = []) {
-    let optimizedStitches: StitchSequence[];
-    if (stitches.length > 0 && stitches[0] instanceof Stitch) {
-      // Input is Stitch[], optimize it.
-      optimizedStitches = optimizeStitches(stitches as Stitch[]);
-    } else {
-      // Input is StitchSequence[] (or empty), flatten and optimize.
-      const flatStitches : Stitch[] = [];
-      (stitches as StitchSequence[]).forEach((sequence) => sequence.flatten(flatStitches));
-      optimizedStitches = optimizeStitches(flatStitches);
-    }
-    this.stitches = optimizedStitches;
+  constructor(stitches: Stitch[] = []) {
+    this.stitches = optimizeStitches(stitches);
     this.firstVisit = null;
   }
 
@@ -152,14 +142,14 @@ export class Row {
    */
   borderWrap(growType: Stitch | null): Row {
     const prefix = growType === null ?
-      [new StitchSequence([Knit], 3)] :
-      [new StitchSequence([Knit], 2), new StitchSequence([growType], 1)];
+      [Knit, Knit, Knit] :
+      [Knit, Knit, growType];
 
     return new Row([
       ...prefix,
-      ...this.stitches,
-      new StitchSequence([WithYarnInFront], 1),
-      new StitchSequence([SlipStitchPurlwise], 3)
+      ...this.flatten(),
+      WithYarnInFront,
+      SlipStitchPurlwise, SlipStitchPurlwise, SlipStitchPurlwise
     ]);
   }
 }
