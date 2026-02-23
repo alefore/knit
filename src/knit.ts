@@ -100,17 +100,15 @@ class KnitState {
     this.currentRow = Number(this.inputs.get(urlParams.row) ?? 0);
     this.configuringStateChange = new EventListener();
     this.stateChange = new EventListener();
-    this.buttonsForm = $(htmlTags.form)[0] as HTMLFormElement;
-    $(this.buttonsForm).submit(() => false);
+    this.buttonsForm = document.createElement(htmlTags.form.slice(1, -1)) as HTMLFormElement;
+    this.buttonsForm.addEventListener('submit', (event) => { event.preventDefault(); });
     this.configuring = this.currentRow === 0;
 
     this.configuringStateChange.addListener(() => {
-      $('#inputs').css(
-        cssProps.display,
-        this.configuring ? cssDisplayValues.inline : cssDisplayValues.none);
-      $('#patternContainer').css(
-        cssProps.display,
-        this.configuring ? cssDisplayValues.none : cssDisplayValues.inline);
+      document.getElementById('inputs')!.style.display =
+        this.configuring ? cssDisplayValues.inline : cssDisplayValues.none;
+      document.getElementById('patternContainer')!.style.display =
+        this.configuring ? cssDisplayValues.none : cssDisplayValues.inline;
     });
 
     this.setupUI();
@@ -159,19 +157,34 @@ class KnitState {
       .appendHtml(this.buttonsForm)
       .setEnabled(this.stateChange, () => this.pattern != null && this.currentRow < (this.pattern?.rowsCount() ?? 0) - 1);
 
-    $('body')
-      .append($('<canvas>', { id: 'knitCanvas' }))
-      .append($(htmlTags.div, { id: 'controls' }).append(this.buttonsForm))
-      .append($(htmlTags.div, {
-        id: 'inputs',
-        style: this.currentRow === 0 ? '' : 'display:none',
-      })
-        .append($(htmlTags.form))
-        .append($(htmlTags.div, { id: objectIds.factoryWarnings })))
-      .append($(htmlTags.div, {
-        id: 'patternContainer',
-        style: this.currentRow === 0 ? 'display:none' : 'display:inline'
-      }));
+    const knitCanvas = document.createElement(htmlTags.canvas.slice(1, -1)) as HTMLCanvasElement;
+    knitCanvas.id = 'knitCanvas';
+    document.body.appendChild(knitCanvas);
+
+    const controlsDiv = document.createElement(htmlTags.div.slice(1, -1));
+    controlsDiv.id = 'controls';
+    controlsDiv.appendChild(this.buttonsForm);
+    document.body.appendChild(controlsDiv);
+
+    const inputsDiv = document.createElement(htmlTags.div.slice(1, -1));
+    inputsDiv.id = 'inputs';
+    if (this.currentRow !== 0) {
+      inputsDiv.style.display = cssDisplayValues.none;
+    }
+    inputsDiv.appendChild(document.createElement(htmlTags.form.slice(1, -1)));
+    const factoryWarningsDiv = document.createElement(htmlTags.div.slice(1, -1));
+    factoryWarningsDiv.id = objectIds.factoryWarnings;
+    inputsDiv.appendChild(factoryWarningsDiv);
+    document.body.appendChild(inputsDiv);
+
+    const patternContainerDiv = document.createElement(htmlTags.div.slice(1, -1));
+    patternContainerDiv.id = 'patternContainer';
+    if (this.currentRow === 0) {
+      patternContainerDiv.style.display = cssDisplayValues.none;
+    } else {
+      patternContainerDiv.style.display = cssDisplayValues.inline;
+    }
+    document.body.appendChild(patternContainerDiv);
   }
 
   private currentPatternFactory(): PatternFactory {
@@ -183,12 +196,15 @@ class KnitState {
   }
 
   private configurationInputChanged(): boolean {
-    const warningsDiv = $('#' + objectIds.factoryWarnings).empty();
+    const warningsDiv = document.getElementById(objectIds.factoryWarnings) as HTMLDivElement;
+    warningsDiv.innerHTML = '';
     try {
       this.pattern = this.currentPatternFactory().build();
     } catch (error) {
       this.pattern = null;
-      warningsDiv.append($(htmlTags.p).text(String(error)));
+      const pElement = document.createElement(htmlTags.p.slice(1, -1));
+      pElement.textContent = String(error);
+      warningsDiv.appendChild(pElement);
       console.error(error);
     }
     this.selectRow(this.currentRow);
@@ -206,7 +222,7 @@ class KnitState {
   public selectRow(row: number): void {
     const isNewRow = this.currentRow !== row;
     this.currentRow = row;
-    const canvas = $('#knitCanvas')[0] as HTMLCanvasElement;
+    const canvas = document.getElementById('knitCanvas') as HTMLCanvasElement;
     if (canvas) {
       const ctx = canvas.getContext('2d');
       ctx?.clearRect(0, 0, canvas.width, canvas.height);
@@ -216,20 +232,23 @@ class KnitState {
       this.updateLocationHash();
       this.pattern.drawToCanvas(document.getElementById('knitCanvas') as HTMLCanvasElement, this.currentRow);
     } else {
-      $('#knitCanvas').empty();
+      const knitCanvas = document.getElementById('knitCanvas') as HTMLCanvasElement;
+      if (knitCanvas) {
+        knitCanvas.innerHTML = '';
+      }
     }
 
-    const container = $('#patternContainer');
-    container.children().removeClass('highlight');
+    const container = document.getElementById('patternContainer') as HTMLElement;
+    Array.from(container.children).forEach(child => child.classList.remove('highlight'));
     const rowData = this.pattern!.rows[this.currentRow];
     if (rowData)
       rowData.visit();
-    const selectedRow = container.children().eq(this.currentRow);
-    if (selectedRow.length) {
-      selectedRow.addClass('highlight');
-      const rowTop = selectedRow.position().top + (container.scrollTop() ?? 0);
-      const paddingTop = Math.max(0, (container.innerHeight() ?? 0) - (selectedRow.outerHeight() ?? 0)) / 3;
-      container.scrollTop(Math.max(0, rowTop - paddingTop));
+    const selectedRow = container.children[this.currentRow] as HTMLElement;
+    if (selectedRow) {
+      selectedRow.classList.add('highlight');
+      const rowTop = selectedRow.offsetTop + container.scrollTop;
+      const paddingTop = Math.max(0, container.clientHeight - selectedRow.offsetHeight) / 3;
+      container.scrollTop = Math.max(0, rowTop - paddingTop);
     }
 
     if (isNewRow) {
@@ -240,19 +259,19 @@ class KnitState {
   }
 
   private renderPattern(): void {
-    const container = $('#patternContainer');
-    container.empty();
+    const container = document.getElementById('patternContainer') as HTMLElement;
+    container.innerHTML = '';
 
     if (this.pattern === null) return;
     this.pattern.forEachRow((rowData: any, index: number) => {
       const divNormal = rowData.createDiv(index, this.pattern);
-      container.append(divNormal);
-      divNormal.click(() => this.selectRow(index));
+      container.appendChild(divNormal);
+      divNormal.addEventListener('click', () => this.selectRow(index));
     });
   }
 
-  private scrollToRow(selectedRow: JQuery<HTMLElement>): void {
-  }
+  // Refactor: Remove unused method
+  // private scrollToRow(selectedRow: JQuery<HTMLElement>): void {}
 
   public addRow(delta: number): void {
     if (this.pattern == null) return;

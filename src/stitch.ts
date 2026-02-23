@@ -25,14 +25,15 @@ export class Stitch {
   }
 
   /**
-   * Generates a jQuery element for the stitch.
+   * Generates a HTML element for the stitch.
    */
-  html(): JQuery<HTMLElement> {
-    return $(htmlTags.span, {
-      style: `color: ${this.color};`,
-      title: this.tooltip,
-      class: 'stitch'
-    }).append(this.representation);
+  html(): HTMLElement {
+    const spanElement = document.createElement(htmlTags.span.slice(1, -1));
+    spanElement.style.color = this.color;
+    spanElement.title = this.tooltip;
+    spanElement.classList.add('stitch');
+    spanElement.textContent = this.representation;
+    return spanElement;
   }
 
   /**

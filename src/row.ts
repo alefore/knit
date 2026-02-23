@@ -48,7 +48,7 @@ function optimizeStitches(input: Stitch[]): StitchSequence[] {
 export class Row {
   public stitches: StitchSequence[];
   public firstVisit: Date | null;
-  private rowDiv: JQuery<HTMLElement>;
+  private rowDiv: HTMLElement | undefined;
 
   constructor(stitches: Stitch[] = []) {
     this.stitches = optimizeStitches(stitches);
@@ -76,7 +76,7 @@ export class Row {
   /**
    * Returns an array of HTML elements/strings separated by zero-width spaces.
    */
-  describeStitches(): (JQuery<HTMLElement> | string)[] {
+  describeStitches(): (HTMLElement | string)[] {
     const zeroWidthSpace = '&#8203;';
     return intersperse(
       this.stitches.map(sequence => sequence.html()),
@@ -87,41 +87,48 @@ export class Row {
   /**
    * Creates the visual representation of the row.
    */
-  createDiv(index: number, pattern: IPattern): JQuery<HTMLElement> {
+  createDiv(index: number, pattern: IPattern): HTMLElement {
     const stitchDelta = this.outputStitches - this.inputStitches;
 
-    this.rowDiv = $(htmlTags.div, { class: 'row' })
-      .append(
-        $(htmlTags.p)
-          .append(
-            $(htmlTags.span, { class: 'rowIndex' })
-              .append(
-                index +
-                (pattern.showRowDirection ?
-                  (index % 2 === 0 ? '↓ ' : '↑ ') :
-                  '') +
-                '(' + this.outputStitches +
-                (stitchDelta === 0 ? '' : ' Δ' + stitchDelta) +
-                ') '
-              )
-          )
-          .append(...this.describeStitches())
-      );
+    const rowDiv = document.createElement(htmlTags.div.slice(1, -1));
+    rowDiv.classList.add('row');
+
+    const pElement = document.createElement(htmlTags.p.slice(1, -1));
+    const spanElement = document.createElement(htmlTags.span.slice(1, -1));
+    spanElement.classList.add('rowIndex');
+    spanElement.textContent = index +
+      (pattern.showRowDirection ?
+        (index % 2 === 0 ? '↓ ' : '↑ ') :
+        '') +
+      '(' + this.outputStitches +
+      (stitchDelta === 0 ? '' : ' Δ' + stitchDelta) +
+      ') ';
+    pElement.appendChild(spanElement);
+
+    // Append described stitches.
+    this.describeStitches().forEach(element => {
+      if (typeof element === 'string') {
+        pElement.insertAdjacentHTML('beforeend', element);
+      } else {
+        pElement.appendChild(element);
+      }
+    });
+    rowDiv.appendChild(pElement);
 
     const previousStitches = pattern.rows.slice(0, index).reduce(
         (total, r) => total + r.outputStitches, 0);
     const totalStitches = pattern.outputStitches;
 
-    this.rowDiv.append($(htmlTags.p, { class: 'details' })
-      .append(
-        Math.floor(100 * previousStitches / totalStitches) +
-        '% (' + previousStitches + ' of ' + totalStitches + ' st)'
-      )
-    );
+    const detailsP = document.createElement(htmlTags.p.slice(1, -1));
+    detailsP.classList.add('details');
+    detailsP.textContent = Math.floor(100 * previousStitches / totalStitches) +
+      '% (' + previousStitches + ' of ' + totalStitches + ' st)';
+    rowDiv.appendChild(detailsP);
 
+    this.rowDiv = rowDiv;
     if (this.firstVisit !== null) this.showVisitTime();
 
-    return this.rowDiv;
+    return rowDiv;
   }
 
   visit() {
@@ -131,9 +138,10 @@ export class Row {
   }
 
   private showVisitTime() {
-    this.rowDiv.append($(htmlTags.p, {
-      class: 'details'
-    }).append(createTimestampView(this.firstVisit!.getTime())));
+    const detailsP = document.createElement(htmlTags.p.slice(1, -1));
+    detailsP.classList.add('details');
+    detailsP.appendChild(createTimestampView(this.firstVisit!.getTime()));
+    this.rowDiv!.appendChild(detailsP);
   }
 
   /**

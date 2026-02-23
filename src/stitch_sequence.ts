@@ -14,30 +14,36 @@ export class StitchSequence {
   /**
    * Generates the HTML representation of the stitch sequence.
    */
-  html(): JQuery<HTMLElement> | string {
+  html(): HTMLElement | string {
     if (this.repetitions === 0) return '';
 
-    const output = $(htmlTags.span, { class: 'stitchSequence' });
+    const output = document.createElement(htmlTags.span.slice(1, -1));
+    output.classList.add('stitchSequence');
     const needParens = this.repetitions !== 1 && this.sequence.length > 1;
 
     // Prefix repetition for multiple stitches: e.g., 2(K, P)
     if (this.repetitions !== 1 && needParens) {
-      output.append(this.repetitions.toString());
+      output.textContent = this.repetitions.toString();
     }
 
-    if (needParens) output.append('(');
+    if (needParens) output.textContent += '(';
 
     this.sequence.forEach((stitch) => {
-      output.append(stitch.html());
+      const stitchHtml = stitch.html();
+      if (typeof stitchHtml === 'string') {
+        output.insertAdjacentHTML('beforeend', stitchHtml);
+      } else {
+        output.appendChild(stitchHtml);
+      }
       const zeroWidthSpace = '&#8203;';
-      output.append(zeroWidthSpace);
+      output.insertAdjacentHTML('beforeend', zeroWidthSpace);
     });
 
-    if (needParens) output.append(')');
+    if (needParens) output.textContent += ')';
 
     // Suffix repetition for single stitches: e.g., K2
     if (this.repetitions !== 1 && !needParens) {
-      output.append(this.repetitions.toString());
+      output.textContent += this.repetitions.toString();
     }
 
     return output;

@@ -1,7 +1,6 @@
-declare var $: JQueryStatic; // Declare jQuery
-
-export function createTimestampView(timestamp: number): JQuery<HTMLElement> {
-  const $element = $('<span>').addClass('timestamp');
+export function createTimestampView(timestamp: number): HTMLElement {
+  const element = document.createElement('span');
+  element.classList.add('timestamp');
 
   function formatTime(value: number, unit: string): string {
     if (value === 1) {
@@ -43,13 +42,12 @@ export function createTimestampView(timestamp: number): JQuery<HTMLElement> {
       nextUpdateInMs = -1;
     }
 
-    $element.text(text);
+    element.textContent = text;
     // If we're not showing an absolute date, schedule an update.
     if (nextUpdateInMs !== -1) {
       setTimeout(() => {
         // Only update if the element is still in the DOM.
-        // Ensure $element[0] is an HTMLElement
-        if ($element[0] && $.contains(document.documentElement, $element[0])) {
+        if (document.documentElement.contains(element)) {
           updateText();
         }
       }, nextUpdateInMs);
@@ -57,5 +55,5 @@ export function createTimestampView(timestamp: number): JQuery<HTMLElement> {
   }
 
   updateText();
-  return $element;
+  return element;
 }

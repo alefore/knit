@@ -30,7 +30,7 @@ export const urlParams = {
 } as const;
 
 const tags = [
-  'div', 'form', 'input', 'p', 'span', 'td', 'tr', 'table', 'select', 'option'
+  'div', 'form', 'input', 'p', 'span', 'td', 'tr', 'table', 'select', 'option', 'canvas'
 ] as const;
 
 export const htmlTags = tags.reduce((obj, tag) => {
