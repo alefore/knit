@@ -13,27 +13,31 @@ const objectIds = createConstants(
 class ControlButton {
   private text: string;
   private description: string;
-  private htmlObject: any;
+  private htmlObject: HTMLInputElement;
 
-  constructor(id: string | null, text: string, description: string, action: (e: JQuery.ClickEvent) => void) {
+  constructor(id: string | null, text: string, description: string, action: (e: MouseEvent) => void) {
     this.text = text;
     this.description = description;
-    this.htmlObject = $(htmlTags.input, {
-      type: htmlInputTypes.submit,
-      value: this.text,
-      title: this.description,
-    }).click(action);
+    const button = document.createElement(htmlTags.input) as HTMLInputElement;
+    button.type = htmlInputTypes.submit;
+    button.value = this.text;
+    button.title = this.description;
+    if (id) {
+      button.id = id;
+    }
+    button.addEventListener('click', action);
+    this.htmlObject = button;
   }
 
-  appendHtml(container: any): this {
-    container.append(this.htmlObject);
+  appendHtml(container: HTMLElement): this {
+    container.appendChild(this.htmlObject);
     return this;
   }
 
   setEnabled(stateListener: EventListener, value: () => boolean): void {
     const htmlObject = this.htmlObject;
     stateListener.addListener(() => {
-      htmlObject.prop(htmlProps.disabled, !value());
+      htmlObject.disabled = !value();
     });
   }
 }
