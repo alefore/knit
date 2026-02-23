@@ -24,7 +24,7 @@ class ControlButton {
   constructor(id: string | null, text: string, description: string, action: (e: MouseEvent) => void) {
     this.text = text;
     this.description = description;
-    const button = document.createElement(htmlTags.input) as HTMLInputElement;
+    const button = document.createElement(htmlTags.input.slice(1, -1)) as HTMLInputElement;
     button.type = htmlInputTypes.submit;
     button.value = this.text;
     button.title = this.description;
@@ -57,7 +57,7 @@ class KnitState {
   public currentRow: number;
   public configuringStateChange: EventListener;
   public stateChange: EventListener;
-  public buttonsForm: any;
+  public buttonsForm: HTMLFormElement;
   public configuring: boolean;
   public pattern: Pattern | null = null;
 
@@ -97,7 +97,8 @@ class KnitState {
     this.currentRow = Number(this.inputs[urlParams.row] ?? 0);
     this.configuringStateChange = new EventListener();
     this.stateChange = new EventListener();
-    this.buttonsForm = $(htmlTags.form).submit(() => false);
+    this.buttonsForm = $(htmlTags.form)[0] as HTMLFormElement;
+    $(this.buttonsForm).submit(() => false);
     this.configuring = this.currentRow === 0;
 
     this.configuringStateChange.addListener(() => {
