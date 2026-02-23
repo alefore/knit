@@ -1,52 +1,38 @@
-/**
- * Creates an object where keys and values are identical.
- * Uses a Proxy to throw an error if a non-existent key is accessed.
- */
-export function createConstants<T extends string>(...keys: T[]):
-    {readonly[K in T]: K} {
-  const constants = keys.reduce((obj, key) => {
-    obj[key] = key;
-    return obj;
-  }, {} as Record<string, string>);
+export const eventIds = {
+  input: 'input',
+} as const;
 
-  return new Proxy(constants, {
-           get: (target, name: string) => {
-             if (name in target) return target[name];
-             throw new Error(`Constant "${String(name)}" is not defined.`);
-           }
-         }) as {readonly[K in T]: K};
-}
+export const colorIds = {
+  black: 'black',
+  cyan: 'cyan',
+  white: 'white',
+} as const;
 
-/**
- * Wraps an existing object in a Proxy to prevent accessing undefined keys.
- */
-function constantsMap<T extends Record<string, any>>(entries: T): Readonly<T> {
-  return new Proxy(entries, {
-           get: (target, name: string) => {
-             if (name in target) return target[name];
-             throw new Error(`Constant "${String(name)}" is not defined.`);
-           }
-         }) as Readonly<T>;
-}
+export const htmlProps = {
+  disabled: 'disabled',
+} as const;
 
-// --- Implementations ---
+export const htmlInputTypes = {
+  submit: 'submit',
+} as const;
 
-export const eventIds = createConstants('input');
+export const cssProps = {
+  display: 'display',
+} as const;
 
-export const colorIds = createConstants('black', 'cyan', 'white');
+export const cssDisplayValues = {
+  inline: 'inline',
+  none: 'none',
+} as const;
 
-// Type safety for the reduced object
+export const urlParams = {
+  row: 'row',
+} as const;
+
 const tags = [
   'div', 'form', 'input', 'p', 'span', 'td', 'tr', 'table', 'select', 'option'
 ] as const;
 
-export const htmlTags = constantsMap(tags.reduce((obj, tag) => {
-  obj[tag] = `<${tag}>`;
-  return obj;
-}, {} as Record<typeof tags[number], string>));
-
-export const htmlProps = createConstants('disabled');
-export const htmlInputTypes = createConstants('submit');
-export const cssProps = createConstants('display');
-export const cssDisplayValues = createConstants('inline', 'none');
-export const urlParams = createConstants('row');
+export const htmlTags = tags.reduce((obj, tag) => {
+  return { ...obj, [tag]: `<${tag}>` };
+}, {} as { [K in typeof tags[number]]: string }) as { [K in typeof tags[number]]: string };

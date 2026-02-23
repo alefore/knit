@@ -1,11 +1,15 @@
-import {createConstants} from './constants.js';
 import {PatternFactoryInput} from './inputs.js';
 import {Pattern} from './pattern.js';
 import {Row} from './row.js';
 import {CableTwoBackKnitTwo, CableTwoFrontKnitTwo, Knit, M1L, M1R, Purl, Stitch} from './stitch.js';
 import {PatternFactoryRegistry} from './pattern_factory_registry.js';
 
-const textures: { [key: string]: string } = createConstants('Stockinette', 'Rib2x2', 'RibMistake', 'Honeycomb');
+const textures = {
+  Stockinette: 'Stockinette',
+  Rib2x2: 'Rib2x2',
+  RibMistake: 'RibMistake',
+  Honeycomb: 'Honeycomb',
+} as const;
 
 function listRepeating<T>(input: T[], desiredLen: number): T[] {
   if (input.length === 0) {

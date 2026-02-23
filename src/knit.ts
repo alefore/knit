@@ -1,4 +1,4 @@
-import { createConstants, cssDisplayValues, cssProps, htmlInputTypes, htmlProps, htmlTags, urlParams } from './constants.js';
+import { cssDisplayValues, cssProps, htmlInputTypes, htmlProps, htmlTags, urlParams } from './constants.js';
 import { drawInputs, parseHash, PatternFactoryInput } from './inputs.js';
 import { EventListener } from './listener.js';
 import { SwipeHandler } from './swipe.js';
@@ -11,10 +11,13 @@ import './capelet_pattern_factory.js';
 import './cylinder_pattern_factory.js';
 import './scarf_pattern_factory.js';
 
-const objectIds = createConstants(
-  'configureButton', 'factoryWarnings', 'knitButton', 'buttonNext',
-  'buttonPrev'
-);
+const objectIds = {
+  configureButton: 'configureButton',
+  factoryWarnings: 'factoryWarnings',
+  knitButton: 'knitButton',
+  buttonNext: 'buttonNext',
+  buttonPrev: 'buttonPrev',
+} as const;
 
 class ControlButton {
   private text: string;

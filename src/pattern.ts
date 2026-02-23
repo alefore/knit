@@ -1,13 +1,13 @@
-import { colorIds, createConstants } from './constants.js';
+import { colorIds } from './constants.js';
 import { Stitch } from './stitch.js';
 import { Row } from './row.js';
 import { PatternFactoryInput } from './inputs.js';
 
 // Define the switch styles as a const object for type safety
-const RowSwitchStyles = createConstants('round', 'backAndForth') as {
-  readonly round: string;
-  readonly backAndForth: string;
-};
+const RowSwitchStyles = {
+  round: 'round',
+  backAndForth: 'backAndForth',
+} as const;
 
 export interface PatternFactory {
   factoryName: string;
