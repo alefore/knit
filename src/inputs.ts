@@ -13,8 +13,8 @@ export class PatternFactoryInput {
   public units: string|null;
   public selectValues: string[]|null;
   public listener: EventListener;
-  public tr: JQuery<HTMLElement>|null;
-  public formInput: any;  // Context-dependent
+  public tr: HTMLTableRowElement|null;
+  public formInput: HTMLInputElement | HTMLSelectElement | null;
   private visibilityRequirements: (() => boolean)[];
 
   constructor(
@@ -34,46 +34,61 @@ export class PatternFactoryInput {
   setValuesFromHash(parsedHash: HashParams): void {
     const input = this;
 
-    // Create the table row using jQuery and constants
-    input.tr = $(htmlTags.tr, {
-                 id: 'tr' + this.id()
-               }).append($(htmlTags.td, {class: 'name'}).text(this.name));
+    const tr = document.createElement('tr');
+    tr.id = 'tr' + this.id();
+    input.tr = tr;
+
+    const nameTd = document.createElement('td');
+    nameTd.className = 'name';
+    nameTd.textContent = this.name;
+    tr.appendChild(nameTd);
 
     const rawValue = parsedHash[this.nameCamelCase()];
     const defaultValue = rawValue ?? this.defaultValue;
 
     if (this.selectValues == null) {
-      input.tr.append(
-          $(htmlTags.td)
-              .append($(htmlTags.input, {
-                        id: this.id(),
-                        title: this.tooltip,
-                        value: defaultValue,
-                        size: 4
-                      }).on(eventIds.input, () => input.listener.notify())));
+      const td = document.createElement('td');
+      const inputElement = document.createElement('input');
+      inputElement.id = this.id();
+      inputElement.title = this.tooltip;
+      inputElement.value = String(defaultValue);
+      inputElement.size = 4;
+      inputElement.addEventListener(eventIds.input, () => input.listener.notify());
+      input.formInput = inputElement;
+      td.appendChild(inputElement);
+      tr.appendChild(td);
     } else {
-      const select = $(htmlTags.select, {id: this.id()});
+      const td = document.createElement('td');
+      const selectElement = document.createElement('select');
+      selectElement.id = this.id();
       this.selectValues.forEach((id) => {
-        select.append($(htmlTags.option, {value: id}).text(id));
+        const option = document.createElement('option');
+        option.value = id;
+        option.textContent = id;
+        selectElement.appendChild(option);
       });
 
-      input.tr.append(
-          $(htmlTags.td)
-              .append(select
-                          .val(
-                              this.selectValues.includes(String(defaultValue)) ?
-                                  defaultValue :
-                                  this.defaultValue)
-                          .on(eventIds.input, () => input.listener.notify())));
+      selectElement.value =
+          this.selectValues.includes(String(defaultValue)) ?
+          String(defaultValue) :
+          String(this.defaultValue);
+      selectElement.addEventListener(eventIds.input, () => input.listener.notify());
+      input.formInput = selectElement;
+      td.appendChild(selectElement);
+      tr.appendChild(td);
     }
 
     if (this.units !== null) {
-      input.tr.append($(htmlTags.td, {class: 'units'}).text(this.units));
+      const unitsTd = document.createElement('td');
+      unitsTd.className = 'units';
+      unitsTd.textContent = this.units;
+      tr.appendChild(unitsTd);
     }
   }
 
   value(): string|number|string[]|undefined {
-    return $('#' + this.id()).val();
+    const element = document.getElementById(this.id()) as HTMLInputElement | HTMLSelectElement;
+    return element?.value;
   }
 
   numberValue(): number {
@@ -89,7 +104,7 @@ export class PatternFactoryInput {
   }
 
   nameCamelCase(): string {
-    return this.name.replace(/[\s:]+/g, '');
+    return this.name.replace(/\s:/g, '');
   }
 
   addVisibilityRequirement(callback: () => boolean): void {
@@ -100,22 +115,27 @@ export class PatternFactoryInput {
     if (!this.tr) return;
 
     if (this.visibilityRequirements.every((fn) => fn())) {
-      this.tr.show();
+      this.tr.style.display = '';
     } else {
-      this.tr.hide();
+      this.tr.style.display = 'none';
     }
   }
 }
 
 export function drawInputs(
     inputs: PatternFactoryInput[], parsedHash: HashParams|null): void {
-  const table = $(htmlTags.table).appendTo('#inputs form');
+  const table = document.createElement('table');
+  const form = document.querySelector('#inputs form');
+  if (form) {
+    form.appendChild(table);
+  }
+
   const actualHash = parsedHash ?? {};
 
   inputs.forEach((input) => {
     input.setValuesFromHash(actualHash);
     if (input.tr) {
-      table.append(input.tr);
+      table.appendChild(input.tr);
     }
   });
 }
