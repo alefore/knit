@@ -1,11 +1,6 @@
 import {eventIds, htmlTags} from './constants.js';
 import {EventListener} from './listener.js';
 
-// Define the shape of the hash parameters
-interface HashParams {
-  [key: string]: string;
-}
-
 export class PatternFactoryInput {
   public name: string;
   public tooltip: string;
@@ -31,7 +26,7 @@ export class PatternFactoryInput {
     this.visibilityRequirements = [];
   }
 
-  setValuesFromHash(parsedHash: HashParams): void {
+  setValuesFromHash(parsedHash: URLSearchParams): void {
     const input = this;
 
     const tr = document.createElement('tr');
@@ -43,7 +38,7 @@ export class PatternFactoryInput {
     nameTd.textContent = this.name;
     tr.appendChild(nameTd);
 
-    const rawValue = parsedHash[this.nameCamelCase()];
+    const rawValue = parsedHash.get(this.nameCamelCase());
     const defaultValue = rawValue ?? this.defaultValue;
 
     if (this.selectValues == null) {
@@ -123,14 +118,14 @@ export class PatternFactoryInput {
 }
 
 export function drawInputs(
-    inputs: PatternFactoryInput[], parsedHash: HashParams|null): void {
+    inputs: PatternFactoryInput[], parsedHash: URLSearchParams|null): void {
   const table = document.createElement('table');
   const form = document.querySelector('#inputs form');
   if (form) {
     form.appendChild(table);
   }
 
-  const actualHash = parsedHash ?? {};
+  const actualHash = parsedHash ?? new URLSearchParams();
 
   inputs.forEach((input) => {
     input.setValuesFromHash(actualHash);
@@ -140,18 +135,7 @@ export function drawInputs(
   });
 }
 
-export function parseHash(): HashParams {
+export function parseHash(): URLSearchParams {
   const hash = window.location.hash.substring(1);
-  const params: HashParams = {};
-  if (!hash) return params;
-
-  // Create URLSearchParams instance from the hash string
-  const searchParams = new URLSearchParams(hash);
-
-  // Iterate over the parameters and populate the HashParams object
-  searchParams.forEach((value, key) => {
-    params[key] = value;
-  });
-
-  return params;
+  return new URLSearchParams(hash);
 }

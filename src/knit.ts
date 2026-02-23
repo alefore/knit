@@ -52,7 +52,7 @@ class ControlButton {
 }
 
 class KnitState {
-  private inputs: Record<string, string>;
+  private inputs: URLSearchParams;
   private patternFactories: PatternFactory[];
   private patternFactorySelector: PatternFactoryInput;
   private patternFactoryInputs: PatternFactoryInput[];
@@ -97,7 +97,7 @@ class KnitState {
       input.listener.addListener(() => this.configurationInputChanged())
     );
 
-    this.currentRow = Number(this.inputs[urlParams.row] ?? 0);
+    this.currentRow = Number(this.inputs.get(urlParams.row) ?? 0);
     this.configuringStateChange = new EventListener();
     this.stateChange = new EventListener();
     this.buttonsForm = $(htmlTags.form)[0] as HTMLFormElement;
