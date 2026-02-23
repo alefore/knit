@@ -3,7 +3,6 @@ import {PatternFactoryInput} from './inputs.js';
 import {Pattern} from './pattern.js';
 import {Row} from './row.js';
 import {CableTwoBackKnitTwo, CableTwoFrontKnitTwo, Knit, M1L, M1R, Purl, Stitch} from './stitch.js';
-import {StitchSequence} from './stitch_sequence.js';
 
 const textures: { [key: string]: string } = createConstants('Stockinette', 'Rib2x2', 'RibMistake', 'Honeycomb');
 
@@ -51,7 +50,7 @@ class Section {
   }
 
   getStitches(
-      rowIndex: number, rowLength: number, separatorWidthInput: PatternFactoryInput): StitchSequence[] {
+      rowIndex: number, rowLength: number, separatorWidthInput: PatternFactoryInput): Stitch[] {
     const widthTop = this.widthTop.numberValue();
     const widthBottom = this.widthBottom.numberValue();
     const previousWidth =
@@ -61,9 +60,9 @@ class Section {
     if (textureValue === undefined || typeof textureValue !== 'string') {
       throw new Error(`Invalid texture value: ${textureValue}`);
     }
-    const output: StitchSequence[] =
+    const output: Stitch[] =
         this.#applyTexture(textureValue, rowIndex, previousWidth, separatorWidthInput);
-    if (desiredWidth >= previousWidth + 2) return [new StitchSequence([M1R], 1), ...output, new StitchSequence([M1L], 1)];
+    if (desiredWidth >= previousWidth + 2) return [M1R, ...output, M1L];
     return output;
   }
 
@@ -79,7 +78,7 @@ class Section {
     return widthTop + (2 * Math.floor(desiredGrowth / 2));
   }
 
-  #getStitchesRib2x2(width: number): StitchSequence[] {
+  #getStitchesRib2x2(width: number): Stitch[] {
     const widthTop = this.widthTop.numberValue();
     const gap = (width - widthTop) / 2;
     const center = listRepeating<Stitch>([Knit, Knit, Purl, Purl], widthTop + gap);
@@ -88,13 +87,13 @@ class Section {
     if (output.length != width)
       throw new Error(
           `"Internal error: unexpected length ${output.length} vs ${width}`);
-    return [new StitchSequence(output, 1)];
+    return output;
   }
 
   #applyTexture(
-      texture: string, index: number, width: number, separatorWidthInput: PatternFactoryInput): StitchSequence[] {
+      texture: string, index: number, width: number, separatorWidthInput: PatternFactoryInput): Stitch[] {
     if (texture === textures.Stockinette)
-      return [new StitchSequence([Knit], width)];
+      return Array(width).fill(Knit);
     else if (texture === textures.Rib2x2) {
       return this.#getStitchesRib2x2(width);
     } else if (texture === textures.RibMistake) {
@@ -103,20 +102,15 @@ class Section {
         throw new Error(
             `Width must be a multiple of 4 for texture ${texture}.`);
 
-      const sequence =
-          [new StitchSequence([Knit], 2), new StitchSequence([Purl], 2)];
-      if (index % 2 == 0) return listRepeating<StitchSequence>(sequence, width / 2);
-      const repeatedSequence = listRepeating<StitchSequence>(sequence, width / 2);
-      return [
-        new StitchSequence([Knit], 1),
-        ...repeatedSequence.slice(1),
-        new StitchSequence([Knit], 1),
-      ];
+      const sequence = [Knit, Knit, Purl, Purl]; // 4 stitches
+      if (index % 2 == 0) return listRepeating<Stitch>(sequence, width);
+      const repeatedSequence = listRepeating<Stitch>([Purl, Purl, Knit, Knit], width - 2);
+      return [Knit, ...repeatedSequence, Knit];
     } else if (texture === textures.Honeycomb) {
       const widthTop = this.widthTop.numberValue();
       const honeycombWidth = Math.floor(widthTop / 8) * 8;
       const sideWidth = (width - honeycombWidth) / 2;
-      const side = sideWidth > 0 ? [new StitchSequence([Knit], sideWidth)] : [];
+      const side = sideWidth > 0 ? Array(sideWidth).fill(Knit) : [];
       return side.concat(honeycomb(index, honeycombWidth)).concat(side);
     } else {
       throw new Error(`Invalid texture: ${texture}`);
@@ -152,18 +146,18 @@ export class CylinderPatternFactory {
     ];
   }
 
-  #addSeparator(stitches: StitchSequence[]): void {
+  #addSeparator(stitches: Stitch[]): void {
     const width = this.separatorWidthInput.numberValue();
     if (width <= 0)
       throw new Error('Invalid separator width (must be greater than 0).');
-    stitches.push(new StitchSequence([Knit], width));
+    stitches.push(...Array(width).fill(Knit));
   }
 
   build(): Pattern {
     const output = new Pattern().setRound();
     for (let rowIndex = 0; rowIndex < this.lengthInput.numberValue();
          rowIndex++) {
-      let stitches: StitchSequence[] = [];
+      let stitches: Stitch[] = [];
       for (let section = 0; section < this.sectionCountInput.numberValue();
            section++) {
         this.#addSeparator(stitches);
@@ -176,42 +170,35 @@ export class CylinderPatternFactory {
   }
 }
 
-function honeycomb(rowId: number, width: number): StitchSequence[] {
+function honeycomb(rowId: number, width: number): Stitch[] {
   const step = rowId % 8;
   if (width % 2 != 0) throw new Error('Honeycomb requires even width.');
   if (step == 2)
-    return listRepeating<StitchSequence>(
+    return listRepeating<Stitch>(
         [
-          new StitchSequence([CableTwoBackKnitTwo], 1),
-          new StitchSequence([Knit], 2),
-          new StitchSequence([CableTwoFrontKnitTwo], 1),
-          new StitchSequence([Knit], 2),
+          CableTwoBackKnitTwo, Knit, Knit, CableTwoFrontKnitTwo, Knit, Knit,
         ],
-        width / 2);
+        width);
 
   if (step == 6)
-    return listRepeating<StitchSequence>(
+    return listRepeating<Stitch>(
         [
-          new StitchSequence([CableTwoFrontKnitTwo], 1),
-          new StitchSequence([Knit], 2),
-          new StitchSequence([CableTwoBackKnitTwo], 1),
-          new StitchSequence([Knit], 2),
+          CableTwoFrontKnitTwo, Knit, Knit, CableTwoBackKnitTwo, Knit, Knit,
         ],
-        width / 2);
+        width);
 
-  return [new StitchSequence([Knit], width)];
+  return Array(width).fill(Knit);
 }
 
 function row2x2(rowId: number, stitches: number): Row {
   const rightSide = rowId % 2 == 0;
   const rowBottomKnit = (rowId + 1) % 4 < 2;
-  let head = listRepeating<StitchSequence>(
-      [new StitchSequence(rightSide != rowBottomKnit ? [Knit, Knit, Purl, Purl] : [Purl, Purl, Knit, Knit], 1)],
-      Math.floor(stitches / 4));
-  let tail: StitchSequence[] = [];
-  if (stitches % 4 >= 1) tail.push(new StitchSequence([rowBottomKnit ? Knit : Purl], 1));
-  if (stitches % 4 >= 2) tail.push(new StitchSequence([rowBottomKnit ? Knit : Purl], 1));
-  if (stitches % 4 == 3) tail.push(new StitchSequence([rowBottomKnit ? Purl : Knit], 1));
+  const repeatingStitches = rightSide != rowBottomKnit ? [Knit, Knit, Purl, Purl] : [Purl, Purl, Knit, Knit];
+  let head = listRepeating<Stitch>(repeatingStitches, Math.floor(stitches / 4) * 4);
+  let tail: Stitch[] = [];
+  if (stitches % 4 >= 1) tail.push(rowBottomKnit ? Knit : Purl);
+  if (stitches % 4 >= 2) tail.push(rowBottomKnit ? Knit : Purl);
+  if (stitches % 4 == 3) tail.push(rowBottomKnit ? Purl : Knit);
   return new Row(
       !rightSide ? [...head, ...tail] : [...tail.reverse(), ...head]);
 }
