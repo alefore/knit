@@ -66,12 +66,11 @@ export class DoubleMossStitch implements KnitTexture {
   buildStitches(
       numberOfStitches: number, knittingStyle: RowSwitchStyle,
       rowIndex: number): Stitch[] {
-    const rowInPattern = rowIndex % 4;
     const indexDeltaFromPattern = rowIndex % 4 < 2 ? 0 : 2;
-    return rib(
-        [Knit, Knit, Purl, Purl], numberOfStitches,
-        indexDeltaFromPattern + knittingStyle === RowSwitchStyles.round ?
-            0 :
-            4 - (numberOfStitches % 4));
+    const totalDelta = indexDeltaFromPattern +
+        (knittingStyle === RowSwitchStyles.round || rowIndex % 2 === 1 ?
+             0 :
+             4 - (numberOfStitches % 4));
+    return rib([Knit, Knit, Purl, Purl], numberOfStitches, totalDelta);
   }
 }
