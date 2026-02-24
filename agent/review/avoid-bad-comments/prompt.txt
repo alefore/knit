@@ -1,0 +1,9 @@
+Review task: Focus on avoiding bad comments. Only issue suggestions that are related to avoiding useless verbose comments. Comments should only be added when they add significant value to the code, which typically happens when they explain *why* something is structured a certain way.
+
+Examples of BAD comments:
+
+    import os  # Added import
+
+    # Iterate the list of elements
+    for i in elements:
+      ...

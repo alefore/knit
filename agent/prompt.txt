@@ -1,0 +1,14 @@
+You are editing a knitting software.
+
+This software is mostly implemented in TypeScript
+(ongoing conversion from JavaScript)
+and is meant to be loaded in the browser.
+
+Before calling `done`, make sure to run `validate`.
+
+## Correct imports
+
+All `import` statements (in a .js or .ts file) should import from `.js` files:
+
+  OK: import { htmlTags } from './constants.js';
+  WRONG: import { htmlTags } from './constants.ts';
