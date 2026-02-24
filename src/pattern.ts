@@ -4,10 +4,12 @@ import { Row } from './row.js';
 import { PatternFactoryInput } from './inputs.js';
 
 // Define the switch styles as a const object for type safety
-const RowSwitchStyles = {
+export const RowSwitchStyles = {
   round: 'round',
   backAndForth: 'backAndForth',
 } as const;
+
+export type RowSwitchStyle = typeof RowSwitchStyles[keyof typeof RowSwitchStyles];
 
 export interface PatternFactory {
   factoryName: string;
@@ -16,18 +18,16 @@ export interface PatternFactory {
 }
 
 export class Pattern {
-  public static readonly rowSwitchStyles = RowSwitchStyles;
-
   public rows: Row[];
-  public rowSwitchStyle: string;
+  public rowSwitchStyle: RowSwitchStyle;
 
   constructor() {
     this.rows = [];
-    this.rowSwitchStyle = Pattern.rowSwitchStyles.backAndForth;
+    this.rowSwitchStyle = RowSwitchStyles.backAndForth;
   }
 
   public setRound(): this {
-    this.rowSwitchStyle = Pattern.rowSwitchStyles.round;
+    this.rowSwitchStyle = RowSwitchStyles.round;
     return this;
   }
 
@@ -52,7 +52,7 @@ export class Pattern {
   }
 
   public get showRowDirection(): boolean {
-    return this.rowSwitchStyle === Pattern.rowSwitchStyles.backAndForth;
+    return this.rowSwitchStyle === RowSwitchStyles.backAndForth;
   }
 
   public addRow(row: Row): void {
@@ -85,7 +85,7 @@ export class Pattern {
           ctx.fillStyle = colorIds.cyan;
         } else {
           ctx.fillStyle =
-            this.rowSwitchStyle === Pattern.rowSwitchStyles.round ||
+            this.rowSwitchStyle === RowSwitchStyles.round ||
             rowIndex % 2 === 0
               ? stitch.color
               : this.#invertColor(stitch.color);
@@ -96,7 +96,7 @@ export class Pattern {
           const y =
             stitchSize *
             (maxStitches -
-              (this.rowSwitchStyle === Pattern.rowSwitchStyles.round ||
+              (this.rowSwitchStyle === RowSwitchStyles.round ||
               rowIndex % 2 === 0
                 ? rowOutputStitches - stitchIndex
                 : stitchIndex + 1));
