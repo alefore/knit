@@ -247,7 +247,7 @@ class KnitState {
     const selectedRow = container.children[this.currentRow] as HTMLElement;
     if (selectedRow) {
       selectedRow.classList.add('highlight');
-      const rowTop = selectedRow.offsetTop + container.scrollTop;
+      const rowTop = selectedRow.offsetTop;
       const paddingTop = Math.max(0, container.clientHeight - selectedRow.offsetHeight) / 3;
       container.scrollTop = Math.max(0, rowTop - paddingTop);
     }
