@@ -42,3 +42,5 @@ export const htmlTags = {
   option: 'option',
   canvas: 'canvas',
 } as const;
+
+export const ZERO_WIDTH_SPACE_HTML_ENTITY = '&#8203;';

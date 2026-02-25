@@ -1,4 +1,4 @@
-import { htmlTags } from './constants.js';
+import { htmlTags, ZERO_WIDTH_SPACE_HTML_ENTITY } from './constants.js';
 import { Knit, SlipStitchPurlwise, WithYarnInFront, Stitch } from './stitch.js';
 import { StitchSequence } from './stitch_sequence.js';
 import { createTimestampView } from './timestamps.js';
@@ -74,14 +74,15 @@ export class Row {
   }
 
   /**
-   * Returns an array of HTML elements/strings separated by zero-width spaces.
+   * Returns an array of HTML elements separated by zero-width spaces.
    */
-  describeStitches(): (HTMLElement | string)[] {
-    const zeroWidthSpace = '&#8203;';
+  describeStitches(): HTMLElement[] {
+    const zeroWidthSpace = document.createElement(htmlTags.span);
+    zeroWidthSpace.innerHTML = ZERO_WIDTH_SPACE_HTML_ENTITY;
     return intersperse(
       this.stitches.map(sequence => sequence.html()),
       zeroWidthSpace
-    );
+    ) as HTMLElement[];
   }
 
   /**
@@ -107,11 +108,7 @@ export class Row {
 
     // Append described stitches.
     this.describeStitches().forEach(element => {
-      if (typeof element === 'string') {
-        pElement.insertAdjacentHTML('beforeend', element);
-      } else {
-        pElement.appendChild(element);
-      }
+      pElement.appendChild(element);
     });
     rowDiv.appendChild(pElement);
 

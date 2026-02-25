@@ -1,4 +1,4 @@
-import { htmlTags } from './constants.js';
+import { htmlTags, ZERO_WIDTH_SPACE_HTML_ENTITY } from './constants.js';
 import { Stitch } from './stitch.js';
 
 export class StitchSequence {
@@ -14,36 +14,49 @@ export class StitchSequence {
   /**
    * Generates the HTML representation of the stitch sequence.
    */
-  html(): HTMLElement | string {
-    if (this.repetitions === 0) return '';
+  html(): HTMLElement {
+    if (this.repetitions === 0) return document.createElement(htmlTags.span);
 
     const output = document.createElement(htmlTags.span);
     output.classList.add('stitchSequence');
     const needParens = this.repetitions !== 1 && this.sequence.length > 1;
 
+    const OPEN_PAREN = '(';
+    const CLOSE_PAREN = ')';
+    const repetitionsText = this.repetitions.toString();
+
     // Prefix repetition for multiple stitches: e.g., 2(K, P)
     if (this.repetitions !== 1 && needParens) {
-      output.textContent = this.repetitions.toString();
+      const repSpan = document.createElement(htmlTags.span);
+      repSpan.textContent = repetitionsText;
+      output.appendChild(repSpan);
     }
 
-    if (needParens) output.textContent += '(';
+    if (needParens) {
+      const parenSpan = document.createElement(htmlTags.span);
+      parenSpan.textContent = OPEN_PAREN;
+      output.appendChild(parenSpan);
+    }
 
     this.sequence.forEach((stitch) => {
       const stitchHtml = stitch.html();
-      if (typeof stitchHtml === 'string') {
-        output.insertAdjacentHTML('beforeend', stitchHtml);
-      } else {
-        output.appendChild(stitchHtml);
-      }
-      const zeroWidthSpace = '&#8203;';
-      output.insertAdjacentHTML('beforeend', zeroWidthSpace);
+      output.appendChild(stitchHtml);
+      const zeroWidthSpace = document.createElement(htmlTags.span);
+      zeroWidthSpace.innerHTML = ZERO_WIDTH_SPACE_HTML_ENTITY;
+      output.appendChild(zeroWidthSpace);
     });
 
-    if (needParens) output.textContent += ')';
+    if (needParens) {
+      const parenSpan = document.createElement(htmlTags.span);
+      parenSpan.textContent = CLOSE_PAREN;
+      output.appendChild(parenSpan);
+    }
 
     // Suffix repetition for single stitches: e.g., K2
     if (this.repetitions !== 1 && !needParens) {
-      output.textContent += this.repetitions.toString();
+      const repSpan = document.createElement(htmlTags.span);
+      repSpan.textContent = repetitionsText;
+      output.appendChild(repSpan);
     }
 
     return output;
