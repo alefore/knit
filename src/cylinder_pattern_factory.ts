@@ -152,15 +152,18 @@ class CylinderPatternFactory {
     for (let rowIndex = 0; rowIndex < this.lengthInput.numberValue();
          rowIndex++) {
       let stitches: Stitch[] = [];
-      const startWithSeparator =
-          knittingStyle === RowSwitchStyles.round || rowIndex % 2 === 1;
+      const normalOrder =
+          knittingStyle === RowSwitchStyles.round || rowIndex % 2 === 0;
       for (let section = 0; section < this.sectionCountInput.numberValue();
            section++) {
-        if (startWithSeparator) stitches.push(...this.#getSeparator(rowIndex));
-        stitches.push(...this.sections[section]!.getStitches(
+        if (normalOrder) stitches.push(...this.#getSeparator(rowIndex));
+        const actualSection = normalOrder ?
+            section :
+            this.sectionCountInput.numberValue() - section - 1;
+        stitches.push(...this.sections[actualSection]!.getStitches(
             rowIndex, this.lengthInput.numberValue(),
             this.separatorWidthInput));
-        if (!startWithSeparator) stitches.push(...this.#getSeparator(rowIndex));
+        if (!normalOrder) stitches.push(...this.#getSeparator(rowIndex));
       }
       output.addRow(new Row(stitches));
     }
