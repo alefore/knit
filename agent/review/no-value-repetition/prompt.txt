@@ -1,0 +1,2 @@
+Avoid repeating values.
+Instead, define a variable at the right scope and re-use the variable.
