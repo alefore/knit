@@ -1,8 +1,8 @@
 import {PatternFactoryInput} from './inputs.js';
-import {Pattern, RowSwitchStyles} from './pattern.js';
+import {Pattern, type RowSwitchStyle, RowSwitchStyles} from './pattern.js';
 import {PatternFactoryRegistry} from './pattern_factory_registry.js';
 import {Row} from './row.js';
-import {Knit, M1L, M1R, Stitch} from './stitch.js';
+import {Knit, M1L, M1R, Purl, Stitch} from './stitch.js';
 import {type KnitTexture, texturesMap} from './texture.js';
 
 class Section {
@@ -10,8 +10,11 @@ class Section {
   widthBottom: PatternFactoryInput;
   texture: PatternFactoryInput;
   inputs: PatternFactoryInput[];
+  knittingStyleInput: PatternFactoryInput;
 
-  constructor(sectionId: number, sectionCountInput: PatternFactoryInput) {
+  constructor(
+      sectionId: number, sectionCountInput: PatternFactoryInput,
+      knittingStyleInput: PatternFactoryInput) {
     this.widthTop = new PatternFactoryInput(
         `${sectionId}: Top Width`,
         `How wide should section ${sectionId} be at the top?`, 3, 'stitches');
@@ -24,6 +27,7 @@ class Section {
         `What type of pattern should section ${sectionId} use?`, 'Stockinette',
         null, Array.from(texturesMap.keys()));
     this.inputs = [this.widthTop, this.widthBottom, this.texture];
+    this.knittingStyleInput = knittingStyleInput;
     this.inputs.forEach(
         (i) => i.addVisibilityRequirement(
             () => sectionCountInput.numberValue() > sectionId));
@@ -89,18 +93,23 @@ class Section {
     // Always call buildStitches with the maximum width for the section to
     // ensure a consistent base texture, as per the updated plan.
     return texture.buildStitches(
-        this.widthBottom.numberValue(), RowSwitchStyles.round, rowIndex);
+        this.widthBottom.numberValue(),
+        this.knittingStyleInput.value() as RowSwitchStyle, rowIndex);
   }
 }
 
 class CylinderPatternFactory {
   factoryName: string = 'Cylinder';
+  knittingStyleInput: PatternFactoryInput;
   lengthInput: PatternFactoryInput;
   separatorWidthInput: PatternFactoryInput;
   sectionCountInput: PatternFactoryInput;
   sections: Section[];
 
   constructor() {
+    this.knittingStyleInput = new PatternFactoryInput(
+        'Knitting Style', 'Should the cylinder be knit in the round or flat?',
+        RowSwitchStyles.round, null, Object.values(RowSwitchStyles));
     this.lengthInput = new PatternFactoryInput(
         'Length', 'How long should the cylinder be?', 30, 'rows');
     this.separatorWidthInput = new PatternFactoryInput(
@@ -111,34 +120,47 @@ class CylinderPatternFactory {
         'Sections', 'How many sections should the polygon have?', 4,
         'sections');
     this.sections = Array.from(
-        {length: 10}, (_, index) => new Section(index, this.sectionCountInput));
+        {length: 10},
+        (_, index) => new Section(
+            index, this.sectionCountInput, this.knittingStyleInput));
   }
 
   getInputs(): PatternFactoryInput[] {
     return [
-      this.lengthInput, this.separatorWidthInput, this.sectionCountInput,
-      ...this.sections.flatMap((s) => s.getInputs())
+      this.knittingStyleInput, this.lengthInput, this.separatorWidthInput,
+      this.sectionCountInput, ...this.sections.flatMap((s) => s.getInputs())
     ];
   }
 
-  #addSeparator(stitches: Stitch[]): void {
+  #getSeparator(rowIndex: number): Stitch[] {
     const width = this.separatorWidthInput.numberValue();
     if (width <= 0)
       throw new Error('Invalid separator width (must be greater than 0).');
-    stitches.push(...Array(width).fill(Knit));
+    return Array(width).fill(
+        this.knittingStyleInput.value() as RowSwitchStyle ===
+                    RowSwitchStyles.round ||
+                rowIndex % 2 === 1 ?
+            Knit :
+            Purl);
   }
 
   build(): Pattern {
-    const output = new Pattern().setRound();
+    const output = new Pattern();
+    const knittingStyle = this.knittingStyleInput.value() as RowSwitchStyle;
+    output.rowSwitchStyle = knittingStyle;
+
     for (let rowIndex = 0; rowIndex < this.lengthInput.numberValue();
          rowIndex++) {
       let stitches: Stitch[] = [];
+      const startWithSeparator =
+          knittingStyle === RowSwitchStyles.round || rowIndex % 2 === 1;
       for (let section = 0; section < this.sectionCountInput.numberValue();
            section++) {
-        this.#addSeparator(stitches);
+        if (startWithSeparator) stitches.push(...this.#getSeparator(rowIndex));
         stitches.push(...this.sections[section]!.getStitches(
             rowIndex, this.lengthInput.numberValue(),
             this.separatorWidthInput));
+        if (!startWithSeparator) stitches.push(...this.#getSeparator(rowIndex));
       }
       output.addRow(new Row(stitches));
     }
