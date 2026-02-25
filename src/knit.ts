@@ -27,7 +27,7 @@ class ControlButton {
   constructor(id: string | null, text: string, description: string, action: (e: MouseEvent) => void) {
     this.text = text;
     this.description = description;
-    const button = document.createElement(htmlTags.input.slice(1, -1)) as HTMLInputElement;
+    const button = document.createElement(htmlTags.input) as HTMLInputElement;
     button.type = htmlInputTypes.submit;
     button.value = this.text;
     button.title = this.description;
@@ -100,7 +100,7 @@ class KnitState {
     this.currentRow = Number(this.inputs.get(urlParams.row) ?? 0);
     this.configuringStateChange = new EventListener();
     this.stateChange = new EventListener();
-    this.buttonsForm = document.createElement(htmlTags.form.slice(1, -1)) as HTMLFormElement;
+    this.buttonsForm = document.createElement(htmlTags.form) as HTMLFormElement;
     this.buttonsForm.addEventListener('submit', (event) => { event.preventDefault(); });
     this.configuring = this.currentRow === 0;
 
@@ -157,27 +157,27 @@ class KnitState {
       .appendHtml(this.buttonsForm)
       .setEnabled(this.stateChange, () => this.pattern != null && this.currentRow < (this.pattern?.rowsCount() ?? 0) - 1);
 
-    const knitCanvas = document.createElement(htmlTags.canvas.slice(1, -1)) as HTMLCanvasElement;
+    const knitCanvas = document.createElement(htmlTags.canvas) as HTMLCanvasElement;
     knitCanvas.id = 'knitCanvas';
     document.body.appendChild(knitCanvas);
 
-    const controlsDiv = document.createElement(htmlTags.div.slice(1, -1));
+    const controlsDiv = document.createElement(htmlTags.div);
     controlsDiv.id = 'controls';
     controlsDiv.appendChild(this.buttonsForm);
     document.body.appendChild(controlsDiv);
 
-    const inputsDiv = document.createElement(htmlTags.div.slice(1, -1));
+    const inputsDiv = document.createElement(htmlTags.div);
     inputsDiv.id = 'inputs';
     if (this.currentRow !== 0) {
       inputsDiv.style.display = cssDisplayValues.none;
     }
-    inputsDiv.appendChild(document.createElement(htmlTags.form.slice(1, -1)));
-    const factoryWarningsDiv = document.createElement(htmlTags.div.slice(1, -1));
+    inputsDiv.appendChild(document.createElement(htmlTags.form));
+    const factoryWarningsDiv = document.createElement(htmlTags.div);
     factoryWarningsDiv.id = objectIds.factoryWarnings;
     inputsDiv.appendChild(factoryWarningsDiv);
     document.body.appendChild(inputsDiv);
 
-    const patternContainerDiv = document.createElement(htmlTags.div.slice(1, -1));
+    const patternContainerDiv = document.createElement(htmlTags.div);
     patternContainerDiv.id = 'patternContainer';
     if (this.currentRow === 0) {
       patternContainerDiv.style.display = cssDisplayValues.none;
@@ -202,7 +202,7 @@ class KnitState {
       this.pattern = this.currentPatternFactory().build();
     } catch (error) {
       this.pattern = null;
-      const pElement = document.createElement(htmlTags.p.slice(1, -1));
+      const pElement = document.createElement(htmlTags.p);
       pElement.textContent = String(error);
       warningsDiv.appendChild(pElement);
       console.error(error);

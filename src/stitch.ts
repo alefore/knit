@@ -28,7 +28,7 @@ export class Stitch {
    * Generates a HTML element for the stitch.
    */
   html(): HTMLElement {
-    const spanElement = document.createElement(htmlTags.span.slice(1, -1));
+    const spanElement = document.createElement(htmlTags.span);
     spanElement.style.color = this.color;
     spanElement.title = this.tooltip;
     spanElement.classList.add('stitch');

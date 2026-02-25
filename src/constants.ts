@@ -29,10 +29,16 @@ export const urlParams = {
   row: 'row',
 } as const;
 
-const tags = [
-  'div', 'form', 'input', 'p', 'span', 'td', 'tr', 'table', 'select', 'option', 'canvas'
-] as const;
-
-export const htmlTags = tags.reduce((obj, tag) => {
-  return { ...obj, [tag]: `<${tag}>` };
-}, {} as { [K in typeof tags[number]]: string }) as { [K in typeof tags[number]]: string };
+export const htmlTags = {
+  div: 'div',
+  form: 'form',
+  input: 'input',
+  p: 'p',
+  span: 'span',
+  td: 'td',
+  tr: 'tr',
+  table: 'table',
+  select: 'select',
+  option: 'option',
+  canvas: 'canvas',
+} as const;

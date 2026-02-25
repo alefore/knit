@@ -17,7 +17,7 @@ export class StitchSequence {
   html(): HTMLElement | string {
     if (this.repetitions === 0) return '';
 
-    const output = document.createElement(htmlTags.span.slice(1, -1));
+    const output = document.createElement(htmlTags.span);
     output.classList.add('stitchSequence');
     const needParens = this.repetitions !== 1 && this.sequence.length > 1;
 

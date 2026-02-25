@@ -90,11 +90,11 @@ export class Row {
   createDiv(index: number, pattern: IPattern): HTMLElement {
     const stitchDelta = this.outputStitches - this.inputStitches;
 
-    const rowDiv = document.createElement(htmlTags.div.slice(1, -1));
+    const rowDiv = document.createElement(htmlTags.div);
     rowDiv.classList.add('row');
 
-    const pElement = document.createElement(htmlTags.p.slice(1, -1));
-    const spanElement = document.createElement(htmlTags.span.slice(1, -1));
+    const pElement = document.createElement(htmlTags.p);
+    const spanElement = document.createElement(htmlTags.span);
     spanElement.classList.add('rowIndex');
     spanElement.textContent = index +
       (pattern.showRowDirection ?
@@ -119,7 +119,7 @@ export class Row {
         (total, r) => total + r.outputStitches, 0);
     const totalStitches = pattern.outputStitches;
 
-    const detailsP = document.createElement(htmlTags.p.slice(1, -1));
+    const detailsP = document.createElement(htmlTags.p);
     detailsP.classList.add('details');
     detailsP.textContent = Math.floor(100 * previousStitches / totalStitches) +
       '% (' + previousStitches + ' of ' + totalStitches + ' st)';
@@ -138,7 +138,7 @@ export class Row {
   }
 
   private showVisitTime() {
-    const detailsP = document.createElement(htmlTags.p.slice(1, -1));
+    const detailsP = document.createElement(htmlTags.p);
     detailsP.classList.add('details');
     detailsP.appendChild(createTimestampView(this.firstVisit!.getTime()));
     this.rowDiv!.appendChild(detailsP);
