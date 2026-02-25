@@ -81,7 +81,7 @@ export class PatternFactoryInput {
     }
   }
 
-  value(): string|number|string[]|undefined {
+  value(): string | undefined {
     return this.formInput?.value;
   }
 
