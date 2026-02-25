@@ -1,9 +1,9 @@
 import {PatternFactoryInput} from './inputs.js';
 import {cubicBezierArray} from './math.js';
 import {Pattern, RowSwitchStyles} from './pattern.js';
+import {PatternFactoryRegistry} from './pattern_factory_registry.js';
 import {Row} from './row.js';
 import {Knit, KnitFrontBack, KnitTwoTogether, Purl, Stitch} from './stitch.js';
-import {PatternFactoryRegistry} from './pattern_factory_registry.js';
 import {type KnitTexture, texturesMap} from './texture.js';
 
 interface Point {
@@ -55,8 +55,8 @@ class ScarfPatternFactory {
         Array.from(texturesMap.keys()));
     this.shapeInput = new PatternFactoryInput(
         'Shape', 'What general shape would you like?',
-        Object.keys(ScarfPatternFactory.cubicBezierFocalPoints)[0] as string, null,
-        Object.keys(ScarfPatternFactory.cubicBezierFocalPoints));
+        Object.keys(ScarfPatternFactory.cubicBezierFocalPoints)[0] as string,
+        null, Object.keys(ScarfPatternFactory.cubicBezierFocalPoints));
   }
 
   getInputs(): PatternFactoryInput[] {
@@ -75,6 +75,7 @@ class ScarfPatternFactory {
 
     const stitchesPerRow = this.#computeStitchesPerRow();
     const output = new Pattern();
+
     stitchesPerRow.forEach((value: number) => this.#addRow(output, value));
     for (let row = 0; row < this.centerLengthInput.numberValue(); row++)
       this.#addRow(output, this.centerWidthInput.numberValue());
@@ -88,7 +89,8 @@ class ScarfPatternFactory {
         (this.rowsInput.numberValue() - this.centerLengthInput.numberValue()) /
         2);
     const coordinates =
-        ScarfPatternFactory.cubicBezierFocalPoints[this.shapeInput.value() as string];
+        ScarfPatternFactory
+            .cubicBezierFocalPoints[this.shapeInput.value() as string];
     const p0 = {x: 0, y: 0};
     const p1 = {
       x: coordinates![0].x * rowsPerSide,
@@ -109,19 +111,22 @@ class ScarfPatternFactory {
         pattern.lastRow().outputStitches - totalBorderStitches;
     const atEvenRow = pattern.rowsCount() % 2 == 0;
 
-    let growType: Stitch | null = null;
+    let growType: Stitch|null = null;
     if (atEvenRow && previousStitches < desiredStitches)
       growType = KnitFrontBack;
     else if (atEvenRow && previousStitches > desiredStitches)
       growType = KnitTwoTogether;
 
-    const texture = texturesMap.get(this.textureInput.value() as string)!;
-    const stitches = texture.buildStitches(
-        previousStitches - (growType === KnitTwoTogether ? 1 : 0),
-        RowSwitchStyles.backAndForth,
-        pattern.rows.length);
-
-    pattern.addRow(new Row(stitches).borderWrap(growType));
+    const allTextureStitches =
+        texturesMap.get(this.textureInput.value() as string)!.buildStitches(
+            this.centerWidthInput.numberValue(), RowSwitchStyles.backAndForth,
+            pattern.rows.length);
+    const stitchesToKeep =
+        previousStitches - (growType === KnitTwoTogether ? 1 : 0);
+    const slicedStitches = atEvenRow ?
+        allTextureStitches.reverse().slice(0, stitchesToKeep).reverse() :
+        allTextureStitches.slice(0, stitchesToKeep);
+    pattern.addRow(new Row(slicedStitches).borderWrap(growType));
   }
 }
 
