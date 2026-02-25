@@ -11,7 +11,7 @@ function applyKnittingStyle(
     knittingStyle: RowSwitchStyle, rowIndex: number,
     pattern: Stitch[]): Stitch[] {
   console.log([rowIndex, pattern]);
-  if (knittingStyle === RowSwitchStyles.round || rowIndex % 2 === 1) {
+  if (knittingStyle === RowSwitchStyles.round || rowIndex % 2 === 0) {
     return pattern;
   }
   return pattern.reverse().map((s) => s === Knit ? Purl : Knit);
@@ -113,6 +113,21 @@ export class HoneycombCables implements KnitTexture {
   }
 }
 
+export class Boneyard implements KnitTexture {
+  private readonly stockinette = new Stockinette();
+
+  buildStitches(
+      numberOfStitches: number, knittingStyle: RowSwitchStyle,
+      rowIndex: number): Stitch[] {
+    if (rowIndex % 12 === 11) {
+      return Array(numberOfStitches)
+          .fill(knittingStyle === RowSwitchStyles.round ? Purl : Knit);
+    }
+    return this.stockinette.buildStitches(
+        numberOfStitches, knittingStyle, rowIndex);
+  }
+}
+
 export const texturesMap: Map<string, KnitTexture> = new Map([
   ['GarterStitch', new GarterStitch()],
   ['Stockinette', new Stockinette()],
@@ -121,4 +136,5 @@ export const texturesMap: Map<string, KnitTexture> = new Map([
   ['RibMistake', new RibMistake()],
   ['DoubleMossStitch', new DoubleMossStitch()],
   ['HoneycombCables', new HoneycombCables()],
+  ['Boneyard', new Boneyard()],
 ]);
