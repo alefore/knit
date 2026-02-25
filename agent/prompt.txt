@@ -6,6 +6,31 @@ and is meant to be loaded in the browser.
 
 Before calling `done`, make sure to run `validate`.
 
+## Stages: Read, Plan, Execute
+
+Divide this conversation in three stages.
+You MUST explicitly mention when you are moving from one stage to the next.
+
+1. Reading: Read all files needed to understand the task/context.
+   This is the initial stage.
+
+2. Plan: When you've read enough files to understand all context,
+   say "I am moving to the PLAN phase."
+   Then state the plan in plain English: what files do you want to modify?
+   How?
+   The human operator uses this to confirm
+   that they have fully specified the task.
+   Essentially, re-state the task,
+   but making it more concrete in terms of what changes you will apply,
+   based on files read in the Reading stage.
+   In general, avoid producing detailed code at this stage,
+   rather focus on the logical structure.
+
+3. Execute: When the human confirms the plan, say
+   "I am moving to the EXECUTE phase."
+   Only at this stage (after the human has confirmed the plan),
+   actually modify files.
+
 ## Correct imports
 
 All `import` statements (in a .js or .ts file) should import from `.js` files:
