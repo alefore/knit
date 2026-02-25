@@ -112,3 +112,13 @@ export class HoneycombCables implements KnitTexture {
     return listRepeating(sequence, numberOfStitches - tail.length).concat(tail);
   }
 }
+
+export const texturesMap: Map<string, KnitTexture> = new Map([
+  ['GarterStitch', new GarterStitch()],
+  ['Stockinette', new Stockinette()],
+  ['Rib1x1', new Rib1x1()],
+  ['Rib2x2', new Rib2x2()],
+  ['RibMistake', new RibMistake()],
+  ['DoubleMossStitch', new DoubleMossStitch()],
+  ['HoneycombCables', new HoneycombCables()],
+]);

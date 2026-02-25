@@ -2,15 +2,8 @@ import {PatternFactoryInput} from './inputs.js';
 import {Pattern, RowSwitchStyles} from './pattern.js';
 import {Row} from './row.js';
 import {Knit, M1L, M1R, Stitch} from './stitch.js';
-import {type KnitTexture, HoneycombCables, Rib2x2, RibMistake, Stockinette} from './texture.js';
+import {texturesMap, type KnitTexture} from './texture.js';
 import {PatternFactoryRegistry} from './pattern_factory_registry.js';
-
-const texturesMap: Map<string, KnitTexture> = new Map([
-  ['Stockinette', new Stockinette()],
-  ['Rib2x2', new Rib2x2()],
-  ['RibMistake', new RibMistake()],
-  ['Honeycomb', new HoneycombCables()],
-]);
 
 class Section {
   widthTop: PatternFactoryInput;
@@ -31,10 +24,8 @@ class Section {
         `What type of pattern should section ${sectionId} use?`,
         'Stockinette',
         null,
-        [
-          'Stockinette', 'Rib2x2', 'RibMistake',
-          'Honeycomb'
-        ]);
+        Array.from(texturesMap.keys())
+    );
     this.inputs = [this.widthTop, this.widthBottom, this.texture];
     this.inputs.forEach(
         (i) => i.addVisibilityRequirement(
