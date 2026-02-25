@@ -10,7 +10,6 @@ export interface KnitTexture {
 function applyKnittingStyle(
     knittingStyle: RowSwitchStyle, rowIndex: number,
     pattern: Stitch[]): Stitch[] {
-  console.log([rowIndex, pattern]);
   if (knittingStyle === RowSwitchStyles.round || rowIndex % 2 === 0) {
     return pattern;
   }
