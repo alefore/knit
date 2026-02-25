@@ -4,7 +4,7 @@ import {Pattern, RowSwitchStyles} from './pattern.js';
 import {Row} from './row.js';
 import {Knit, KnitFrontBack, KnitTwoTogether, Purl, Stitch} from './stitch.js';
 import {PatternFactoryRegistry} from './pattern_factory_registry.js';
-import {type KnitTexture, GarterStitch, DoubleMossStitch} from './texture.js';
+import {type KnitTexture, texturesMap} from './texture.js';
 
 interface Point {
   x: number;
@@ -21,11 +21,6 @@ class ScarfPatternFactory {
     Thin: [{x: 0.75, y: 0.3}, {x: 0.5, y: 0.7}],
     Thick: [{x: 0.5, y: 0.3}, {x: 0.25, y: 0.7}],
     Straight: [{x: 0.5, y: 0.5}, {x: 0.5, y: 0.5}],
-  };
-
-  static textures: {[key: string]: KnitTexture} = {
-    'Garter': new GarterStitch(),
-    'Double moss': new DoubleMossStitch(),
   };
 
   factoryName = 'Sophie Scarf';
@@ -56,8 +51,8 @@ class ScarfPatternFactory {
         25, 'stitches');
     this.textureInput = new PatternFactoryInput(
         'Texture', 'What type of texture do you want?',
-        Object.keys(ScarfPatternFactory.textures)[0] as string, null,
-        Object.keys(ScarfPatternFactory.textures));
+        Array.from(texturesMap.keys())[0] as string, null,
+        Array.from(texturesMap.keys()));
     this.shapeInput = new PatternFactoryInput(
         'Shape', 'What general shape would you like?',
         Object.keys(ScarfPatternFactory.cubicBezierFocalPoints)[0] as string, null,
@@ -120,7 +115,7 @@ class ScarfPatternFactory {
     else if (atEvenRow && previousStitches > desiredStitches)
       growType = KnitTwoTogether;
 
-    const texture = ScarfPatternFactory.textures[this.textureInput.value() as string]!;
+    const texture = texturesMap.get(this.textureInput.value() as string)!;
     const stitches = texture.buildStitches(
         previousStitches - (growType === KnitTwoTogether ? 1 : 0),
         RowSwitchStyles.backAndForth,
