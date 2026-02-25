@@ -1,9 +1,9 @@
 import {PatternFactoryInput} from './inputs.js';
 import {Pattern, RowSwitchStyles} from './pattern.js';
+import {PatternFactoryRegistry} from './pattern_factory_registry.js';
 import {Row} from './row.js';
 import {Knit, M1L, M1R, Stitch} from './stitch.js';
-import {texturesMap, type KnitTexture} from './texture.js';
-import {PatternFactoryRegistry} from './pattern_factory_registry.js';
+import {type KnitTexture, texturesMap} from './texture.js';
 
 class Section {
   widthTop: PatternFactoryInput;
@@ -21,11 +21,8 @@ class Section {
         'stitches');
     this.texture = new PatternFactoryInput(
         `${sectionId}: Texture`,
-        `What type of pattern should section ${sectionId} use?`,
-        'Stockinette',
-        null,
-        Array.from(texturesMap.keys())
-    );
+        `What type of pattern should section ${sectionId} use?`, 'Stockinette',
+        null, Array.from(texturesMap.keys()));
     this.inputs = [this.widthTop, this.widthBottom, this.texture];
     this.inputs.forEach(
         (i) => i.addVisibilityRequirement(
@@ -39,40 +36,60 @@ class Section {
   }
 
   getStitches(
-      rowIndex: number, rowLength: number, separatorWidthInput: PatternFactoryInput): Stitch[] {
-    const widthTop = this.widthTop.numberValue();
-    const widthBottom = this.widthBottom.numberValue();
-    const previousWidth =
-        rowIndex === 0 ? widthTop : this.#getRowWidth(rowIndex - 1, rowLength);
+      rowIndex: number, rowLength: number,
+      separatorWidthInput: PatternFactoryInput): Stitch[] {
+    const previousWidth = rowIndex === 0 ?
+        this.widthTop.numberValue() :
+        this.#getRowWidth(rowIndex - 1, rowLength);
     const desiredWidth = this.#getRowWidth(rowIndex, rowLength);
     const textureValue = this.texture.value();
     if (textureValue === undefined || typeof textureValue !== 'string') {
       throw new Error(`Invalid texture value: ${textureValue}`);
     }
-    const output: Stitch[] =
-        this.#applyTexture(textureValue, rowIndex, previousWidth);
-    if (desiredWidth >= previousWidth + 2) return [M1R, ...output, M1L];
-    return output;
+
+    const currentIncreaseAmount =
+        (desiredWidth > previousWidth) ? (desiredWidth - previousWidth) : 0;
+
+    const rawTextureOutput: Stitch[] =
+        this.#applyTexture(textureValue, rowIndex);
+
+    // The core texture needs to be `desiredWidth - currentIncreaseAmount` long.
+    // The `widthBottom` will be used as the base width for generating the
+    // texture. The `startTrim` is to center the `desiredWidth` segment within
+    // the `widthBottom`.
+    const stitchesToExtract = desiredWidth - currentIncreaseAmount;
+    const totalTrim = this.widthBottom.numberValue() - stitchesToExtract;
+    const startTrim = totalTrim / 2;
+
+    const centralTexture =
+        rawTextureOutput.slice(startTrim, startTrim + stitchesToExtract);
+
+    if (currentIncreaseAmount > 0) {
+      return [M1R, ...centralTexture, M1L];
+    }
+    return centralTexture;
   }
 
   #getRowWidth(index: number, total: number): number {
     const widthTop = this.widthTop.numberValue();
-    const widthBottom = this.widthBottom.numberValue();
     const rowRatio = index / (total - 1);
-    const desiredWidth =
-        Math.round((1 - rowRatio) * widthTop + rowRatio * widthBottom);
+    const desiredWidth = Math.round(
+        (1 - rowRatio) * widthTop + rowRatio * this.widthBottom.numberValue());
     // Total since the top.
     const desiredGrowth = desiredWidth - widthTop;
     // We can only grow by multiples of 2, so round it.
     return widthTop + (2 * Math.floor(desiredGrowth / 2));
   }
 
-  #applyTexture(textureName: string, rowIndex: number, width: number): Stitch[] {
+  #applyTexture(textureName: string, rowIndex: number): Stitch[] {
     const texture = texturesMap.get(textureName);
     if (!texture) {
       throw new Error(`Invalid texture: ${textureName}`);
     }
-    return texture.buildStitches(width, RowSwitchStyles.round, rowIndex);
+    // Always call buildStitches with the maximum width for the section to
+    // ensure a consistent base texture, as per the updated plan.
+    return texture.buildStitches(
+        this.widthBottom.numberValue(), RowSwitchStyles.round, rowIndex);
   }
 }
 
@@ -120,7 +137,8 @@ class CylinderPatternFactory {
            section++) {
         this.#addSeparator(stitches);
         stitches.push(...this.sections[section]!.getStitches(
-            rowIndex, this.lengthInput.numberValue(), this.separatorWidthInput));
+            rowIndex, this.lengthInput.numberValue(),
+            this.separatorWidthInput));
       }
       output.addRow(new Row(stitches));
     }
