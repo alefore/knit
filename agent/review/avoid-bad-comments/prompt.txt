@@ -7,3 +7,8 @@ Examples of BAD comments:
     # Iterate the list of elements
     for i in elements:
       ...
+
+Commented out code should generally be removed.
+An exception to that could be if the commented-out code
+helps explain the code
+(for example, providing some pseudo-code or such).
