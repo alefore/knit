@@ -12,7 +12,7 @@ function flip(p: Point): Point {
 }
 
 function minus(a: Point, b: Point): Point {
-  return {x: a.x - b.x, y: a.x - b.x};
+  return {x: a.x - b.x, y: a.y - b.y};
 }
 
 function applyZoom(p: Point, zoom: number): Point {
@@ -32,7 +32,8 @@ export class PatternCanvasView {
   private isClick: boolean;  // True if the current mouse interaction is
                              // considered a click (not a drag).
   private isFlipped: boolean =
-      false;  // True if the canvas is flipped 90 degrees.
+      false;                        // True if the canvas is flipped 90 degrees.
+  private selectedRow: number = 0;  // Stores the currently selected row.
 
   private readonly ZOOM_FACTOR = 1.1;
   private readonly MIN_ZOOM_LEVEL = 0.1;
@@ -88,7 +89,7 @@ export class PatternCanvasView {
     };
   }
 
-  public drawPattern(pattern: Pattern|null, currentRow: number): void {
+  public drawPattern(pattern: Pattern|null): void {
     this.currentPattern = pattern;
     const ctx = this.canvas.getContext('2d');
     if (!ctx) return;
@@ -118,7 +119,7 @@ export class PatternCanvasView {
           this.currentPattern!.rowSwitchStyle === RowSwitchStyles.round ||
           rowIndex % 2 === 0;
       row.flatten().forEach((stitch) => {
-        if (rowIndex === currentRow) {
+        if (rowIndex === this.selectedRow) {
           ctx.fillStyle = colorIds.cyan;
         } else {
           ctx.fillStyle =
@@ -148,6 +149,12 @@ export class PatternCanvasView {
     ctx.restore();
   }
 
+  public selectRow(pattern: Pattern|null, row: number): void {
+    this.currentPattern = pattern;  // Update currentPattern
+    this.selectedRow = row;
+    this.drawPattern(this.currentPattern);
+  }
+
   private setupEventListeners(): void {
     this.canvas.addEventListener('wheel', this.handleWheel.bind(this));
     this.canvas.addEventListener('mousedown', this.handleMouseDown.bind(this));
@@ -170,21 +177,21 @@ export class PatternCanvasView {
 
   private zoomIn(): void {
     this.zoomLevel *= this.ZOOM_FACTOR;
-    this.drawPattern(this.currentPattern, 0);
+    this.drawPattern(this.currentPattern);
   }
 
   private zoomOut(): void {
     this.zoomLevel /= this.ZOOM_FACTOR;
     if (this.zoomLevel < this.MIN_ZOOM_LEVEL)
       this.zoomLevel = this.MIN_ZOOM_LEVEL;
-    this.drawPattern(this.currentPattern, 0);
+    this.drawPattern(this.currentPattern);
   }
 
   private toggleFlipView(): void {
     this.isFlipped = !this.isFlipped;
     this.zoomLevel = 1;
     this.centerPattern();
-    this.drawPattern(this.currentPattern, 0);
+    this.drawPattern(this.currentPattern);
   }
 
   private centerPattern(): void {
@@ -234,7 +241,7 @@ export class PatternCanvasView {
     this.offset.y -= (transformedMouse.y * oldZoom + this.offset.y - mouse.y) *
         (this.zoomLevel / oldZoom - 1);
 
-    this.drawPattern(this.currentPattern, 0);
+    this.drawPattern(this.currentPattern);
   }
 
   private handleMouseDown(event: MouseEvent): void {
@@ -269,7 +276,7 @@ export class PatternCanvasView {
       this.offset.y += delta.y;
       this.lastX = event.clientX;
       this.lastY = event.clientY;
-      this.drawPattern(this.currentPattern, 0);
+      this.drawPattern(this.currentPattern);
     }
   }
 
@@ -288,6 +295,9 @@ export class PatternCanvasView {
     const rowIndex = Math.floor(xCoordinate / stitchSizeAtZoom1);
     if (rowIndex >= 0 && rowIndex < this.currentPattern.rows.length) {
       this.onRowSelected(rowIndex);
+      this.selectRow(
+          this.currentPattern,
+          rowIndex);  // Update the selected row and redraw.
     }
   }
 

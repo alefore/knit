@@ -94,7 +94,7 @@ class KnitState {
     this.configurationInputChanged();
     this.stateChange.notify();
     this.renderPattern();
-    this.selectRow(this.currentRow);
+    this.patternCanvasView.selectRow(this.pattern, this.currentRow);
   }
 
   private setupUI(): void {
@@ -204,10 +204,9 @@ class KnitState {
 
     if (this.pattern != null) {
       this.updateLocationHash();
-      this.patternCanvasView.drawPattern(this.pattern, this.currentRow);
+      this.patternCanvasView.selectRow(this.pattern, this.currentRow);
     } else {
-      this.patternCanvasView.drawPattern(
-          null, this.currentRow);  // Clear canvas if no pattern
+      this.patternCanvasView.drawPattern(null);  // Clear canvas if no pattern
     }
 
     const container =
