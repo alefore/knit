@@ -1,0 +1,9 @@
+Class attributes should generally have good comments that describe their
+semantics. These comments should focus first-and-foremost on what the data
+itself represents (what the data is). It is OK for these comments to describe
+how the data is used (but that should be secondary to what the data is).
+
+An exception to this rule would be trivial class or attributes where the
+semantics are completely obvious (i.e., where the comment doesn't really add any
+information that's not already implied by the name and type). In those cases, it
+is OK for class variables to not have any comments.

@@ -12,3 +12,15 @@ Commented out code should generally be removed.
 An exception to that could be if the commented-out code
 helps explain the code
 (for example, providing some pseudo-code or such).
+
+Examples of GOOD comments:
+
+    class Foo {
+      private offsetX: number;   // X-offset for panning the canvas.
+      private offsetY: number;   // Y-offset for panning the canvas.
+      …
+    }
+
+These are good comments (even if they are somewhat obvious) because good
+documentation about the semantics of class attributes (data) can help make
+software significantly more maintainable.
