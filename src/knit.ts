@@ -290,8 +290,8 @@ let wakeLock: WakeLockSentinel | null = null;
 
 async function requestWakeLock(): Promise<void> {
   try {
-    if (wakeLock === null && 'wakeLock' in navigator) {
-      wakeLock = await (navigator as any).wakeLock.request('screen');
+    if (wakeLock === null && 'wakeLock' in navigator && navigator.wakeLock) {
+      wakeLock = await navigator.wakeLock.request('screen');
       wakeLock?.addEventListener('release', () => {
         wakeLock = null;
       });
