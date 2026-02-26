@@ -75,7 +75,8 @@ class KnitState {
       event.preventDefault();
     });
     this.configuring = this.currentRow === 0;
-    this.patternCanvasView = new PatternCanvasView();
+    this.patternCanvasView =
+        new PatternCanvasView((row: number) => this.selectRow(row));
     document.body.appendChild(this.patternCanvasView.getCanvas());
 
     this.configuringStateChange.addListener(() => {
