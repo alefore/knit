@@ -2,20 +2,37 @@ import {colorIds} from './constants.js';
 import {ControlButton} from './control_button.js';
 import {Pattern, RowSwitchStyles} from './pattern.js';
 
+interface Point {
+  x: number;
+  y: number;
+}
+
+function flip(p: Point): Point {
+  return {x: p.y, y: p.x};
+}
+
+function minus(a: Point, b: Point): Point {
+  return {x: a.x - b.x, y: a.x - b.x};
+}
+
+function applyZoom(p: Point, zoom: number): Point {
+  return {x: p.x * zoom, y: p.y * zoom};
+}
+
 export class PatternCanvasView {
   private canvas: HTMLCanvasElement;
   private currentPattern: Pattern|null;
-  private zoomLevel: number;  // Current zoom level of the canvas.
-  private offsetX: number;    // X-offset for panning the canvas.
-  private offsetY: number;    // Y-offset for panning the canvas.
-  private isDragging:
-      boolean;            // True if the canvas is currently being dragged.
+  private zoomLevel: number;    // Current zoom level of the canvas.
+  private offset: Point;        // Offset for panning the canvas.
+  private isDragging: boolean;  // True if the canvas is being dragged.
   private lastX: number;  // Last X-coordinate of the mouse during a drag event.
   private lastY: number;  // Last Y-coordinate of the mouse during a drag event.
   // Callback function invoked when a row is selected within the canvas.
   private onRowSelected: (row: number) => void;
   private isClick: boolean;  // True if the current mouse interaction is
                              // considered a click (not a drag).
+  private isFlipped: boolean =
+      false;  // True if the canvas is flipped 90 degrees.
 
   private readonly ZOOM_FACTOR = 1.1;
   private readonly MIN_ZOOM_LEVEL = 0.1;
@@ -29,8 +46,7 @@ export class PatternCanvasView {
     // CSS.
     this.currentPattern = null;
     this.zoomLevel = 1;
-    this.offsetX = 0;
-    this.offsetY = 0;
+    this.offset = {x: 0, y: 0};
     this.isDragging = false;
     this.lastX = 0;
     this.lastY = 0;
@@ -42,6 +58,34 @@ export class PatternCanvasView {
 
   public getCanvas(): HTMLCanvasElement {
     return this.canvas;
+  }
+
+  private _getPatternDimensions() {
+    if (this.currentPattern === null) {
+      throw new Error('No pattern to calculate dimensions for.');
+    }
+
+    const unflippedPatternSizeStitches = {
+      x: this.currentPattern.rowsCount(),
+      y: Math.max(...this.currentPattern.rows.map(row => row.outputStitches))
+    };
+
+    const baseStitchSizeWidth =
+        this.canvas.width / unflippedPatternSizeStitches.x;
+    const baseStitchSizeHeight =
+        this.canvas.height / unflippedPatternSizeStitches.y;
+    const stitchSizeAtZoom1 =
+        Math.min(baseStitchSizeWidth, baseStitchSizeHeight);
+    const unflippedPatternSizePixels =
+        applyZoom(unflippedPatternSizeStitches, stitchSizeAtZoom1);
+
+    return {
+      unflippedPatternSizeStitches,
+      unflippedPatternSizePixels,
+      baseStitchSizeWidth,
+      baseStitchSizeHeight,
+      stitchSizeAtZoom1,
+    };
   }
 
   public drawPattern(pattern: Pattern|null, currentRow: number): void {
@@ -58,26 +102,21 @@ export class PatternCanvasView {
       return;
     }
 
-    const maxStitches =
-        Math.max(...this.currentPattern.rows.map(row => row.outputStitches));
-
-    const baseStitchSizeWidth =
-        this.canvas.width / this.currentPattern.rowsCount();
-    const baseStitchSizeHeight = this.canvas.height / maxStitches;
-
-    const stitchSize =
-        Math.min(baseStitchSizeWidth, baseStitchSizeHeight) * this.zoomLevel;
+    const {
+      unflippedPatternSizeStitches,
+      stitchSizeAtZoom1,
+      unflippedPatternSizePixels
+    } = this._getPatternDimensions();
 
     ctx.save();
-    ctx.translate(this.offsetX, this.offsetY);
-
+    ctx.translate(this.offset.x, this.offset.y);
+    ctx.scale(this.zoomLevel, this.zoomLevel);
     this.currentPattern.forEachRow((row, rowIndex) => {
       let stitchIndex = 0;
       const rowOutputStitches = row.outputStitches;
       const isRoundOrEvenRow =
           this.currentPattern!.rowSwitchStyle === RowSwitchStyles.round ||
           rowIndex % 2 === 0;
-
       row.flatten().forEach((stitch) => {
         if (rowIndex === currentRow) {
           ctx.fillStyle = colorIds.cyan;
@@ -87,13 +126,21 @@ export class PatternCanvasView {
         }
 
         for (let s = 0; s < stitch.outputStitches; s++) {
-          const x = rowIndex * stitchSize;
-          const y = stitchSize *
-              (maxStitches -
-               (isRoundOrEvenRow ? rowOutputStitches - stitchIndex :
-                                   stitchIndex + 1));
+          const unflipped = {
+            x: rowIndex,
+            y: (unflippedPatternSizeStitches.y - 1) -
+                (isRoundOrEvenRow ? rowOutputStitches - stitchIndex - 1 :
+                                    stitchIndex)
+          };
 
-          ctx.fillRect(x, y, stitchSize, stitchSize);
+          const flipped = {
+            x: isRoundOrEvenRow ? rowOutputStitches - stitchIndex - 1 :
+                                  stitchIndex,
+            y: rowIndex
+          };
+          const final = applyZoom(
+              this.isFlipped ? flipped : unflipped, stitchSizeAtZoom1);
+          ctx.fillRect(final.x, final.y, stitchSizeAtZoom1, stitchSizeAtZoom1);
           stitchIndex++;
         }
       });
@@ -116,6 +163,9 @@ export class PatternCanvasView {
 
     new ControlButton(null, '➖', 'Zoom Out', () => this.zoomOut())
         .appendHtml(buttonsForm);
+
+    new ControlButton(null, '🔁', 'Flip View', () => this.toggleFlipView())
+        .appendHtml(buttonsForm);
   }
 
   private zoomIn(): void {
@@ -130,6 +180,43 @@ export class PatternCanvasView {
     this.drawPattern(this.currentPattern, 0);
   }
 
+  private toggleFlipView(): void {
+    this.isFlipped = !this.isFlipped;
+    this.zoomLevel = 1;
+    this.centerPattern();
+    this.drawPattern(this.currentPattern, 0);
+  }
+
+  private centerPattern(): void {
+    if (this.currentPattern === null) {
+      return;
+    }
+
+    const {unflippedPatternSizeStitches, stitchSizeAtZoom1} =
+        this._getPatternDimensions();
+
+    let effectivePatternSizePixels = applyZoom(
+        unflippedPatternSizeStitches, stitchSizeAtZoom1 * this.zoomLevel);
+
+    if (this.isFlipped) {
+      effectivePatternSizePixels = flip(effectivePatternSizePixels);
+    }
+
+    // Calculate offsets to center the *effective* pattern on the canvas
+    this.offset.x = (this.canvas.width - effectivePatternSizePixels.x) / 2;
+    this.offset.y = (this.canvas.height - effectivePatternSizePixels.y) / 2;
+  }
+
+  private getTransformedCoordinates(canvas: Point): Point {
+    if (this.currentPattern === null) {
+      return canvas;
+    }
+    // Coordinates relative to start of pattern (removing zoom level and
+    // offset).
+    const base = applyZoom(minus(canvas, this.offset), 1 / this.zoomLevel);
+    return this.isFlipped ? flip(base) : base;
+  }
+
   private handleWheel(event: WheelEvent): void {
     event.preventDefault();
     const scaleAmount = -event.deltaY * 0.001;
@@ -138,34 +225,48 @@ export class PatternCanvasView {
     if (this.zoomLevel < this.MIN_ZOOM_LEVEL)
       this.zoomLevel = this.MIN_ZOOM_LEVEL;
 
-    // Adjust offsetX and offsetY to zoom towards the cursor
-    const rect = this.canvas.getBoundingClientRect();
-    const mouseX = event.clientX - rect.left;
-    const mouseY = event.clientY - rect.top;
+    const mouse = this.getClickCoordinates(event);
+    const transformedMouse = this.getTransformedCoordinates(mouse);
 
-    this.offsetX -= (mouseX - this.offsetX) * (this.zoomLevel / oldZoom - 1);
-    this.offsetY -= (mouseY - this.offsetY) * (this.zoomLevel / oldZoom - 1);
+    // Now adjust the offset.x and offset.y for the unflipped pattern's origin.
+    this.offset.x -= (transformedMouse.x * oldZoom + this.offset.x - mouse.x) *
+        (this.zoomLevel / oldZoom - 1);
+    this.offset.y -= (transformedMouse.y * oldZoom + this.offset.y - mouse.y) *
+        (this.zoomLevel / oldZoom - 1);
 
     this.drawPattern(this.currentPattern, 0);
   }
 
   private handleMouseDown(event: MouseEvent): void {
     this.isDragging = true;
-    this.isClick = true;  // Assume it's a click initially
+    this.isClick = true;
     this.lastX = event.clientX;
     this.lastY = event.clientY;
   }
 
+  private getClickCoordinates(event: MouseEvent): Point {
+    const rect = this.canvas.getBoundingClientRect();
+    const scaleX = this.canvas.width / rect.width;
+    const scaleY = this.canvas.height / rect.height;
+    return {
+      x: (event.clientX - rect.left) * scaleX,
+      y: (event.clientY - rect.top) * scaleY
+    };
+  }
+
   private handleMouseMove(event: MouseEvent): void {
     if (this.isDragging) {
-      const deltaX = event.clientX - this.lastX;
-      const deltaY = event.clientY - this.lastY;
-      if (Math.abs(deltaX) > this.DRAG_THRESHOLD ||
-          Math.abs(deltaY) > this.DRAG_THRESHOLD) {
+      const delta = {
+        x: event.clientX - this.lastX,
+        y: event.clientY - this.lastY
+      };
+      if (Math.abs(delta.x) > this.DRAG_THRESHOLD ||
+          Math.abs(delta.y) > this.DRAG_THRESHOLD) {
         this.isClick = false;
       }
-      this.offsetX += deltaX;
-      this.offsetY += deltaY;
+
+      this.offset.x += delta.x;
+      this.offset.y += delta.y;
       this.lastX = event.clientX;
       this.lastY = event.clientY;
       this.drawPattern(this.currentPattern, 0);
@@ -180,21 +281,12 @@ export class PatternCanvasView {
     if (this.currentPattern === null || !this.isClick) {
       return;
     }
-    const currentPattern = this.currentPattern;
 
-    const rect = this.canvas.getBoundingClientRect();
-    const clickX = event.clientX - rect.left;
-    const transformedX = (clickX - this.offsetX) / this.zoomLevel;
-
-    const maxStitches =
-        Math.max(...currentPattern.rows.map(row => row.outputStitches));
-    const baseStitchSizeWidth = this.canvas.width / currentPattern.rowsCount();
-    const baseStitchSizeHeight = this.canvas.height / maxStitches;
-    const stitchSize = Math.min(baseStitchSizeWidth, baseStitchSizeHeight);
-
-    const rowIndex = Math.floor(transformedX / stitchSize);
-
-    if (rowIndex >= 0 && rowIndex < currentPattern.rows.length) {
+    const {stitchSizeAtZoom1} = this._getPatternDimensions();
+    const xCoordinate =
+        this.getTransformedCoordinates(this.getClickCoordinates(event)).x;
+    const rowIndex = Math.floor(xCoordinate / stitchSizeAtZoom1);
+    if (rowIndex >= 0 && rowIndex < this.currentPattern.rows.length) {
       this.onRowSelected(rowIndex);
     }
   }
