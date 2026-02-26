@@ -5,6 +5,7 @@ import './cylinder_pattern_factory.js';
 import './scarf_pattern_factory.js';
 
 import {cssDisplayValues, cssProps, htmlInputTypes, htmlProps, htmlTags, urlParams} from './constants.js';
+import {ControlButton} from './control_button.js';
 import {drawInputs, parseHash, PatternFactoryInput} from './inputs.js';
 import {EventListener} from './listener.js';
 import {Pattern, type PatternFactory} from './pattern.js';
@@ -19,40 +20,6 @@ const objectIds = {
   buttonNext: 'buttonNext',
   buttonPrev: 'buttonPrev',
 } as const;
-
-class ControlButton {
-  private text: string;
-  private description: string;
-  private htmlObject: HTMLInputElement;
-
-  constructor(
-      id: string|null, text: string, description: string,
-      action: (e: MouseEvent) => void) {
-    this.text = text;
-    this.description = description;
-    const button = document.createElement(htmlTags.input) as HTMLInputElement;
-    button.type = htmlInputTypes.submit;
-    button.value = this.text;
-    button.title = this.description;
-    if (id) {
-      button.id = id;
-    }
-    button.addEventListener('click', action);
-    this.htmlObject = button;
-  }
-
-  appendHtml(container: HTMLElement): this {
-    container.appendChild(this.htmlObject);
-    return this;
-  }
-
-  setEnabled(stateListener: EventListener, value: () => boolean): void {
-    const htmlObject = this.htmlObject;
-    stateListener.addListener(() => {
-      htmlObject.disabled = !value();
-    });
-  }
-}
 
 class KnitState {
   private inputs: URLSearchParams;
@@ -109,6 +76,7 @@ class KnitState {
     });
     this.configuring = this.currentRow === 0;
     this.patternCanvasView = new PatternCanvasView();
+    document.body.appendChild(this.patternCanvasView.getCanvas());
 
     this.configuringStateChange.addListener(() => {
       document.getElementById('inputs')!.style.display =
@@ -168,7 +136,7 @@ class KnitState {
             () => this.pattern != null &&
                 this.currentRow < (this.pattern?.rowsCount() ?? 0) - 1);
 
-    document.body.appendChild(this.patternCanvasView.getCanvas());
+    this.patternCanvasView.initializeCanvasControls(this.buttonsForm);
 
     const controlsDiv = document.createElement(htmlTags.div);
     controlsDiv.id = 'controls';
