@@ -39,9 +39,7 @@ class Section {
     return this.inputs;
   }
 
-  getStitches(
-      rowIndex: number, rowLength: number,
-      separatorWidthInput: PatternFactoryInput): Stitch[] {
+  getStitches(rowIndex: number, rowLength: number): Stitch[] {
     const previousWidth = rowIndex === 0 ?
         this.widthTop.numberValue() :
         this.#getRowWidth(rowIndex - 1, rowLength);
@@ -102,7 +100,6 @@ class TrianglesPatternFactory {
   factoryName: string = 'Triangles';
   knittingStyleInput: PatternFactoryInput;
   lengthInput: PatternFactoryInput;
-  separatorWidthInput: PatternFactoryInput;
   sectionCountInput: PatternFactoryInput;
   sections: Section[];
 
@@ -112,36 +109,20 @@ class TrianglesPatternFactory {
         RowSwitchStyles.round, null, Object.values(RowSwitchStyles));
     this.lengthInput = new PatternFactoryInput(
         'Length', 'How long should the set of triangles be?', 30, 'rows');
-    this.separatorWidthInput = new PatternFactoryInput(
-        'Separator Width',
-        'How wide should the separator (between front and back parts) be?', 2,
-        'stitches');
     this.sectionCountInput = new PatternFactoryInput(
         'Sections', 'How many sections should the polygon have?', 4,
         'sections');
     this.sections = Array.from(
-        {length: 10},
+        {length: 20},
         (_, index) => new Section(
             index, this.sectionCountInput, this.knittingStyleInput));
   }
 
   getInputs(): PatternFactoryInput[] {
     return [
-      this.knittingStyleInput, this.lengthInput, this.separatorWidthInput,
-      this.sectionCountInput, ...this.sections.flatMap((s) => s.getInputs())
+      this.knittingStyleInput, this.lengthInput, this.sectionCountInput,
+      ...this.sections.flatMap((s) => s.getInputs())
     ];
-  }
-
-  #getSeparator(rowIndex: number): Stitch[] {
-    const width = this.separatorWidthInput.numberValue();
-    if (width <= 0)
-      throw new Error('Invalid separator width (must be greater than 0).');
-    return Array(width).fill(
-        this.knittingStyleInput.value() as RowSwitchStyle ===
-                    RowSwitchStyles.round ||
-                rowIndex % 2 === 1 ?
-            Knit :
-            Purl);
   }
 
   build(): Pattern {
@@ -152,18 +133,15 @@ class TrianglesPatternFactory {
     for (let rowIndex = 0; rowIndex < this.lengthInput.numberValue();
          rowIndex++) {
       let stitches: Stitch[] = [];
-      const normalOrder =
-          knittingStyle === RowSwitchStyles.round || rowIndex % 2 === 0;
+      const invertOrder =
+          knittingStyle === RowSwitchStyles.backAndForth && rowIndex % 2 === 1;
       for (let section = 0; section < this.sectionCountInput.numberValue();
            section++) {
-        if (normalOrder) stitches.push(...this.#getSeparator(rowIndex));
-        const actualSection = normalOrder ?
-            section :
-            this.sectionCountInput.numberValue() - section - 1;
+        const actualSection = invertOrder ?
+            this.sectionCountInput.numberValue() - section - 1 :
+            section;
         stitches.push(...this.sections[actualSection]!.getStitches(
-            rowIndex, this.lengthInput.numberValue(),
-            this.separatorWidthInput));
-        if (!normalOrder) stitches.push(...this.#getSeparator(rowIndex));
+            rowIndex, this.lengthInput.numberValue()));
       }
       output.addRow(new Row(stitches));
     }
