@@ -98,9 +98,13 @@ class KnitState {
   }
 
   private setupUI(): void {
-    new ControlButton(null, '📖', 'About this software', () => {
-      window.open('http://github.com/alefore/knit', '_blank');
-    }).appendHtml(this.buttonsForm);
+    new ControlButton(
+        null, '📖', 'About this software',
+        () => {
+          window.open('http://github.com/alefore/knit', '_blank');
+        })
+        .appendHtml(this.buttonsForm)
+        .setVisibility(this.configuringStateChange, () => this.configuring);
 
     new ControlButton(
         objectIds.configureButton, '⚙️', 'Configure the pattern',
@@ -110,7 +114,7 @@ class KnitState {
           this.configuringStateChange.notify();
         })
         .appendHtml(this.buttonsForm)
-        .setEnabled(this.configuringStateChange, () => !this.configuring);
+        .setVisibility(this.configuringStateChange, () => !this.configuring);
 
     new ControlButton(
         objectIds.knitButton, '🚀', 'Start knitting',
@@ -120,14 +124,14 @@ class KnitState {
           this.configuringStateChange.notify();
         })
         .appendHtml(this.buttonsForm)
-        .setEnabled(this.configuringStateChange, () => this.configuring);
+        .setVisibility(this.configuringStateChange, () => this.configuring);
 
     new ControlButton(
         objectIds.buttonPrev, '←', 'Previous row', () => this.addRow(-1))
         .appendHtml(this.buttonsForm)
         .setEnabled(
-            this.stateChange,
-            () => this.pattern != null && this.currentRow > 0);
+            this.stateChange, () => this.pattern != null && this.currentRow > 0)
+        .setVisibility(this.configuringStateChange, () => !this.configuring);
 
     new ControlButton(
         objectIds.buttonNext, '→', 'Next row', () => this.addRow(+1))
@@ -135,7 +139,8 @@ class KnitState {
         .setEnabled(
             this.stateChange,
             () => this.pattern != null &&
-                this.currentRow < (this.pattern?.rowsCount() ?? 0) - 1);
+                this.currentRow < (this.pattern?.rowsCount() ?? 0) - 1)
+        .setVisibility(this.configuringStateChange, () => !this.configuring);
 
     this.patternCanvasView.initializeCanvasControls(this.buttonsForm);
 
