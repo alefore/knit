@@ -1,7 +1,7 @@
 // Import pattern factories to ensure they are registered.
 import './cable_pattern_factory.js';
 import './capelet_pattern_factory.js';
-import './cylinder_pattern_factory.js';
+import './triangles_pattern_factory.js';
 import './scarf_pattern_factory.js';
 
 import {cssDisplayValues, cssProps, htmlInputTypes, htmlProps, htmlTags, urlParams} from './constants.js';

@@ -98,8 +98,8 @@ class Section {
   }
 }
 
-class CylinderPatternFactory {
-  factoryName: string = 'Cylinder';
+class TrianglesPatternFactory {
+  factoryName: string = 'Triangles';
   knittingStyleInput: PatternFactoryInput;
   lengthInput: PatternFactoryInput;
   separatorWidthInput: PatternFactoryInput;
@@ -108,10 +108,10 @@ class CylinderPatternFactory {
 
   constructor() {
     this.knittingStyleInput = new PatternFactoryInput(
-        'Knitting Style', 'Should the cylinder be knit in the round or flat?',
+        'Knitting Style', 'Should the piece be knit in the round or flat?',
         RowSwitchStyles.round, null, Object.values(RowSwitchStyles));
     this.lengthInput = new PatternFactoryInput(
-        'Length', 'How long should the cylinder be?', 30, 'rows');
+        'Length', 'How long should the set of triangles be?', 30, 'rows');
     this.separatorWidthInput = new PatternFactoryInput(
         'Separator Width',
         'How wide should the separator (between front and back parts) be?', 2,
@@ -171,4 +171,4 @@ class CylinderPatternFactory {
   }
 }
 
-PatternFactoryRegistry.register('Cylinder', CylinderPatternFactory);
+PatternFactoryRegistry.register('Triangles', TrianglesPatternFactory);
