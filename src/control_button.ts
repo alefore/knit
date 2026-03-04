@@ -27,10 +27,17 @@ export class ControlButton {
     return this;
   }
 
-  setEnabled(stateListener: EventListener, value: () => boolean): void {
-    const htmlObject = this.htmlObject;
+  setEnabled(stateListener: EventListener, value: () => boolean): ControlButton {
     stateListener.addListener(() => {
-      htmlObject.disabled = !value();
+      this.htmlObject.disabled = !value();
     });
+    return this;
+  }
+
+  setVisibility(stateListener: EventListener, value: () => boolean): ControlButton {
+    stateListener.addListener(() => {
+      this.htmlObject.hidden = !value();
+    });
+    return this;
   }
 }
