@@ -15,6 +15,9 @@ type CubicBezierFocalPoints = {
   [key: string]: [Point, Point];
 };
 
+const TRUE_STRING = 'true';
+const FALSE_STRING = 'false';
+
 class ScarfPatternFactory {
   static cubicBezierFocalPoints: CubicBezierFocalPoints = {
     Balanced: [{x: 0.6, y: 0.3}, {x: 0.4, y: 0.7}],
@@ -31,6 +34,12 @@ class ScarfPatternFactory {
   centerWidthInput: PatternFactoryInput;
   textureInput: PatternFactoryInput;
   shapeInput: PatternFactoryInput;
+  /**
+   * Whether the increases and decreases should be symmetric. If true, increases
+   * and decreases occur on even rows. If false, increases occur on even rows
+   * and decreases on odd rows.
+   */
+  symmetricInput: PatternFactoryInput;
 
   constructor() {
     this.rowsInput = new PatternFactoryInput(
@@ -57,12 +66,15 @@ class ScarfPatternFactory {
         'Shape', 'What general shape would you like?',
         Object.keys(ScarfPatternFactory.cubicBezierFocalPoints)[0] as string,
         null, Object.keys(ScarfPatternFactory.cubicBezierFocalPoints));
+    this.symmetricInput = new PatternFactoryInput(
+        'Symmetric', 'Should the increases and decreases be symmetric?',
+        TRUE_STRING, null, [TRUE_STRING, FALSE_STRING]);
   }
 
   getInputs(): PatternFactoryInput[] {
     return [
       this.rowsInput, this.centerLengthInput, this.centerWidthInput,
-      this.textureInput, this.shapeInput
+      this.textureInput, this.shapeInput, this.symmetricInput
     ];
   }
 
@@ -112,10 +124,21 @@ class ScarfPatternFactory {
     const atEvenRow = pattern.rowsCount() % 2 == 0;
 
     let growType: Stitch|null = null;
-    if (atEvenRow && previousStitches < desiredStitches)
-      growType = KnitFrontBack;
-    else if (atEvenRow && previousStitches > desiredStitches)
-      growType = KnitTwoTogether;
+    if (previousStitches < desiredStitches) {
+      if (atEvenRow) {
+        growType = KnitFrontBack;
+      }
+    } else if (previousStitches > desiredStitches) {
+      if (this.symmetricInput.value() === TRUE_STRING) {
+        if (atEvenRow) {
+          growType = KnitTwoTogether;
+        }
+      } else {
+        if (!atEvenRow) {
+          growType = KnitTwoTogether;
+        }
+      }
+    }
 
     const allTextureStitches =
         texturesMap.get(this.textureInput.value() as string)!.buildStitches(
