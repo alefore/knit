@@ -1,1 +1,0 @@
-^(\.|src|src/[a-z_/]*\.(css|js|ts|html|py|md)|\.*.md|index.html)$
