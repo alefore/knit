@@ -17,6 +17,8 @@ function run_command {
   rm -f "$tmp_output"
 }
 
-run_command "npx tsc"
+[ ! -d node_modules ] && run_command "npm install --prefer-offline --no-audit"
+
+run_command "npm run build"
 
 exit $exit_status
