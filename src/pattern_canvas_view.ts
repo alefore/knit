@@ -2,7 +2,7 @@ import {colorIds} from './constants.js';
 import {ControlButton} from './control_button.js';
 import {Pattern, RowSwitchStyles} from './pattern.js';
 import type {KnitPoint} from './point.js'; // Added import
-import {flip, minus, applyZoom} from './point.js'; // Added import
+import {flip, minus, scale} from './point.js'; // Added import
 
 export class PatternCanvasView {
   private canvas: HTMLCanvasElement;
@@ -63,7 +63,7 @@ export class PatternCanvasView {
     const stitchSizeAtZoom1 =
         Math.min(baseStitchSizeWidth, baseStitchSizeHeight);
     const unflippedPatternSizePixels =
-        applyZoom(unflippedPatternSizeStitches, stitchSizeAtZoom1);
+        scale(unflippedPatternSizeStitches, stitchSizeAtZoom1);
 
     return {
       unflippedPatternSizeStitches,
@@ -124,7 +124,7 @@ export class PatternCanvasView {
                                   stitchIndex,
             y: rowIndex
           };
-          const final = applyZoom(
+          const final = scale(
               this.isFlipped ? flipped : unflipped, stitchSizeAtZoom1);
           ctx.fillRect(final.x, final.y, stitchSizeAtZoom1, stitchSizeAtZoom1);
           stitchIndex++;
@@ -187,7 +187,7 @@ export class PatternCanvasView {
     const {unflippedPatternSizeStitches, stitchSizeAtZoom1} =
         this._getPatternDimensions();
 
-    let effectivePatternSizePixels = applyZoom(
+    let effectivePatternSizePixels = scale(
         unflippedPatternSizeStitches, stitchSizeAtZoom1 * this.zoomLevel);
 
     if (this.isFlipped) {
@@ -205,7 +205,7 @@ export class PatternCanvasView {
     }
     // Coordinates relative to start of pattern (removing zoom level and
     // offset).
-    const base = applyZoom(minus(canvas, this.offset), 1 / this.zoomLevel);
+    const base = scale(minus(canvas, this.offset), 1 / this.zoomLevel);
     return this.isFlipped ? flip(base) : base;
   }
 
