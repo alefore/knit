@@ -52,6 +52,7 @@ export class PatternCanvasView {
   }
 
   public drawPattern(pattern: Pattern|null): void {
+    const isNewPattern = this.currentPattern !== pattern;
     this.currentPattern = pattern;
     if (this.currentPattern === null) {
       const ctx = this.canvas.getContext('2d');
@@ -61,6 +62,14 @@ export class PatternCanvasView {
       }
       return;
     }
+
+    if (isNewPattern) {
+      this.zoomLevel = 1;
+      this.offset = {x: 0, y: 0};
+      this.isFlipped = false;
+      this.centerPattern();
+    }
+
     this.renderer.render(
         this.currentPattern, this.zoomLevel, this.offset, this.isFlipped,
         this.selectedRow);
