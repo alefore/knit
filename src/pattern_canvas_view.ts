@@ -36,6 +36,8 @@ export class PatternCanvasView {
       getCurrentCanvasState: this.getCurrentCanvasState.bind(this),
       redraw: () => this.drawPattern(this.currentPattern),
     });
+
+    window.onresize = this.resizeCanvas.bind(this);
   }
 
   public getCanvas(): HTMLCanvasElement {
@@ -90,6 +92,13 @@ export class PatternCanvasView {
 
     new ControlButton(null, '🔁', 'Flip View', () => this.toggleFlipView())
         .appendHtml(buttonsForm);
+  }
+
+  private resizeCanvas(): void {
+    this.canvas.width = window.innerWidth;
+    this.canvas.height = window.innerHeight;
+    this.centerPattern();
+    this.drawPattern(this.currentPattern);
   }
 
   private zoomIn(): void {
