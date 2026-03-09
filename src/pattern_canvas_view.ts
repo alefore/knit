@@ -142,6 +142,7 @@ export class PatternCanvasView {
   private handlePan(delta: KnitPoint): void {
     this.offset.x += delta.x;
     this.offset.y += delta.y;
+    this.drawPattern(this.currentPattern);
   }
 
   private handleZoom(scaleAmount: number, mouseCanvasCoords: KnitPoint): void {
