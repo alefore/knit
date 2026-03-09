@@ -115,7 +115,6 @@ export class PatternCanvasView {
 
   private toggleFlipView(): void {
     this.isFlipped = !this.isFlipped;
-    this.zoomLevel = 1;
     this.centerPattern();
     this.drawPattern(this.currentPattern);
   }
