@@ -217,7 +217,10 @@ export class PatternCanvasView {
     if (this.zoomLevel < this.MIN_ZOOM_LEVEL)
       this.zoomLevel = this.MIN_ZOOM_LEVEL;
 
-    const mouse = this.getClickCoordinates(event);
+    const mouse = this.getClickCoordinates({
+      x: event.clientX,
+      y: event.clientY
+    });
     const transformedMouse = this.getTransformedCoordinates(mouse);
 
     // Now adjust the offset.x and offset.y for the unflipped pattern's origin.
@@ -236,13 +239,13 @@ export class PatternCanvasView {
     this.lastY = event.clientY;
   }
 
-  private getClickCoordinates(event: MouseEvent): KnitPoint {
+  private getClickCoordinates(point: KnitPoint): KnitPoint {
     const rect = this.canvas.getBoundingClientRect();
     const scaleX = this.canvas.width / rect.width;
     const scaleY = this.canvas.height / rect.height;
     return {
-      x: (event.clientX - rect.left) * scaleX,
-      y: (event.clientY - rect.top) * scaleY
+      x: (point.x - rect.left) * scaleX,
+      y: (point.y - rect.top) * scaleY
     };
   }
 
@@ -276,7 +279,10 @@ export class PatternCanvasView {
 
     const {stitchSizeAtZoom1} = this._getPatternDimensions();
     const xCoordinate =
-        this.getTransformedCoordinates(this.getClickCoordinates(event)).x;
+        this.getTransformedCoordinates(this.getClickCoordinates({
+          x: event.clientX,
+          y: event.clientY
+        })).x;
     const rowIndex = Math.floor(xCoordinate / stitchSizeAtZoom1);
     if (rowIndex >= 0 && rowIndex < this.currentPattern.rows.length) {
       this.onRowSelected(rowIndex);
