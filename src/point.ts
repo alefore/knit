@@ -1,16 +1,16 @@
-export interface Point {
+export interface KnitPoint {
   x: number;
   y: number;
 }
 
-export function flip(p: Point): Point {
+export function flip(p: KnitPoint): KnitPoint {
   return {x: p.y, y: p.x};
 }
 
-export function minus(a: Point, b: Point): Point {
+export function minus(a: KnitPoint, b: KnitPoint): KnitPoint {
   return {x: a.x - b.x, y: a.y - b.y};
 }
 
-export function applyZoom(p: Point, zoom: number): Point {
+export function applyZoom(p: KnitPoint, zoom: number): KnitPoint {
   return {x: p.x * zoom, y: p.y * zoom};
 }

@@ -1,14 +1,14 @@
 import {colorIds} from './constants.js';
 import {ControlButton} from './control_button.js';
 import {Pattern, RowSwitchStyles} from './pattern.js';
-import type {Point} from './point.js'; // Added import
+import type {KnitPoint} from './point.js'; // Added import
 import {flip, minus, applyZoom} from './point.js'; // Added import
 
 export class PatternCanvasView {
   private canvas: HTMLCanvasElement;
   private currentPattern: Pattern|null;
   private zoomLevel: number;    // Current zoom level of the canvas.
-  private offset: Point;        // Offset for panning the canvas.
+  private offset: KnitPoint;        // Offset for panning the canvas.
   private isDragging: boolean;  // True if the canvas is being dragged.
   private lastX: number;  // Last X-coordinate of the mouse during a drag event.
   private lastY: number;  // Last Y-coordinate of the mouse during a drag event.
@@ -199,7 +199,7 @@ export class PatternCanvasView {
     this.offset.y = (this.canvas.height - effectivePatternSizePixels.y) / 2;
   }
 
-  private getTransformedCoordinates(canvas: Point): Point {
+  private getTransformedCoordinates(canvas: KnitPoint): KnitPoint {
     if (this.currentPattern === null) {
       return canvas;
     }
@@ -236,7 +236,7 @@ export class PatternCanvasView {
     this.lastY = event.clientY;
   }
 
-  private getClickCoordinates(event: MouseEvent): Point {
+  private getClickCoordinates(event: MouseEvent): KnitPoint {
     const rect = this.canvas.getBoundingClientRect();
     const scaleX = this.canvas.width / rect.width;
     const scaleY = this.canvas.height / rect.height;
