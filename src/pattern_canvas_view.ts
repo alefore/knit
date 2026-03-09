@@ -1,23 +1,8 @@
 import {colorIds} from './constants.js';
 import {ControlButton} from './control_button.js';
 import {Pattern, RowSwitchStyles} from './pattern.js';
-
-interface Point {
-  x: number;
-  y: number;
-}
-
-function flip(p: Point): Point {
-  return {x: p.y, y: p.x};
-}
-
-function minus(a: Point, b: Point): Point {
-  return {x: a.x - b.x, y: a.y - b.y};
-}
-
-function applyZoom(p: Point, zoom: number): Point {
-  return {x: p.x * zoom, y: p.y * zoom};
-}
+import type {Point} from './point.js'; // Added import
+import {flip, minus, applyZoom} from './point.js'; // Added import
 
 export class PatternCanvasView {
   private canvas: HTMLCanvasElement;
